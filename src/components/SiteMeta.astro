@@ -8,7 +8,7 @@ interface Props {
 
 const {
   title = "Ski & Magi",
-  description = "På Ski & Magi reiser omlag 400 studenter ...",
+  description = "På Ski & Magi reiser omlag 400 studenter på en tredagers skitur i den norske fjellheimen. Dette har vært en tradisjon siden tidlig 90-tall og er det eldste arrangementet for studenter i Ålesund.",
   author = "Dennis Løvold",
   themeColor = "#0b0f1a",
 } = Astro.props as Props;
@@ -26,7 +26,7 @@ const fullTitle = isHome ? siteName : `${rawTitle} | ${siteName}`;
 const socialTitle = isHome ? siteName : `${rawTitle} - ${siteName}`;
 
 // Always use the same OG image
-const ogImage = "/skiogmagi-og.png";
+const ogImage = "/og-image.png";
 
 // Absolute URL for OG/Twitter
 const pageUrl = Astro.url.href;
