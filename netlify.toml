@@ -1,0 +1,40 @@
+# example netlify.toml
+[build]
+  command = "pnpm run build"
+  functions = "netlify/functions"
+  publish = "dist"
+
+## Headers: caching and performance
+## Fingerprinted assets from Astro (`/_astro/*`) can be cached for a year
+[[headers]]
+  for = "/_astro/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+## Common static asset folders (if present)
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/images/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/fonts/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+## HTML should not be aggressively cached
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+## Fallback for other files in the root (short cache)
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Cache-Control = "public, max-age=604800"

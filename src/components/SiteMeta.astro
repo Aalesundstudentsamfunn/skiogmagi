@@ -1,0 +1,47 @@
+---
+const { title = "Ski & Magi", description = "Opplev vintermagien i Oppdal.", author = "Ski & Magi", themeColor = "#0b0f1a" } = Astro.props;
+
+const subtitle = "Ski & Magi";
+
+// Always use the same OG image
+const ogImage = "/skiogmagi-og.png";
+
+// Absolute URL for OG/Twitter
+const pageUrl = Astro.url.href;
+const ogImageUrl = Astro.site ? new URL(ogImage, Astro.site).toString() : ogImage;
+---
+
+<!-- Primary Meta -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, viewport-fit=cover" />
+<title>{title} – {subtitle}</title>
+<meta name="description" content={description} />
+<meta name="author" content={author} />
+
+<!-- Canonical -->
+<link rel="canonical" href={pageUrl} />
+
+<!-- Theme colors -->
+<meta name="theme-color" content={themeColor} />
+
+<!-- Apple mobile -->
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+<!-- Favicons -->
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<link rel="manifest" href="/site.webmanifest" />
+
+<!-- Open Graph -->
+<meta property="og:type" content="website" />
+<meta property="og:title" content={`${title} – ${subtitle}`} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={pageUrl} />
+<meta property="og:image" content={ogImageUrl} />
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={`${title} – ${subtitle}`} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={ogImageUrl} />

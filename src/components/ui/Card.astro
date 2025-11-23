@@ -1,0 +1,17 @@
+---
+export interface Props {
+  as?: string;
+  class?: string;
+}
+
+const { as = 'article', class: cls = '', ...rest } = Astro.props as Props;
+const Tag = as as any;
+
+const base = 'relative overflow-hidden rounded-2xl shadow-lg bg-white/5';
+
+---
+
+<Tag class={`${base} ${cls}`} {...rest}>
+  <slot />
+</Tag>
+

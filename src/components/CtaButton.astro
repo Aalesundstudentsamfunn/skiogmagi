@@ -1,0 +1,36 @@
+---
+import ExternalLink from "../assets/images/external-link.svg";
+import Button from "./ui/Button.astro";
+
+export interface Props {
+  label: string;
+  href?: string;
+  disabled?: boolean;
+  class?: string;
+  newTab?: boolean;
+}
+
+const { label, href, disabled = false, class: cls = "", newTab = false } = Astro.props as Props;
+
+const targetProps = newTab ? { target: "_blank", rel: "noreferrer noopener" } : {};
+
+const base = "cta-btn rounded-full px-7 py-3 text-white";
+const enabled = "bg-gradient-to-r from-indigo-500 to-fuchsia-600 shadow-[0_10px_30px_rgba(99,102,241,0.25)] hover:-translate-y-0.5 active:translate-y-0 inline-flex items-center gap-2";
+const disabledCls = "bg-gradient-to-r from-neutral-400 to-neutral-500 opacity-60 cursor-not-allowed inline-flex items-center gap-2";
+---
+
+{
+  !disabled && href ? (
+    <Button href={href} class={`${base} ${enabled} ${cls}`} {...targetProps}>
+      <span>{label}</span>
+      <ExternalLink class="w-5 h-5 opacity-90" />
+      <span class="pointer-events-none shine" />
+    </Button>
+  ) : (
+    <Button class={`${base} ${disabled ? disabledCls : enabled} ${cls}`} disabled={disabled}>
+      <span>{label}</span>
+      {!disabled && <ExternalLink class="w-5 h-5 opacity-90" />}
+      {!disabled && <span class="pointer-events-none shine" />}
+    </Button>
+  )
+}

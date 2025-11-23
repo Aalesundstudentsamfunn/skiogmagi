@@ -1,0 +1,51 @@
+---
+import { CldImage } from "astro-cloudinary";
+import Card from "./ui/Card.astro";
+
+export interface Props {
+  id: string;
+  title: string;
+  tag?: string;
+  year: string;
+  people?: string;
+  img: string; // Cloudinary public ID
+  tint: string;
+}
+
+const { id, title, tag, year, people, img, tint } = Astro.props as Props;
+---
+
+<Card as="article" id={`card-${id}`} class="memory-card isolate contain-[paint] bg-neutral-900/5 cursor-pointer transform transition-transform hover:scale-[1.02]">
+  <button type="button" class="absolute inset-0 z-50 cursor-pointer" aria-label={`Åpne ${title} ${year}`} aria-haspopup="dialog" aria-controls={id} data-open data-target={id}></button>
+
+  <div class="relative overflow-hidden clip rounded-inherit isolate">
+    <div class="group relative will-change-transform transition-[transform,box-shadow,filter] hover:shadow-2xl hover:brightness-[1.03]" data-img-wrapper>
+      <div class="absolute inset-0 skeleton"></div>
+
+      <CldImage draggable="false" src={img} alt={title} class="h-56 w-full opacity-0 object-cover transition-transform duration-300 group-hover:scale-[1.1] sm:h-64" sizes="(min-width: 1024px) 33vw, 100vw" loading="lazy" fetchpriority="low" onload="this.style.opacity='1'; this.closest('[data-img-wrapper]')?.setAttribute('data-loaded','true');" />
+
+      <div class={`absolute inset-0 z-5 pointer-events-none bg-linear-to-tr ${tint} animate-aurora`} style="border-radius: inherit; opacity: .8"></div>
+
+      <div class="absolute inset-0 z-11 flex flex-col justify-between p-5 pointer-events-none sm:p-6" style="border-radius: inherit">
+        <div>
+          {tag && <span class={`relative inline-flex items-center rounded-full border border-white/30 bg-linear-to-r ${tint} px-3 py-1 text-xs font-semibold text-white backdrop-blur-md`}>{tag}</span>}
+        </div>
+
+        <div class="text-white">
+          <h3 class="text-2xl font-extrabold sm:text-3xl">
+            {title}
+          </h3>
+          {
+            (year || people) && (
+              <div class="mt-2 flex items-center gap-3 text-sm font-semibold text-white/90 sm:text-base">
+                <span>{year}</span>
+                {year && people && <span class="opacity-70">•</span>}
+                {people && <span>{people}</span>}
+              </div>
+            )
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</Card>

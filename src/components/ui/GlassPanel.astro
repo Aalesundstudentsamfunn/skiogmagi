@@ -1,0 +1,17 @@
+---
+import type { HTMLAttributes } from "astro/types";
+
+export interface Props extends HTMLAttributes<"div"> {
+  class?: string;
+}
+
+const { class: cls = "", ...rest } = Astro.props as Props;
+---
+
+<div
+  {...rest}
+  class={`relative w-full overflow-hidden rounded-3xl border border-white/20 bg-white/10 p-8 shadow-[inset_0_1px_0_rgba(255,255,255,0.25)] backdrop-blur-md sm:p-12 ${cls}`}
+>
+  <div aria-hidden class="pointer-events-none absolute inset-0 -z-10 mix-blend-soft-light opacity-40" style="background: linear-gradient(120deg, rgba(59,130,246,0.18), rgba(139,92,246,0.16), rgba(236,72,153,0.14));"></div>
+  <slot />
+</div>

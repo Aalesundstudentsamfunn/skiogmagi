@@ -1,0 +1,15 @@
+/* TEAM */
+Developer: Dennis Løvold
+Website: https://skiogmagi.no
+Location: Ålesund, Norway
+
+/* SITE */
+Last updated: 2025-11-22
+Standards: HTML5, CSS3, JavaScript, Astro
+Components: TailwindCSS, Mux Player, Cloudinary
+Hosting: Domeneshop
+Design: Ski & Magi
+
+/* CONTACT */
+General: skiogmagi@astudent.no
+Security: it@astudent.no

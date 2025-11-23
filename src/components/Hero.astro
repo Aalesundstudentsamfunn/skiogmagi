@@ -1,0 +1,179 @@
+---
+import { MuxPlayer } from "@mux/mux-player-astro";
+import VideoButton from "./VideoButton.astro";
+import TitleSvg from "../assets/images/skiogmagi_full.svg";
+import { CldImage } from "astro-cloudinary";
+import { getEntry } from "astro:content";
+
+const heroEntry = await getEntry("hero", "index");
+const { titleAriaLabel, subtitle, ctaLabel } = heroEntry.data;
+---
+
+<div id="container" class="relative flex max-h-lvh" style="font-family: Inter, Roboto, 'Helvetica Neue', 'Arial Nova', 'Nimbus Sans', Arial, sans-serif;">
+  <!-- Video -->
+  <MuxPlayer id="bgPlayer" playbackId="oH900N4ZEOj7xTzGaw6lmBHQ3P9Da9MhaP8nb400R00gWU" primaryColor="#155dfc" thumbnailTime={0} hotkeys="noc nok nom nof noarrowleft noarrowright" preload="none" class="absolute left-0 right-0 h-full w-full pointer-events-auto z-[1]" />
+
+  <div class="absolute inset-0 skeleton z-8"></div>
+  <CldImage src="cover-min_oxufkc_azdl5p" version="1763807656" id="hero" alt="" aria-hidden="true" class="absolute left-0 right-0 h-full object-cover w-full transition-opacity duration-300 poster z-6" sizes="100vw" loading="eager" decoding="async" fetchpriority="high" draggable="false" onload="this.style.opacity=''; this.parentElement?.setAttribute('data-loaded','true');" />
+
+  <!-- Dark overlay while paused (non-interactive) -->
+  <div aria-hidden="true" class="absolute inset-0 opacity-100 pause-overlay z-7 bg-black/45 pointer-events-none"></div>
+
+  <!-- HERO -->
+  <section class="hero-overlay relative z-10 flex flex-col items-center min-w-screen min-h-svh gap-4 px-8 mt-50 lg:mt-40 text-center">
+    <TitleSvg aria-label={titleAriaLabel} class="hero-tit w-[20%] min-w-[170px] drop-shadow-[0_2px_12px_rgba(0,0,0,0.35)] transition-all duration-300 group-[.is-playing]:opacity-0 group-[.is-playing]:translate-y-2" />
+
+    <h2 class="hero-sub mt-5 uppercase text-white/95 font-medium text-[clamp(1.75rem,4vw,2.25rem)]">{subtitle}</h2>
+
+    <div class="inline-flex gap-3 sm:gap-2 z-50 pointer-events-auto">
+      <VideoButton icon="mdi:play" label={ctaLabel} action="play" class="btn-play" />
+    </div>
+  </section>
+
+  <!-- Pause button -->
+  <VideoButton icon="mdi:pause" action="pause" class="btn-pause absolute right-10 top-30 z-15" />
+</div>
+
+<script is:inline>
+  (async () => {
+    try {
+      await customElements.whenDefined("mux-player");
+    } catch {}
+    const container = document.getElementById("container");
+    const player = document.getElementById("bgPlayer");
+    let hasPlayed = false;
+    container?.classList.remove("is-playing", "has-played");
+
+    container?.addEventListener("click", (e) => {
+      const el = e.target;
+      if (!(el instanceof HTMLElement)) return;
+      const btn = el.closest("[data-video-action]");
+      if (!btn || !player) return;
+      const action = btn.getAttribute("data-video-action");
+      console.log("[Hero] button pressed:", action);
+      if (action === "play") {
+        container?.classList.add("is-playing");
+        player.play();
+      } else if (action === "pause") {
+        player.pause();
+        container?.classList.remove("is-playing");
+      } else if (action === "toggle") {
+        if (player.paused) {
+          container?.classList.add("is-playing");
+          player.play();
+        } else {
+          player.pause();
+          container?.classList.remove("is-playing");
+        }
+      }
+    });
+
+    const setPlaying = (is) => {
+      container?.classList.toggle("is-playing", !!is);
+    };
+
+    player?.addEventListener("play", () => {
+      console.log("[Hero] player: play");
+      setPlaying(true);
+      if (!hasPlayed) {
+        hasPlayed = true;
+        container?.classList.add("has-played");
+      }
+    });
+    player?.addEventListener("pause", () => {
+      setPlaying(false);
+    });
+    player?.addEventListener("ended", () => {
+      setPlaying(false);
+    });
+  })();
+</script>
+
+<style is:global>
+  /* smooth transitions */
+  .pause-overlay,
+  .hero-sub,
+  .hero-tit,
+  .btn-play,
+  .btn-pause {
+    transition:
+      opacity 700ms ease,
+      transform 200ms ease;
+  }
+
+  .poster {
+    transition: all 4s ease;
+  }
+
+  /* hide poster as soon as playing starts */
+  #container.is-playing .poster {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* initial states */
+  .btn-pause {
+    opacity: 0;
+    transform: translateY(-0.25rem);
+    pointer-events: none;
+  }
+
+  /* when video is playing */
+  #container.is-playing .pause-overlay {
+    opacity: 0; /* dark veil fades out while playing */
+  }
+  #container.is-playing .hero-sub {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
+
+  #container.is-playing .hero-tit {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
+
+  /* These two are in a CHILD component, so use :global (this whole block is global) */
+  #container.is-playing .btn-play {
+    opacity: 0;
+    transform: translateY(0.25rem);
+    pointer-events: none;
+  }
+  #container.is-playing .btn-pause {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  /* once user played at least once, permanently hide poster & cover grad */
+  #container.has-played .poster,
+  #container.has-played .cover-grad {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* Enable player controls; fit media to cover */
+  mux-player {
+    --dialog: none;
+    --loading-indicator: none;
+    --play-button: none;
+    --live-button: none;
+    --seek-backward-button: none;
+    --seek-forward-button: none;
+    --captions-button: none;
+    --airplay-button: none;
+    --pip-button: none;
+    --cast-button: none;
+    --playback-rate-button: none;
+    --time-range: none;
+    --time-display: none;
+    --duration-display: none;
+    --rendition-menu-button: none;
+    --bottom-play-button: none;
+    --media-object-fit: cover;
+  }
+
+  /* Allow clicking player controls at all times */
+  .hero-overlay {
+    pointer-events: none;
+  }
+</style>

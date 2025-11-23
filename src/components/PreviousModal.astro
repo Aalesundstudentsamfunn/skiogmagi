@@ -1,0 +1,280 @@
+---
+import { CldImage } from "astro-cloudinary";
+
+export interface Props {
+  id: string;
+  title: string;
+  year: string;
+  tag?: string;
+  people?: string;
+  blurb?: string;
+  gallery?: string[]; // Cloudinary public IDs
+  tint: string;
+}
+
+const { id, title, year, tag, people, blurb, gallery = [], tint } = Astro.props as Props;
+
+const headingId = `${id}-title`;
+---
+
+<dialog id={id} class="modal" aria-labelledby={headingId} tabindex="-1">
+  <div class="modal-container fixed inset-0 grid place-items-center p-4 sm:p-6">
+    <div class="modal-panel relative grid max-h-[90vh] w-full max-w-4xl grid-rows-[auto,1fr,auto] overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-black/5">
+      <header class="flex items-start justify-between gap-4 border-b border-neutral-200 px-4 py-3 sm:px-5 sm:py-4">
+        <div class="min-w-0">
+          {
+            tag && (
+              <div class="mb-1">
+                <span class={`inline-flex items-center rounded-full border border-white/30 bg-linear-to-r ${tint} px-2.5 py-0.5 text-xs font-semibold text-white shadow-sm`}>{tag}</span>
+              </div>
+            )
+          }
+
+          <h3 id={headingId} class="truncate text-xl font-bold text-neutral-900 sm:text-2xl">
+            {title}
+            <span class="font-semibold text-neutral-500"> • {year}</span>
+          </h3>
+
+          {people && <p class="mt-1 text-sm text-neutral-500">{people}</p>}
+        </div>
+
+        <button type="button" class="shrink-0 rounded-full p-2 text-neutral-600 outline-none ring-0 transition hover:bg-neutral-100 hover:text-neutral-900 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" aria-label="Lukk" data-close>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5">
+            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 0 1 1.414 0L10 8.586l4.293-4.293a1 1 0 1 1 1.414 1.414L11.414 10l4.293 4.293a1 1 0 0 1-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 0 1-1.414-1.414L8.586 10 4.293 5.707a1 1 0 0 1 0-1.414Z" clip-rule="evenodd"></path>
+          </svg>
+        </button>
+      </header>
+
+      <div class="modal-body flex min-h-0 flex-col overflow-hidden px-4 pb-4 pt-3 sm:px-5 sm:pb-4 sm:pt-4">
+        {blurb && <p class="mb-4 text-neutral-700">{blurb}</p>}
+
+        {
+          gallery.length > 0 && (
+            <div class="gallery-scroll relative h-full min-h-0 flex-1 overflow-y-auto scrollbar-hidden" style="scrollbar-gutter: stable both-edges;">
+              <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                {gallery.map((g, i) => (
+                  <figure class="relative aspect-4/3 overflow-hidden rounded-xl bg-neutral-100 ring-1 ring-black/5" aria-label={`Bilde ${i + 1} av ${title}`} data-img-wrapper data-public-id={g}>
+                    <div class="absolute inset-0 skeleton" />
+                    <CldImage draggable="false" src={g} alt={`${title} bilde ${i + 1}`} class="h-full w-full object-cover opacity-0 transition-opacity duration-300" sizes="(min-width: 640px) 33vw, 50vw" loading="lazy" fetchpriority="low" onload="this.style.opacity='1'; this.closest('[data-img-wrapper]')?.setAttribute('data-loaded','true');" />
+                  </figure>
+                ))}
+              </div>
+            </div>
+          )
+        }
+      </div>
+
+      <footer class="flex justify-end gap-3 border-t border-neutral-200 px-4 py-3 sm:px-5 sm:py-4">
+        <button type="button" class="inline-flex items-center rounded-lg bg-neutral-900 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-neutral-800 outline-none ring-0 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" data-close> Lukk </button>
+      </footer>
+    </div>
+  </div>
+</dialog>
+
+<script is:inline data-dialog-id={id} data-cloud-name={import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME}>
+  (function () {
+    const script = document.currentScript;
+    const dialogId = script?.dataset.dialogId;
+    const cloudName = script?.dataset.cloudName || "";
+    const dlg = dialogId ? document.getElementById(dialogId) : null;
+    if (!dlg) return;
+
+    const closeWithAnim = () => {
+      if (!dlg.hasAttribute("open")) return;
+      dlg.classList.add("closing");
+      setTimeout(() => {
+        try {
+          dlg.close();
+        } catch {
+          dlg.removeAttribute("open");
+        }
+        dlg.classList.remove("closing");
+      }, 150);
+    };
+
+    // Close buttons
+    dlg.querySelectorAll("[data-close]").forEach((b) =>
+      b.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        closeWithAnim();
+      })
+    );
+
+    // ESC closes with animation
+    dlg.addEventListener("cancel", (e) => {
+      e.preventDefault();
+      closeWithAnim();
+    });
+
+    // Ensure gallery scroll is reset when dialog closes
+    dlg.addEventListener("close", () => {
+      const scroller = dlg.querySelector(".gallery-scroll");
+      scroller && scroller.classList.remove("lightbox-open");
+      const overlay = dlg.querySelector(".lightbox");
+      overlay && overlay.remove();
+    });
+
+    // Backdrop click closes (click outside modal-panel)
+    dlg.addEventListener("click", (e) => {
+      const panel = dlg.querySelector(".modal-panel");
+      const overlay = dlg.querySelector(".lightbox");
+      const t = e.target;
+      if (overlay && t instanceof Node && overlay.contains(t)) return;
+      if (panel && t instanceof Node && !panel.contains(t)) {
+        e.preventDefault();
+        closeWithAnim();
+      }
+    });
+
+    // Lightbox overlay
+    let lightboxEl = null;
+
+    const ensureLightbox = () => {
+      if (lightboxEl) return lightboxEl;
+      const host = dlg;
+      if (!host) return null;
+
+      const wrap = document.createElement("div");
+      wrap.className = "lightbox";
+      wrap.innerHTML = `
+        <div class="lightbox__frame">
+          <div class="lightbox__imgwrap">
+            <img class="lightbox__img" alt="" />
+            <button class="lightbox__close" aria-label="Lukk">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5">
+                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 0 1 1.414 0L10 8.586l4.293-4.293a1 1 0 1 1 1.414 1.414L11.414 10l4.293 4.293a1 1 0 0 1-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 0 1-1.414-1.414L8.586 10 4.293 5.707a1 1 0 0 1 0-1.414Z" clip-rule="evenodd"></path>
+              </svg>
+            </button>
+          </div>
+        </div>`;
+
+      host.appendChild(wrap);
+
+      const onClose = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        wrap.classList.remove("is-active");
+        setTimeout(() => wrap.remove(), 120);
+        lightboxEl = null;
+        document.removeEventListener("keydown", onKey);
+        const scroller = dlg.querySelector(".gallery-scroll");
+        scroller && scroller.classList.remove("lightbox-open");
+      };
+
+      const onKey = (e) => {
+        if (e.key === "Escape") onClose(e);
+      };
+
+      wrap.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (e.target === wrap) onClose(e);
+      });
+
+      wrap.querySelector(".lightbox__close")?.addEventListener("click", onClose);
+      document.addEventListener("keydown", onKey);
+
+      lightboxEl = wrap;
+      return wrap;
+    };
+
+    const buildUrl = (publicId) => {
+      if (!publicId) return "";
+      if (/^https?:\/\//.test(publicId)) return publicId;
+      if (!cloudName) return "";
+      return `https://res.cloudinary.com/${cloudName}/image/upload/f_auto,q_auto,w_1600/${publicId}`;
+    };
+
+    dlg.querySelectorAll("figure[data-img-wrapper]").forEach((fig) => {
+      fig.style.cursor = "zoom-in";
+      fig.addEventListener("click", (ev) => {
+        ev.stopPropagation();
+        ev.preventDefault();
+        const pid = fig.getAttribute("data-public-id");
+        const url = buildUrl(pid);
+        const overlay = ensureLightbox();
+        const img = overlay?.querySelector(".lightbox__img");
+        if (overlay && img && url) {
+          img.setAttribute("src", url);
+          img.setAttribute("alt", fig.getAttribute("aria-label") || "");
+          img.setAttribute("draggable", "false");
+          overlay.classList.add("is-active");
+        }
+      });
+    });
+  })();
+</script>
+
+<style is:global>
+  dialog.modal::backdrop {
+    background: transparent;
+  }
+
+  .gallery-scroll {
+    position: relative;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .gallery-scroll::-webkit-scrollbar {
+    display: none;
+  }
+
+  dialog.modal .lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 80;
+    display: grid;
+    place-items: center;
+    background: rgba(0, 0, 0, 0.85);
+    opacity: 0;
+    transition: opacity 0.12s ease;
+  }
+  dialog.modal .lightbox.is-active {
+    opacity: 1;
+  }
+
+  dialog.modal .lightbox__frame {
+    position: relative;
+  }
+
+  dialog.modal .lightbox__imgwrap {
+    position: relative;
+    display: inline-block;
+  }
+
+  dialog.modal .lightbox__img {
+    display: block;
+    width: 90vw;
+    max-width: 90vw;
+    max-height: 85vh;
+    object-fit: contain;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  }
+
+  @media (min-width: 1024px) {
+    dialog.modal .lightbox__img {
+      width: 50vw;
+      max-width: 50vw;
+    }
+  }
+
+  dialog.modal .lightbox__close {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    padding: 0.35rem;
+    line-height: 0;
+    border: 0;
+    border-radius: 9999px;
+    background: rgba(0, 0, 0, 0.6);
+    color: #fff;
+    cursor: pointer;
+    outline: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  }
+
+  .gallery-scroll.lightbox-open {
+    overflow: hidden;
+  }
+</style>

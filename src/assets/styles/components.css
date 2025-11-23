@@ -1,0 +1,118 @@
+/* Shared component-level styles extracted from local components */
+
+/* Modal base + backdrop */
+dialog.modal { padding: 0; margin: 0; background: transparent; }
+/* Center dialog safely within viewport on all devices */
+dialog.modal[open] {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  /* Leave breathing room incl. safe areas (iPhone) */
+  padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+  z-index: 1000;
+}
+dialog.modal::backdrop { background: rgb(0 0 0 / 0.6); backdrop-filter: blur(3px); pointer-events: none; }
+/* Remove any default browser focus outlines on <dialog> */
+dialog.modal:focus,
+dialog.modal:focus-visible,
+dialog.modal:focus-within { outline: none; }
+
+/* Sibling overlay that captures clicks (transparent; visuals handled by ::backdrop) */
+.modal-overlay { display: none; position: fixed; inset: 0; z-index: 999; background: transparent; }
+.modal[open] + .modal-overlay { display: block; }
+
+/* Modal animations (keyframes in animations.css) */
+.modal-panel { animation: modalIn 220ms cubic-bezier(0.2, 0.8, 0.2, 1); max-height: 100%; display: flex; flex-direction: column; overflow: hidden; }
+.modal-panel:focus { outline: none; }
+/* Allow body to scroll while header/footer stay fixed within panel */
+.modal-panel > .modal-body,
+.modal-panel > .p-5 { flex: 1 1 auto; min-height: 0; overflow: auto; }
+
+/* Modal gallery expansion */
+.gallery-grid figure {
+  cursor: zoom-in;
+  transition: transform 220ms cubic-bezier(.2,.8,.2,1), box-shadow 220ms ease, border-radius 220ms ease;
+  will-change: transform;
+}
+.gallery-grid figure img {
+  transition: transform 250ms cubic-bezier(.2,.8,.2,1), filter 200ms ease;
+}
+.gallery-grid figure[data-expanded="true"] {
+  grid-column: 1 / -1; /* span all columns */
+  aspect-ratio: 16 / 9;
+  z-index: 2;
+  cursor: zoom-out;
+  box-shadow: 0 10px 30px rgba(0,0,0,.15);
+  transform: scale(1.015);
+  border-radius: 1rem;
+}
+.gallery-grid figure[data-expanded="true"] img {
+  transform: scale(1.04);
+}
+.modal.closing .modal-panel { animation: modalOut 150ms ease forwards; }
+
+/* CTA button shine sweep */
+.cta-btn {
+  position: relative; overflow: hidden; animation: aurora 12s ease-in-out infinite;
+  /* Tunable shine variables with sensible defaults */
+  --shine-duration: 900ms;
+  --shine-opacity: 0.9;
+  --shine-width: 50%;
+}
+.cta-btn .shine {
+  position: absolute;
+  inset: auto;
+  top: 0; left: -150%; height: 100%; width: var(--shine-width);
+  background: linear-gradient(115deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.45) 50%, rgba(255, 255, 255, 0) 100%);
+  transform: skewX(-20deg);
+  opacity: 0; transition: opacity 0.2s ease;
+}
+.cta-btn:hover .shine { animation: shine-sweep var(--shine-duration) ease forwards; opacity: var(--shine-opacity); }
+
+/* Memory card special effects (sparkle keyframes in animations.css) */
+.sparkle {
+  position: absolute;
+  left: var(--x); top: var(--y);
+  width: 8px; height: 8px; border-radius: 9999px;
+  background: radial-gradient(closest-side, rgba(255, 255, 255, 0.98), rgba(255, 255, 255, 0.55) 40%, rgba(255, 255, 255, 0) 72%);
+  filter: blur(0.3px);
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.55), 0 0 18px rgba(255, 255, 255, 0.35);
+  opacity: 0; animation: sparkleTwinkle 2.4s ease-in-out infinite; animation-delay: var(--d);
+}
+.memory-card::before {
+  content: ""; position: absolute; inset: 0; border-radius: inherit;
+  background: radial-gradient(120% 80% at 10% 20%, rgba(255, 255, 255, 0.08), transparent 50%),
+              radial-gradient(120% 90% at 90% 80%, rgba(255, 255, 255, 0.06), transparent 60%);
+  opacity: 0; transition: opacity 0.35s ease;
+}
+.memory-card:hover::before { opacity: 1; }
+.memory-card::after {
+  content: ""; position: absolute; top: -10%; left: -150%; width: 65%; height: 120%; border-radius: 9999px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0));
+  filter: blur(8px); transform: skew(-20deg); opacity: 0;
+  z-index: 8; pointer-events: none;
+}
+.memory-card:hover::after { opacity: 1; animation: shine-sweep 1100ms ease; }
+.memory-card span { text-shadow: 0 1px 4px rgba(0, 0, 0, 0.35); }
+.memory-card:hover span { filter: brightness(1.1) saturate(1.2); }
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .animate-aurora, .sparkle, .memory-card::before, .memory-card::after, .cta-btn .shine {
+    animation: none !important; transition: none !important; opacity: 0.4;
+  }
+}
+
+/* Skeleton UI overlays: base + fade out once content is loaded */
+.skeleton {
+  transition: opacity 220ms ease;
+  background: linear-gradient(90deg,
+      rgba(0,0,0,0.06) 25%,
+      rgba(0,0,0,0.10) 37%,
+      rgba(0,0,0,0.06) 63%);
+  background-size: 400% 100%;
+  animation: skeleton-shimmer 1.2s ease-in-out infinite;
+}
+[data-loaded="true"] .skeleton { opacity: 0; pointer-events: none; }

@@ -1,0 +1,178 @@
+---
+import PageLayout from "../layouts/PageLayout.astro";
+import Footer from "../components/Footer.astro";
+import GlassPanel from "../components/ui/GlassPanel.astro";
+
+const title = "Billett";
+const desc = "Programmet slippes snart - hold av dagene 5-8. februar og bli med på vintermagien.";
+
+// Let Vite/Astro build page.ts -> JS file and give us the URL
+const ticketScript = await import("../scripts/ticket/page.ts?url");
+---
+
+<PageLayout title={title} description={desc}>
+  <!-- Header hero (liquid glass) -->
+  <section id="hero" class="hero relative isolate mt-20 sm:mt-24">
+    <div class="ticket-shell py-10 sm:py-12 text-white">
+      <GlassPanel class="w-full p-6 sm:p-8 text-white">
+        <h1 class="text-4xl font-extrabold sm:text-5xl">Se billett</h1>
+        <p class="mt-2 text-white/85">Skriv inn din billett-ID for å hente detaljene.</p>
+
+        <form id="ticket-form" class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-[1fr_auto]" novalidate>
+          <div>
+            <label for="ticketId" class="sr-only">Billett-ID</label>
+            <input id="ticketId" name="ticketId" inputmode="text" autocomplete="off" placeholder="F.eks. ABC123" pattern="[A-Za-z0-9\-]{3,}" class="w-full rounded-lg border border-white/30 bg-white/10 backdrop-blur px-4 py-3 text-white placeholder-white/70 outline-none focus:ring-2 focus:ring-white/60" />
+          </div>
+          <button type="submit" class="cta-btn inline-flex items-center justify-center rounded-lg bg-white/90 text-sky-900 px-6 py-3 font-semibold shadow-sm transition hover:bg-white"> Hent billett </button>
+        </form>
+
+        <p id="form-help" class="mt-2 text-sm text-white/80">Bruk koden fra e-posten din. Bare tall, bokstaver og bindestrek.</p>
+      </GlassPanel>
+    </div>
+  </section>
+
+  <!-- Results -->
+  <section class="ticket-shell pt-2 pb-10">
+    <div id="status" role="status" aria-live="polite" class="mb-3 text-sm text-white/85"></div>
+
+    <!-- Loading skeleton -->
+    <GlassPanel id="placeholder" class="hidden w-full p-5">
+      <div class="flex items-center justify-between gap-3 border-b border-black/5 pb-4 mb-4">
+        <div class="space-y-2 w-full">
+          <div class="h-5 w-40 rounded skeleton"></div>
+          <div class="h-4 w-56 rounded skeleton"></div>
+        </div>
+        <div class="h-6 w-20 rounded-full skeleton"></div>
+      </div>
+      <div class="grid gap-4 sm:grid-cols-[1fr_auto]">
+        <div class="grid gap-3 sm:grid-cols-2">
+          <div class="space-y-2">
+            <div class="h-4 w-24 rounded skeleton"></div>
+            <div class="h-5 w-40 rounded skeleton"></div>
+          </div>
+          <div class="space-y-2">
+            <div class="h-4 w-20 rounded skeleton"></div>
+            <div class="h-5 w-48 rounded skeleton"></div>
+          </div>
+        </div>
+        <div class="h-52 w-52 rounded-lg skeleton justify-self-center sm:justify-self-auto"></div>
+      </div>
+    </GlassPanel>
+
+    <div id="result" class="hidden">
+      <GlassPanel class="w-full p-0 text-white">
+        <header class="flex items-center justify-between gap-3 border-b border-white/15 px-5 py-4">
+          <div>
+            <h2 class="text-lg font-semibold text-white">
+              <span id="ticket-product"></span>
+            </h2>
+            <p class="text-sm text-white/85 flex items-center gap-2">
+              Billett-ID:
+              <span id="ticket-id" class="font-mono"></span>
+              <button id="copy-id" type="button" class="rounded-md px-2 py-1 text-xs font-medium text-white ring-1 ring-white/15 hover:bg-white/10"> Kopier </button>
+            </p>
+          </div>
+          <div class="flex items-center gap-2">
+            <span id="ticket-status" class="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium"></span>
+          </div>
+        </header>
+
+        <div class="px-5 py-5 grid gap-5 sm:grid-cols-[1fr_auto]">
+          <div class="grid gap-3 sm:grid-cols-2 min-w-0">
+            <div>
+              <div class="text-sm text-white/70">Navn</div>
+              <div id="ticket-owner" class="font-medium text-white"></div>
+            </div>
+            <div>
+              <div class="text-sm text-white/70">E-post</div>
+              <div id="ticket-email" class="font-medium text-white wrap-break-word"></div>
+            </div>
+            <div id="row-phone" class="hidden">
+              <div class="text-sm text-white/70">Telefon</div>
+              <div id="ticket-phone" class="font-medium text-white"></div>
+            </div>
+            <div id="row-original" class="hidden">
+              <div class="text-sm text-white/70">Opprinnelig eier</div>
+              <div id="ticket-original" class="font-medium text-white"></div>
+            </div>
+          </div>
+
+          <!-- QR code renders the ID only -->
+          <div class="sm:row-span-2 sm:col-start-2 self-start">
+            <div class="qr-box relative rounded-lg border border-white/15 bg-white/95 p-3 text-center">
+              <img draggable="false" id="ticket-qr" alt="QR-kode for billett" class="mx-auto block h-48 w-48 object-contain cursor-zoom-in" width="192" height="192" />
+            </div>
+            <div class="mt-2 text-xs sm:text-sm text-white/85">Klikk for å forstørre</div>
+          </div>
+        </div>
+      </GlassPanel>
+    </div>
+  </section>
+
+  <!-- QR fullscreen dialog -->
+  <dialog id="qr-dialog" class="modal" aria-label="QR i fullskjerm">
+    <div class="modal-container fixed inset-0 grid place-items-center p-4">
+      <div class="modal-panel relative w-full max-w-xl overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-black/5 p-6 flex items-center justify-center">
+        <button type="button" data-close aria-label="Lukk" class="absolute right-3 top-3 rounded-md px-2 py-1 text-xs font-medium text-neutral-700 ring-1 ring-black/10 hover:bg-neutral-100"> Lukk </button>
+        <img id="qr-big" alt="QR-kode i fullskjerm" class="block w-[80vw] max-w-[420px] h-auto" />
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Transfer dialog -->
+  <dialog id="transfer-dialog" class="modal" aria-label="Gi bort billett">
+    <div class="modal-container fixed inset-0 grid place-items-center p-4">
+      <form id="transfer-form" class="modal-panel relative w-full max-w-lg overflow-hidden rounded-2xl border border-black/10 bg-white text-neutral-900 shadow-2xl ring-1 ring-black/5 p-5">
+        <h3 class="text-lg font-semibold text-neutral-900">Gi bort billett</h3>
+        <p class="mt-1 text-sm text-neutral-600">Fyll ut ny eier. Dette er en demo - ingen faktisk overføring skjer.</p>
+        <div class="mt-4 grid gap-3 sm:grid-cols-2">
+          <div class="sm:col-span-2">
+            <label for="newName" class="text-sm text-neutral-700">Navn</label>
+            <input id="newName" name="newName" required class="mt-1 w-full rounded-lg border border-black/15 bg-white px-3 py-2 text-neutral-900 outline-none focus:ring-2 focus:ring-indigo-500/60" />
+          </div>
+          <div class="sm:col-span-2">
+            <label for="newEmail" class="text-sm text-neutral-700">E-post</label>
+            <input id="newEmail" name="newEmail" type="email" required class="mt-1 w-full rounded-lg border border-black/15 bg-white px-3 py-2 text-neutral-900 outline-none focus:ring-2 focus:ring-indigo-500/60" />
+          </div>
+          <div class="sm:col-span-2">
+            <label for="newPhone" class="text-sm text-neutral-700"> Telefon (valgfritt) </label>
+            <input id="newPhone" name="newPhone" class="mt-1 w-full rounded-lg border border-black/15 bg-white px-3 py-2 text-neutral-900 outline-none focus:ring-2 focus:ring-indigo-500/60" />
+          </div>
+        </div>
+        <div class="mt-5 flex justify-end gap-2">
+          <button type="button" data-close class="rounded-md px-3 py-2 text-sm font-medium text-neutral-700 ring-1 ring-black/10 hover:bg-neutral-100"> Avbryt </button>
+          <button type="submit" class="rounded-md px-3 py-2 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700"> Overfør </button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+</PageLayout>
+
+<div class="mt-auto">
+  <Footer />
+</div>
+
+<!-- Let Vite-built JS run as a proper ESM module -->
+<script type="module" src={ticketScript.default}></script>
+
+<style is:global>
+  /* shared container for hero + ticket so widths always match */
+  .ticket-shell {
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 48rem; /* Tailwind max-w-3xl */
+    padding-left: 1.5rem; /* px-6 */
+    padding-right: 1.5rem;
+  }
+
+  .qr-box {
+    isolation: isolate;
+  }
+
+  .skeleton {
+    transition: opacity 220ms ease;
+    background: linear-gradient(90deg, rgba(0, 0, 0, 0.06) 25%, rgba(0, 0, 0, 0.1) 37%, rgba(0, 0, 0, 0.06) 63%);
+    background-size: 400% 100%;
+    animation: skeleton-shimmer 1.2s ease-in-out infinite;
+  }
+</style>

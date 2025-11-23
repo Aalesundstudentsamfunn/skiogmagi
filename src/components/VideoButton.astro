@@ -1,0 +1,23 @@
+---
+import { Icon } from "astro-icon/components";
+
+export interface Props {
+  icon?: string; // e.g. "heroicons:play-solid"
+  label?: string;
+  action?: string;
+  class?: string;
+  size?: "sm" | "md" | "lg";
+}
+
+const { icon, label, action, class: cls = "", size = "md" } = Astro.props;
+
+// Tailwind classes
+const sizeClasses = size === "sm" ? "px-3 py-2 text-sm gap-2" : size === "lg" ? "px-5 py-3 text-base gap-2.5" : "px-3 py-3 text-sm gap-2";
+const glassClasses = "text-white bg-white/15 border border-white/25 backdrop-blur-md [filter:saturate(1.8)] " + "shadow-[inset_0_1px_0_rgba(255,255,255,0.2),0_8px_24px_rgba(0,0,0,0.25)] " + "hover:bg-white/25 hover:-translate-y-0.5 active:translate-y-0 " + "focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60";
+const baseClasses = "hover:cursor-pointer inline-flex items-center justify-center rounded-full select-none font-semibold transition " + "gap-2 " + glassClasses;
+---
+
+<button class={`${baseClasses} ${sizeClasses} ${cls}`} data-video-action={action ?? ""} aria-label={label ?? action ?? "button"}>
+  {icon && <Icon name={icon} class="w-5 h-5 pointer-events-none shrink-0" />}
+  {label && <span class="tracking-wide pointer-events-none">{label}</span>}
+</button>

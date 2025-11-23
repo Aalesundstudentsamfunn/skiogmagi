@@ -1,0 +1,42 @@
+---
+import { CldImage } from "astro-cloudinary";
+
+export interface Props {
+  title?: string;
+  paragraphs?: string[];
+  heroImg?: string; // Cloudinary public ID
+  img2?: string; // Cloudinary public ID
+  img3?: string; // Cloudinary public ID
+}
+
+const { title = "Om Ski og Magi", paragraphs = ["Ski & Magi er vinterens eventyr for studentene ved NTNU i Ålesund. Et eventyr der hverdagen legges igjen hjemme, og fjellheimen åpner dørene til et univers av snø, fest og latter. Hvert år reiser vi til et av Norges beste skisteder for å skape magi som blir med lenge etterpå.", "Oppdal, Bjorli, Hafjell, Kvitfjell, Storefjell og Sogndal har alle satt scenen for uforglemmelige turer. Dagene byr på skikjøring i frisk fjelluft, mens kveldene samler oss i en atmosfære du bare får når hundrevis av studenter deler samme reisefeber og samme gode humør.", "Ski & Magi handler om mer enn bakker og snø, det handler om å kjenne fellesskapet, møte nye mennesker, og oppleve den lille gnisten som oppstår når alt ligger til rette for ett perfekt vinter eventyr. Her skapes vennskap, historier og tradisjoner – år etter år."], heroImg = "skiogmagi_2025_1_yweuhz", img2 = "skiogmagi_2025_2_cekhou", img3 = "skiogmagi_2025_3_rgujx4" } = Astro.props as Props;
+---
+
+<section class="w-full bg-neutral-100">
+  <div class="max-w-6xl px-6 py-12 mx-auto lg:py-16">
+    <div class="grid items-start gap-10 lg:grid-cols-2">
+      <div>
+        <h2 class="text-4xl font-extrabold tracking-tight text-neutral-900 sm:text-5xl">{title}</h2>
+        <div class="mt-6 space-y-5 text-neutral-700 leading-relaxed text-[0.98rem] sm:text-base">
+          {paragraphs.map((p) => <p>{p}</p>)}
+        </div>
+      </div>
+      <div class="grid gap-4">
+        <figure class="relative overflow-hidden shadow-md aspect-video rounded-2xl" data-img-wrapper>
+          <div class="absolute inset-0 skeleton"></div>
+          <CldImage draggable="false" src={heroImg} alt="Skikjører i norske fjell" class="object-cover w-full h-full transition-opacity duration-300" sizes="(min-width: 1024px) 50vw, 100vw" loading="lazy" fetchpriority="low" onload="this.style.opacity=''; this.closest('[data-img-wrapper]')?.setAttribute('data-loaded','true');" />
+        </figure>
+        <div class="grid grid-cols-2 gap-4">
+          <figure class="relative overflow-hidden shadow-md aspect-4/3 rounded-2xl" data-img-wrapper>
+            <div class="absolute inset-0 skeleton"></div>
+            <CldImage draggable="false" src={img2} alt="Fjellstue ved solnedgang" class="object-cover w-full h-full transition-opacity duration-300" sizes="(min-width: 1024px) 25vw, 50vw" loading="lazy" fetchpriority="low" onload="this.style.opacity=''; this.closest('[data-img-wrapper]')?.setAttribute('data-loaded','true');" />
+          </figure>
+          <figure class="relative overflow-hidden shadow-md aspect-4/3 rounded-2xl" data-img-wrapper>
+            <div class="absolute inset-0 skeleton"></div>
+            <CldImage draggable="false" src={img3} alt="Vinterlek i snøen" class="object-cover w-full h-full transition-opacity duration-300" sizes="(min-width: 1024px) 25vw, 50vw" loading="lazy" fetchpriority="low" onload="this.style.opacity=''; this.closest('[data-img-wrapper]')?.setAttribute('data-loaded','true');" />
+          </figure>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

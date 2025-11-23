@@ -1,0 +1,28 @@
+---
+import SiteMeta from "../components/SiteMeta.astro";
+import Navigation from "../components/Navigation.astro";
+import "../assets/styles/global.css";
+
+const { title = "Ski & Magi", description = "På Ski & Magi reiser omlag 400 studenter på en tredagers skitur i den norske fjellheimen. Dette har vært en tradisjon siden tidlig 90-tall og er det eldste arrangementet for studenter i Ålesund." } = Astro.props;
+---
+
+<html lang="en" data-theme="cerberus">
+  <head>
+    <!-- Performance: preconnect to Mux domains used by the Hero player -->
+    <link rel="preconnect" href="https://stream.mux.com" crossorigin />
+    <link rel="preconnect" href="https://image.mux.com" crossorigin />
+    <SiteMeta title={title} description={description} />
+  </head>
+  <body class="text-neutral-900 bg-neutral-100">
+    <Navigation />
+    <main class="min-h-svh flex flex-col">
+      <slot />
+    </main>
+  </body>
+</html>
+
+<script>
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("/sw.js").catch(console.error);
+  }
+</script>

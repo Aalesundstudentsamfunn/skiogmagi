@@ -1,0 +1,4 @@
+Contact: mailto:it@astudent.no
+Preferred-Languages: en, no
+Canonical: https://skiogmagi.no/.well-known/security.txt
+Expires: 2026-06-01T00:00:00Z

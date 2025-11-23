@@ -1,0 +1,45 @@
+---
+export interface Props {
+  label?: string;
+  href?: string;
+  type?: 'button' | 'submit' | 'reset';
+  disabled?: boolean;
+  class?: string;
+  ariaLabel?: string;
+}
+
+const {
+  label,
+  href,
+  type = 'button',
+  disabled = false,
+  class: cls = '',
+  ariaLabel,
+  ...rest
+} = Astro.props as Props;
+
+const hasCustomTextColor = /\btext-[^\s]+/.test(cls);
+const hasCustomRadius = /\brounded[^\s]*/.test(cls);
+
+const base =
+  'inline-flex items-center gap-2 px-4 py-2 font-semibold whitespace-nowrap transition-colors transition-transform duration-300 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/60';
+const defaultStyle = [
+  hasCustomRadius ? null : 'rounded-lg',
+  'bg-neutral-900',
+  hasCustomTextColor ? null : 'text-white',
+  'hover:bg-neutral-800',
+]
+  .filter(Boolean)
+  .join(' ');
+
+---
+
+{href ? (
+  <a href={href} aria-label={ariaLabel} class={`${base} ${defaultStyle} ${cls}`} {...rest}>
+    <slot>{label}</slot>
+  </a>
+) : (
+  <button type={type} disabled={disabled} aria-disabled={disabled ? 'true' : undefined} aria-label={ariaLabel} class={`${base} ${defaultStyle} ${disabled ? 'opacity-60 cursor-not-allowed' : ''} ${cls}`} {...rest}>
+    <slot>{label}</slot>
+  </button>
+)}

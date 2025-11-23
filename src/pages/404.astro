@@ -1,0 +1,68 @@
+---
+import PageLayout from "../layouts/PageLayout.astro";
+import Footer from "../components/Footer.astro";
+import Button from "../components/ui/Button.astro";
+import GlassPanel from "../components/ui/GlassPanel.astro";
+
+const title = "Fant ikke siden";
+const description = "Den lenken du fulgte ser ut til å ha kjørt seg bort i fjellet. Men vi hjelper deg gjerne tilbake til magien.";
+const suggestions = [
+  {
+    title: "Sjekk programmet",
+    detail: "Se hele helgen, dag for dag. Kanskje du lette etter en aktivitet?",
+    href: "/program",
+  },
+  {
+    title: "Finn billetten din",
+    detail: "Har du billett-ID klar? Her kan du hente detaljer.",
+    href: "/billett",
+  },
+  {
+    title: "Ta kontakt",
+    detail: "Send oss en e-post hvis du trenger hjelp med booking eller info.",
+    href: "mailto:skiogmagi@astudent.no",
+  },
+];
+---
+
+<PageLayout title={title} description={description}>
+  <section class="hero relative isolate mt-24 px-6 text-center text-white">
+    <div aria-hidden class="pointer-events-none absolute inset-0 -z-10">
+      <div class="absolute inset-x-0 top-10 mx-auto h-64 w-64 rounded-full bg-sky-400/30 blur-[120px]"></div>
+      <div class="absolute inset-x-0 bottom-0 mx-auto h-72 w-72 rounded-full bg-fuchsia-500/30 blur-[140px]"></div>
+    </div>
+    <div class="mx-auto max-w-3xl py-16 sm:py-20">
+      <p class="text-sm uppercase tracking-[0.35em] text-white/70">404</p>
+      <h1 class="mt-3 text-4xl font-extrabold tracking-tight sm:text-5xl">{title}</h1>
+      <p class="mt-4 text-lg text-white/85">{description}</p>
+      <div class="mt-8 flex flex-wrap items-center justify-center gap-3 text-base font-semibold">
+        <Button href="/" class="bg-white text-sky-900 shadow-lg shadow-sky-500/20 hover:bg-white/95"> Til magien </Button>
+        <Button href="/program" class="bg-white/10 text-white ring-1 ring-white/30 hover:bg-white/15"> Se programmet </Button>
+      </div>
+    </div>
+  </section>
+
+  <section class="mx-auto w-full max-w-4xl px-6 pb-16 text-white">
+    <GlassPanel class="p-6 sm:p-10 text-left">
+      <h2 class="text-2xl font-bold">Forslag til veien videre</h2>
+      <p class="mt-2 text-white/80">Her er noen snarveier som ofte løser flokene.</p>
+      <div class="mt-6 grid gap-4 sm:grid-cols-2">
+        {
+          suggestions.map((tip) => (
+            <article class="rounded-2xl border border-white/15 bg-white/5 p-4">
+              <h3 class="text-lg font-semibold">{tip.title}</h3>
+              <p class="mt-1 text-sm text-white/80">{tip.detail}</p>
+              <a href={tip.href} class="mt-3 inline-flex items-center text-sm font-semibold text-white hover:text-white/80">
+                Gå til {tip.href.startsWith("mailto:") ? "e‑post" : "side"} →
+              </a>
+            </article>
+          ))
+        }
+      </div>
+    </GlassPanel>
+  </section>
+
+  <div class="mt-auto">
+    <Footer />
+  </div>
+</PageLayout>

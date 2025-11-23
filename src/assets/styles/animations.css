@@ -1,0 +1,49 @@
+/* === Shared Animations === */
+
+/* Unified shine sweep animation (used for buttons, cards, etc.) */
+@keyframes shine-sweep {
+  0% { left: -150%; opacity: 0; }
+  25% { opacity: 0.8; }
+  100% { left: 150%; opacity: 0; }
+}
+
+/* Aurora background drift (slow gradient motion) */
+  @keyframes aurora {
+    0% {
+      background-position: 0% 50%;
+      filter: hue-rotate(0deg);
+      opacity: 0.8;
+    }
+    50% {
+      background-position: 100% 50%;
+      filter: hue-rotate(20deg);
+      opacity: 0.9;
+    }
+    100% {
+      background-position: 0% 50%;
+      filter: hue-rotate(0deg);
+      opacity: 0.8;
+    }
+  }
+
+/* Modal animations */
+@keyframes modalIn {
+  from { opacity: 0; transform: translateY(10px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes modalOut {
+  from { opacity: 1; transform: translateY(0) scale(1); }
+  to { opacity: 0; transform: translateY(8px) scale(0.985); }
+}
+
+/* Sparkle animation for card effects */
+@keyframes sparkleTwinkle {
+  0%, 100% { opacity: 0; transform: translate(-50%, -50%) scale(0.65); }
+  50% { opacity: 1; transform: translate(-50%, -50%) scale(1.18); }
+}
+
+/* Skeleton shimmer fallback (replaced by Skeleton plugin when installed) */
+@keyframes skeleton-shimmer {
+  0% { background-position: 100% 0; }
+  100% { background-position: 0 0; }
+}

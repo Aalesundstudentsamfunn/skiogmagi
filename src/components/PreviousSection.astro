@@ -1,0 +1,75 @@
+---
+import MemoryCard from "./PreviousCard.astro";
+import MemoryModal from "./PreviousModal.astro";
+import { getCollection, type CollectionEntry } from "astro:content";
+
+type MemoryEntry = CollectionEntry<"memories">;
+
+export interface Memory {
+  id: string;
+  title: string;
+  tag?: string;
+  year: string;
+  people?: string;
+  img: string;
+  tint: string;
+  blurb?: string;
+  gallery?: string[];
+}
+
+export interface Props {
+  heading?: string;
+  subheading?: string;
+  items?: Memory[];
+}
+
+// Load from content collection
+const memoryEntries: MemoryEntry[] = await getCollection("memories");
+
+// Map to plain Memory objects & sort by year (newest first)
+const contentItems: Memory[] = memoryEntries.map((entry) => entry.data as Memory).sort((a, b) => Number(b.year) - Number(a.year));
+
+// Allow overrides via props
+const { heading = "Magiske minner fra tidligere år", subheading = "Hvert år skaper vi nye eventyr på nye steder. Se hvor magien har tatt oss.", items = contentItems } = Astro.props as Props;
+---
+
+<section class="w-full bg-neutral-100">
+  <div class="max-w-6xl px-6 mx-auto py-10 lg:py-14">
+    <div class="mb-8 text-center">
+      <h2 class="text-3xl font-extrabold tracking-tight sm:text-4xl text-neutral-900">
+        {heading}
+      </h2>
+      <p class="mt-2 text-neutral-500">{subheading}</p>
+    </div>
+
+    <div class="grid gap-6 sm:gap-7 lg:grid-cols-3">
+      {items.map((m) => <MemoryCard {...m} />)}
+    </div>
+  </div>
+
+  {items.map((m) => <MemoryModal {...m} />)}
+</section>
+
+<script is:inline>
+  // Simple modal controller (no scroll lock)
+  const openModal = (dlg) => {
+    try {
+      dlg.showModal?.();
+    } catch {
+      dlg.setAttribute("open", "");
+    }
+  };
+
+  // Open on [data-open][data-target]
+  document.addEventListener("click", (e) => {
+    const el = e.target;
+    if (!(el instanceof Element)) return;
+    const opener = el.closest("[data-open][data-target]");
+    if (!opener) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const id = opener.getAttribute("data-target");
+    const dlg = id && document.getElementById(id);
+    if (dlg instanceof HTMLDialogElement || dlg instanceof HTMLElement) openModal(dlg);
+  });
+</script>

@@ -1,0 +1,27 @@
+---
+import SiteMeta from "../components/SiteMeta.astro";
+import Navigation from "../components/Navigation.astro";
+import MagicBackground from "../components/ui/MagicBackground.astro";
+import "../assets/styles/global.css";
+
+const { title = "Ski & Magi", description = "Vintermagi." } = Astro.props;
+---
+
+<html lang="en" data-theme="cerberus">
+  <head>
+    <SiteMeta title={title} description={description} />
+  </head>
+  <body class="text-neutral-900 bg-neutral-100">
+    <Navigation />
+    <main class="relative isolate overflow-hidden min-h-svh flex flex-col">
+      <MagicBackground sparkles={false} />
+      <slot />
+    </main>
+  </body>
+</html>
+
+<script>
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("/sw.js").catch(console.error);
+  }
+</script>

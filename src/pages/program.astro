@@ -1,0 +1,278 @@
+---
+import PageLayout from "../layouts/PageLayout.astro";
+import Footer from "../components/Footer.astro";
+
+type ProgramDay = {
+  id: string;
+  label: string;
+  dateLabel: string;
+  summary?: string;
+  order?: number;
+};
+
+const programModules = import.meta.glob<{ data: ProgramDay }>("../content/program/*.mdx", { eager: true });
+
+const days = Object.values(programModules)
+  .map((mod) => mod?.data)
+  .filter((d): d is ProgramDay => Boolean(d))
+  .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+
+const title = "Program";
+const desc = "Programmet slippes snart - hold av dagene 5-8. februar og bli med på vintermagien.";
+---
+
+<PageLayout title={title} description={desc}>
+  <!-- Header hero to keep nav in contrast -->
+  <section id="hero" class="hero relative isolate overflow-hidden mt-20 sm:mt-24">
+    <div class="mx-auto max-w-6xl px-6 pt-16 sm:pt-20 text-white">
+      <h1 class="text-4xl font-extrabold drop-shadow sm:text-5xl">{title}</h1>
+      <p class="mt-3 text-white/90">{desc}</p>
+    </div>
+  </section>
+
+  <!-- Content -->
+  <section class="mx-auto w-full max-w-6xl px-6 py-8 sm:py-10 text-white mb-66 md:mb-4 hidden">
+    <!-- Mobile: top tabs + panel -->
+    <div class="md:hidden">
+      <!-- Tabs row -->
+      <div role="tablist" aria-label="Dager (mobil)" class="flex items-center gap-3 overflow-x-auto overflow-y-visible -mx-6 px-6 py-2 text-white scrollbar-hidden">
+        {
+          days.map((d) => (
+            <button id={`mtab-${d.id}`} data-tab={d.id} role="tab" aria-selected="false" aria-controls={`mpanel-${d.id}`} class="whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/10 active:bg-white/20 focus:bg-white/15 ring-1 ring-white/15 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/60 data-[active=true]:bg-indigo-600 data-[active=true]:text-white data-[active=true]:shadow-sm data-[active=true]:ring-0">
+              {d.label}
+            </button>
+          ))
+        }
+      </div>
+
+      <!-- Active day content -->
+      <div class="relative mt-4 rounded-2xl border border-white/15 bg-white/10 p-4 sm:p-5 text-white shadow-sm backdrop-blur-md">
+        {
+          days.map((d) => (
+            <div id={`mpanel-${d.id}`} data-panel data-day-id={d.id} role="tabpanel" aria-labelledby={`mtab-${d.id}`} hidden class="panel">
+              <header class="mb-2">
+                <h2 class="text-xl font-bold text-white">{d.label}</h2>
+                <p class="text-white/70">
+                  {d.dateLabel}
+                  {d.summary ? ` · ${d.summary}` : ""}
+                </p>
+              </header>
+
+              <div class="rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-sm text-white/90">Vi er like gira som deg! Programmet kommer snart! &lt;3</div>
+
+              {/**
+               * Temporarily hiding detailed schedule until ready to publish
+               * <ul class="timeline relative ml-0.5 pl-3">...</ul>
+               */}
+            </div>
+          ))
+        }
+      </div>
+    </div>
+
+    <!-- Desktop: tabs + timeline -->
+    <div class="hidden md:grid grid-cols-[280px_1fr] gap-6">
+      <!-- Tabs (left) -->
+      <div role="tablist" aria-label="Dager" class="h-max rounded-2xl border border-white/15 bg-white/10 p-3 shadow-sm backdrop-blur-md space-y-2 text-white">
+        {
+          days.map((d) => (
+            <button id={`tab-${d.id}`} data-tab={d.id} role="tab" aria-selected="false" aria-controls={`panel-${d.id}`} class="group w-full text-left rounded-xl px-4 py-3 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/60 hover:bg-white/10 data-[active=true]:bg-indigo-600 data-[active=true]:text-white data-[active=true]:shadow-sm">
+              <div class="text-xs text-white/70">{d.dateLabel}</div>
+              <div class="mt-0.5 font-semibold text-white">{d.label}</div>
+              {d.summary && <div class="mt-1 text-sm text-white/85">{d.summary}</div>}
+            </button>
+          ))
+        }
+      </div>
+
+      <!-- Panels (right) -->
+      <div class="relative rounded-2xl border border-white/15 bg-white/10 p-4 sm:p-6 shadow-sm backdrop-blur-md text-white">
+        <!-- ambient glows -->
+        <div aria-hidden class="pointer-events-none absolute -top-20 -left-16 h-40 w-40 rounded-full bg-sky-300/25 blur-3xl"></div>
+        <div aria-hidden class="pointer-events-none absolute -bottom-20 -right-16 h-40 w-40 rounded-full bg-fuchsia-300/25 blur-3xl"></div>
+
+        {
+          days.map((d) => (
+            <div id={`panel-${d.id}`} data-panel data-day-id={d.id} role="tabpanel" aria-labelledby={`tab-${d.id}`} hidden class="panel">
+              <header class="mb-4">
+                <h2 class="text-2xl font-bold text-white">{d.label}</h2>
+                <p class="text-white/70">
+                  {d.dateLabel}
+                  {d.summary ? ` · ${d.summary}` : ""}
+                </p>
+              </header>
+
+              <div class="rounded-2xl border border-white/15 bg-white/5 px-4 py-4 text-white/90">Vi er like gira som deg! Programmet kommer snart! &lt;3</div>
+
+              {/**
+               * Temporarily hiding detailed schedule until ready to publish
+               * <ul class="timeline relative ml-0.5 pl-3">...</ul>
+               */}
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <div class="mt-auto">
+    <Footer />
+  </div>
+</PageLayout>
+
+<script is:inline>
+  /* eslint-env browser */
+
+  function setupProgramTabs() {
+    const tabButtons = Array.from(document.querySelectorAll("[data-tab]"));
+    const panelEls = Array.from(document.querySelectorAll("[data-panel]"));
+
+    if (!tabButtons.length || !panelEls.length) return;
+
+    function sizeConnectors() {
+      // For each timeline list, compute center-to-center connectors
+      document.querySelectorAll("ul.timeline").forEach((ul) => {
+        const items = Array.from(ul.querySelectorAll(":scope > li"));
+        items.forEach((li, i) => {
+          const next = items[i + 1];
+          const conn = li.querySelector("[data-conn]");
+          const bullet = li.querySelector(".timeline-bullet");
+          if (!conn || !bullet || !next) return;
+
+          const b1 = bullet.getBoundingClientRect();
+          const nextBullet = next.querySelector(".timeline-bullet");
+          if (!nextBullet) return;
+          const b2 = nextBullet.getBoundingClientRect();
+
+          const startY = b1.top + b1.height / 2;
+          const endY = b2.top + b2.height / 2;
+
+          // Position within current li coordinate space
+          const liRect = li.getBoundingClientRect();
+          const top = startY - liRect.top;
+          const height = Math.max(0, endY - startY);
+
+          Object.assign(conn.style, {
+            top: `${top}px`,
+            height: `${height}px`,
+            left: "0px", // center of 2px line aligns to bullet's left:1px
+          });
+        });
+      });
+    }
+
+    function setActive(id) {
+      // Toggle selected state on all matching buttons
+      tabButtons.forEach((btn) => {
+        const isActive = btn.getAttribute("data-tab") === id;
+        btn.setAttribute("aria-selected", isActive ? "true" : "false");
+        btn.dataset.active = isActive ? "true" : "false";
+      });
+
+      // Show/hide all panels for each view
+      panelEls.forEach((panel) => {
+        const show = panel.getAttribute("data-day-id") === id;
+        panel.hidden = !show;
+      });
+
+      // After toggling content, recompute connector sizes
+      window.requestAnimationFrame(sizeConnectors);
+
+      try {
+        if (window.history.replaceState) {
+          window.history.replaceState(null, "", `#${id}`);
+        }
+      } catch (err) {
+        // Ignore history errors (older browsers / weird envs)
+        console.warn("Failed to update URL hash", err);
+      }
+    }
+
+    // Initial tab based on hash or fallback to first day
+    const hash = window.location.hash.slice(1);
+    const initialId = tabButtons.find((btn) => btn.getAttribute("data-tab") === hash)?.getAttribute("data-tab") || tabButtons[0]?.getAttribute("data-tab");
+
+    if (initialId) {
+      setActive(initialId);
+    }
+
+    // Wire click interactions
+    tabButtons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const id = btn.getAttribute("data-tab");
+        if (id) setActive(id);
+      });
+    });
+
+    // Keyboard nav per tablist (scope to each group)
+    document.querySelectorAll('[role="tablist"]').forEach((listEl) => {
+      const localTabs = Array.from(listEl.querySelectorAll("[data-tab]"));
+      localTabs.forEach((btn, idx) => {
+        btn.addEventListener("keydown", (event) => {
+          const key = event.key;
+          if (key === "ArrowRight" || key === "ArrowDown") {
+            event.preventDefault();
+            const next = localTabs[(idx + 1) % localTabs.length];
+            if (next) next.focus();
+          } else if (key === "ArrowLeft" || key === "ArrowUp") {
+            event.preventDefault();
+            const prev = localTabs[(idx - 1 + localTabs.length) % localTabs.length];
+            if (prev) prev.focus();
+          }
+        });
+      });
+    });
+
+    // Recalculate on resize (debounced via rAF)
+    let rafId = 0;
+    function onResize() {
+      window.cancelAnimationFrame(rafId);
+      rafId = window.requestAnimationFrame(sizeConnectors);
+    }
+
+    window.addEventListener("resize", onResize);
+  }
+
+  // Guard for SSR so ESLint/TypeScript don't freak out
+  if (typeof window !== "undefined") {
+    window.addEventListener("DOMContentLoaded", setupProgramTabs);
+  }
+</script>
+
+<style is:global>
+  /* Cosmetic helper: subtle appearance for mobile panel */
+  .panel {
+    animation: panel-in 200ms ease;
+  }
+  @keyframes panel-in {
+    from {
+      opacity: 0.96;
+      transform: translateY(2px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Add life to timeline bullets */
+  @keyframes bulletPulse {
+    from {
+      box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.6);
+    }
+    to {
+      box-shadow: 0 0 0 12px rgba(56, 189, 248, 0);
+    }
+  }
+  .timeline-bullet {
+    animation: bulletPulse 2.2s ease-out infinite;
+  }
+
+  /* Timeline container for positioning only */
+  .timeline {
+    position: relative;
+  }
+
+  /* Connector segments are placed per-item via data-conn and sized by JS
+     so each runs from one dot center to the next dot center precisely. */
+</style>

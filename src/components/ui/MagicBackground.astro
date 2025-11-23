@@ -1,0 +1,27 @@
+---
+export interface Props {
+  class?: string;
+  showTopRule?: boolean;
+  sparkles?: boolean;
+}
+const { class: cls = "", showTopRule = false, sparkles = true } = Astro.props;
+---
+
+<div aria-hidden class={`absolute inset-0 -z-10 ${cls}`}>
+  <div class="absolute inset-0 bg-gradient-to-br from-[#0b0f1a] via-sky-950/70 to-cyan-900/60"></div>
+  <div class="absolute inset-0 animate-aurora opacity-80" style="background: linear-gradient(120deg, rgba(27,166,223,0.28), rgba(59,130,246,0.18), rgba(14,165,233,0.16)); background-size: 200% 200%;"></div>
+  <div class="absolute -left-24 -top-24 h-64 w-64 rounded-full blur-3xl bg-cyan-400/25"></div>
+  <div class="absolute -right-24 -bottom-16 h-64 w-64 rounded-full blur-3xl bg-sky-400/25"></div>
+
+  {sparkles && (
+    <div class="pointer-events-none absolute inset-0">
+      <span class="sparkle" style="--x:8%; --y:25%; --d:0s"></span>
+      <span class="sparkle" style="--x:26%; --y:70%; --d:.5s"></span>
+      <span class="sparkle" style="--x:52%; --y:55%; --d:1.1s"></span>
+      <span class="sparkle" style="--x:74%; --y:20%; --d:.9s"></span>
+      <span class="sparkle" style="--x:90%; --y:40%; --d:1.4s"></span>
+    </div>
+  )}
+</div>
+
+{showTopRule && <div aria-hidden class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent"></div>}
