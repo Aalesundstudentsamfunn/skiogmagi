@@ -4,10 +4,10 @@ import Footer from "../components/Footer.astro";
 import GlassPanel from "../components/ui/GlassPanel.astro";
 
 const title = "Billett";
-const desc = "Programmet slippes snart - hold av dagene 5-8. februar og bli med på vintermagien.";
+const desc = "Se detaljer om billetten din til vintermagien Sogndal, i en senere utgave vil du også ha mulighet til å overføre billetten din til noen andre.";
 ---
 
-<PageLayout title={title} description={desc}>
+<PageLayout title="{title}" description="{desc}">
   <!-- Header hero (liquid glass) -->
   <section id="hero" class="hero relative isolate mt-20 sm:mt-24">
     <div class="ticket-shell py-10 sm:py-12 text-white">
@@ -20,7 +20,7 @@ const desc = "Programmet slippes snart - hold av dagene 5-8. februar og bli med 
             <label for="ticketId" class="sr-only">Billett-ID</label>
             <input id="ticketId" name="ticketId" inputmode="text" autocomplete="off" placeholder="F.eks. ABC123" pattern="[A-Za-z0-9\-]{3,}" class="w-full rounded-lg border border-white/30 bg-white/10 backdrop-blur px-4 py-3 text-white placeholder-white/70 outline-none focus:ring-2 focus:ring-white/60" />
           </div>
-          <button type="submit" class="cta-btn inline-flex items-center justify-center rounded-lg bg-white/90 text-sky-900 px-6 py-3 font-semibold shadow-sm transition hover:bg-white"> Hent billett </button>
+          <button type="submit" class="cta-btn inline-flex items-center justify-center rounded-lg bg-white/90 text-sky-900 px-6 py-3 font-semibold shadow-sm transition hover:bg-white">Hent billett</button>
         </form>
 
         <p id="form-help" class="mt-2 text-sm text-white/80">Bruk koden fra e-posten din. Bare tall, bokstaver og bindestrek.</p>
@@ -58,15 +58,19 @@ const desc = "Programmet slippes snart - hold av dagene 5-8. februar og bli med 
 
     <div id="result" class="hidden">
       <GlassPanel class="w-full p-0 text-white">
-        <header class="flex items-center justify-between gap-3 border-b border-white/15 px-5 py-4">
+        <header class="flex items-center justify-between gap-3 pb-3 border-b border-white/15">
           <div>
             <h2 class="text-lg font-semibold text-white">
               <span id="ticket-product"></span>
             </h2>
-            <p class="text-sm text-white/85 flex items-center gap-2">
-              Billett-ID:
-              <span id="ticket-id" class="font-mono"></span>
-              <button id="copy-id" type="button" class="rounded-md px-2 py-1 text-xs font-medium text-white ring-1 ring-white/15 hover:bg-white/10"> Kopier </button>
+            <p class="text-sm text-white/85 flex flex-wrap items-center gap-2">
+              <span class="whitespace-nowrap">Billett-ID:</span>
+
+              <!-- ID value splits to new line when needed -->
+              <span id="ticket-id" class="font-mono break-all"></span>
+
+              <!-- Copy button always stays attached to the ID -->
+              <button id="copy-id" type="button" class="rounded-md px-2 py-1 text-xs font-medium text-white ring-1 ring-white/15 hover:bg-white/10">Kopier</button>
             </p>
           </div>
           <div class="flex items-center gap-2">
@@ -74,7 +78,7 @@ const desc = "Programmet slippes snart - hold av dagene 5-8. februar og bli med 
           </div>
         </header>
 
-        <div class="px-5 py-5 grid gap-5 sm:grid-cols-[1fr_auto]">
+        <div class="pt-3 grid gap-5 sm:grid-cols-[1fr_auto]">
           <div class="grid gap-3 sm:grid-cols-2 min-w-0">
             <div>
               <div class="text-sm text-white/70">Navn</div>
@@ -110,7 +114,7 @@ const desc = "Programmet slippes snart - hold av dagene 5-8. februar og bli med 
   <dialog id="qr-dialog" class="modal" aria-label="QR i fullskjerm">
     <div class="modal-container fixed inset-0 grid place-items-center p-4">
       <div class="modal-panel relative w-full max-w-xl overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-black/5 p-6 flex items-center justify-center">
-        <button type="button" data-close aria-label="Lukk" class="absolute right-3 top-3 rounded-md px-2 py-1 text-xs font-medium text-neutral-700 ring-1 ring-black/10 hover:bg-neutral-100"> Lukk </button>
+        <button type="button" data-close aria-label="Lukk" class="absolute right-3 top-3 rounded-md px-2 py-1 text-xs font-medium text-neutral-700 ring-1 ring-black/10 hover:bg-neutral-100">Lukk</button>
         <img id="qr-big" alt="QR-kode i fullskjerm" class="block w-[80vw] max-w-[420px] h-auto" />
       </div>
     </div>
@@ -137,8 +141,8 @@ const desc = "Programmet slippes snart - hold av dagene 5-8. februar og bli med 
           </div>
         </div>
         <div class="mt-5 flex justify-end gap-2">
-          <button type="button" data-close class="rounded-md px-3 py-2 text-sm font-medium text-neutral-700 ring-1 ring-black/10 hover:bg-neutral-100"> Avbryt </button>
-          <button type="submit" class="rounded-md px-3 py-2 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700"> Overfør </button>
+          <button type="button" data-close class="rounded-md px-3 py-2 text-sm font-medium text-neutral-700 ring-1 ring-black/10 hover:bg-neutral-100">Avbryt</button>
+          <button type="submit" class="rounded-md px-3 py-2 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700">Overfør</button>
         </div>
       </form>
     </div>
@@ -161,8 +165,29 @@ const desc = "Programmet slippes snart - hold av dagene 5-8. februar og bli med 
     padding-right: 1.5rem;
   }
 
+  .ticket-shell {
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+    max-width: 48rem;
+    box-sizing: border-box;
+  }
+
+  .ticket-shell > * {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
   .qr-box {
     isolation: isolate;
+    max-width: 100%; /* ✅ don't let it overflow on narrow screens */
+  }
+
+  #ticket-qr {
+    width: 100%;
+    max-width: 196px; /* keep the nice size on bigger screens */
+    height: auto;
   }
 
   .skeleton {

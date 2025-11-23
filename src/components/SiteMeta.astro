@@ -1,20 +1,40 @@
 ---
-const { title = "Ski & Magi", description = "Opplev vintermagien i Oppdal.", author = "Ski & Magi", themeColor = "#0b0f1a" } = Astro.props;
+const {
+  title = "Ski & Magi",
+  description = "På Ski & Magi reiser omlag 400 studenter på en tredagers skitur i den norske fjellheimen. Dette har vært en tradisjon siden tidlig 90-tall og er det eldste arrangementet for studenter i Ålesund.",
+  author = "Dennis Løvold",
+  themeColor = "#0b0f1a",
+} = Astro.props;
 
-const subtitle = "Ski & Magi";
+const siteName = "Ski & Magi";
+
+// Normalize + decide how the full title should look
+const rawTitle = title || siteName;
+const isHome = rawTitle === siteName;
+
+// Browser tab title
+const fullTitle = isHome ? siteName : `${rawTitle} | ${siteName}`;
+
+// For OG/Twitter you can use the same, or a dash if you prefer
+const socialTitle = isHome ? siteName : `${rawTitle} – ${siteName}`;
 
 // Always use the same OG image
 const ogImage = "/skiogmagi-og.png";
 
 // Absolute URL for OG/Twitter
 const pageUrl = Astro.url.href;
-const ogImageUrl = Astro.site ? new URL(ogImage, Astro.site).toString() : ogImage;
+const ogImageUrl = Astro.site
+  ? new URL(ogImage, Astro.site).toString()
+  : ogImage;
 ---
 
 <!-- Primary Meta -->
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, viewport-fit=cover" />
-<title>{title} – {subtitle}</title>
+<meta
+  name="viewport"
+  content="width=device-width, height=device-height, initial-scale=1, viewport-fit=cover"
+/>
+<title>{fullTitle}</title>
 <meta name="description" content={description} />
 <meta name="author" content={author} />
 
@@ -35,13 +55,13 @@ const ogImageUrl = Astro.site ? new URL(ogImage, Astro.site).toString() : ogImag
 
 <!-- Open Graph -->
 <meta property="og:type" content="website" />
-<meta property="og:title" content={`${title} – ${subtitle}`} />
+<meta property="og:title" content={socialTitle} />
 <meta property="og:description" content={description} />
 <meta property="og:url" content={pageUrl} />
 <meta property="og:image" content={ogImageUrl} />
 
 <!-- Twitter -->
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content={`${title} – ${subtitle}`} />
+<meta name="twitter:title" content={socialTitle} />
 <meta name="twitter:description" content={description} />
 <meta name="twitter:image" content={ogImageUrl} />
