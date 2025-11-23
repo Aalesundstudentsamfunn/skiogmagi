@@ -1,10 +1,17 @@
 ---
+interface Props {
+  title?: string;
+  description?: string;
+  author?: string;
+  themeColor?: string;
+}
+
 const {
   title = "Ski & Magi",
-  description = "På Ski & Magi reiser omlag 400 studenter på en tredagers skitur i den norske fjellheimen. Dette har vært en tradisjon siden tidlig 90-tall og er det eldste arrangementet for studenter i Ålesund.",
+  description = "På Ski & Magi reiser omlag 400 studenter ...",
   author = "Dennis Løvold",
   themeColor = "#0b0f1a",
-} = Astro.props;
+} = Astro.props as Props;
 
 const siteName = "Ski & Magi";
 
@@ -15,8 +22,8 @@ const isHome = rawTitle === siteName;
 // Browser tab title
 const fullTitle = isHome ? siteName : `${rawTitle} | ${siteName}`;
 
-// For OG/Twitter you can use the same, or a dash if you prefer
-const socialTitle = isHome ? siteName : `${rawTitle} – ${siteName}`;
+// OG/Twitter titles
+const socialTitle = isHome ? siteName : `${rawTitle} - ${siteName}`;
 
 // Always use the same OG image
 const ogImage = "/skiogmagi-og.png";
