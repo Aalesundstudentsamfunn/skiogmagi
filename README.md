@@ -5,6 +5,8 @@ Includes program pages, event info, landing video, and a full ticket lookup syst
 **NOTE:**
 *This is a production repo, commits here will update the website. Use local for testing or development branch.*
 
+[![Netlify Status](https://api.netlify.com/api/v1/badges/8da4c468-7fc0-4296-99f2-4d7d65636d1f/deploy-status)](https://app.netlify.com/projects/skiogmagi/deploys)
+
 ---
 
 ## 🌲 Tech Stack
