@@ -1,46 +1,201 @@
-# Astro Starter Kit: Basics
+# Ski & Magi — Official Website  
+A fast, modern website built with Astro for the Ski & Magi winter trip.  
+Includes program pages, event info, landing video, and a full ticket lookup system.
 
-```sh
-pnpm create astro@latest -- --template basics
-```
+**NOTE:**
+*This is a production repo, commits here will update the website. Use local for testing or development branch.*
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+---
 
-## 🚀 Project Structure
+## 🌲 Tech Stack
 
-Inside of your Astro project, you'll see the following folders and files:
+- **Astro** (static-first frontend framework)  
+- **TypeScript**  
+- **Tailwind CSS**  
+- **Mux Player** (landing hero background video)  
+- **Cloudinary** (on-demand media optimization)  
+- **Netlify** (CI/CD hosting)
 
-```text
+---
+
+## 🚀 Getting Started
+
+### Requirements  
+- Node.js **18+** (LTS recommended)  
+- npm or pnpm  
+
+### Install
+
+\`\`\`bash
+git clone <repo-url>
+cd skiogmagi
+npm install
+\`\`\`
+
+### Local development
+
+\`\`\`bash
+npm run dev
+\`\`\`
+
+Runs the site at:
+
+\`\`\`
+http://localhost:4321
+\`\`\`
+
+### Build for production
+
+\`\`\`bash
+npm run build
+\`\`\`
+
+Outputs to the \`/dist\` directory.
+
+### Preview production build
+
+\`\`\`bash
+npm run preview
+\`\`\`
+
+---
+
+## 🔐 Environment Variables
+
+Create a \`.env\` file in the project root.
+
+\`\`\`
+PUBLIC_CLOUDINARY_CLOUD_NAME=skiogmagi
+\`\`\`
+
+Only public-prefixed env vars are exposed to the client in Astro.
+
+Include this file in your repo:
+
+\`\`\`
+.env.example
+\`\`\`
+
+---
+
+## 📁 Project Structure
+
+\`\`\`
 /
-├── public/
-│   └── favicon.svg
-├── src
-│   ├── assets
-│   │   └── astro.svg
-│   ├── components
-│   │   └── Welcome.astro
-│   ├── layouts
-│   │   └── Layout.astro
-│   └── pages
-│       └── index.astro
-└── package.json
-```
+├─ public/
+│   └─ scripts/
+│       └─ ticket/
+│           ├── page.js        # Page controller
+│           ├── api.js         # fetch logic
+│           └── ui.js          # render & dialog logic
+│
+├─ src/
+│   ├─ pages/                  # Site pages (index, billett, program, etc.)
+│   │   └─ api/                # Astro server endpoints (/api/tickets/[ref].ts)
+│   ├─ components/             # UI components
+│   ├─ layouts/                # PageLayout, wrappers
+│   ├─ content/                # MDX (trip memories, etc.)
+│   └─ styles/                 # Tailwind & global styles
+│
+├─ astro.config.mjs
+└─ package.json
+\`\`\`
 
-To learn more about the folder structure of an Astro project, refer to [our guide on project structure](https://docs.astro.build/en/basics/project-structure/).
+---
 
-## 🧞 Commands
+## 🎫 Ticket Lookup System
 
-All commands are run from the root of the project, from a terminal:
+The route \`/billett\` lets users fetch their ticket details.
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `pnpm install`             | Installs dependencies                            |
-| `pnpm dev`             | Starts local dev server at `localhost:4321`      |
-| `pnpm build`           | Build your production site to `./dist/`          |
-| `pnpm preview`         | Preview your build locally, before deploying     |
-| `pnpm astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `pnpm astro -- --help` | Get help using the Astro CLI                     |
+### Frontend files  
+Located in:
 
-## 👀 Want to learn more?
+\`\`\`
+public/scripts/ticket/
+  page.js — handles form, URL params, auto-fetch & lifecycle
+  api.js  — fetchTicketByRefId()
+  ui.js   — DOM rendering, QR code, dialogs
+\`\`\`
 
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+### How it works
+
+1. User enters a ticket ID  
+2. OR visits a direct link:
+
+\`\`\`
+/billett/?ticketId=ABC123
+\`\`\`
+
+3. \`page.js\`:
+   - reads the query  
+   - fetches ticket JSON from \`/api/tickets/<id>\`  
+   - updates UI  
+   - renders QR code  
+   - cleans the URL afterward  
+
+### API response format
+
+\`\`\`json
+{
+  "id": "ABC123",
+  "product": "Ski & Magi 2026",
+  "ownerName": "Name Example",
+  "email": "example@domain.com",
+  "phone": "12345678",
+  "originalOwner": null, // Must fetch this from internal supabase later
+  "status": "ACTIVE"
+}
+\`\`\`
+
+If you replace the backend later, update \`src/pages/api/tickets/[ref].ts\`.
+
+---
+
+## 🌐 Deployment (Netlify)
+
+Site is deployed automatically via **Netlify → GitHub integration**.
+
+### Netlify build settings
+
+**Build command:**
+
+\`\`\`
+npm run build
+\`\`\`
+
+**Publish directory:**
+
+\`\`\`
+dist
+\`\`\`
+
+**Node version:**  
+Set to **18.x** in **Site Settings → Build & Deploy → Environment**.
+
+### Netlify environment variables  
+Add under:
+
+**Site Settings → Environment Variables**
+
+\`\`\`
+PUBLIC_CLOUDINARY_CLOUD_NAME
+\`\`\`
+
+---
+
+## 🧰 Maintenance Notes
+
+- **Video hero:** Update Mux playback ID in \`Hero.astro\`.  
+- **Trip memories:** Add MDX files in \`src/content/memories\`.  
+- **Ticket system:**  
+  - Scripts must stay in \`/public/scripts/ticket/\`  
+  - Ensure \`/api/tickets/[ref].ts\` is returning valid JSON with \`refId\` uppercase  
+- **QR codes:** Free QR service works, Cloudinary fetch available for performance.
+
+---
+
+## 🗿 License
+
+This project is proprietary and maintained for the Ski & Magi crew.
+
+PS: Takk til GPT for rask readme
