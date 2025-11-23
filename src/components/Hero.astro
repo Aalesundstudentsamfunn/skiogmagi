@@ -9,18 +9,18 @@ const heroEntry = await getEntry("hero", "index");
 const { titleAriaLabel, subtitle, ctaLabel } = heroEntry.data;
 ---
 
-<div id="container" class="relative flex max-h-lvh" style="font-family: Inter, Roboto, 'Helvetica Neue', 'Arial Nova', 'Nimbus Sans', Arial, sans-serif;">
+<div id="container" class="relative flex max-h-dvh" style="font-family: Inter, Roboto, 'Helvetica Neue', 'Arial Nova', 'Nimbus Sans', Arial, sans-serif;">
   <!-- Video -->
-  <MuxPlayer id="bgPlayer" playbackId="oH900N4ZEOj7xTzGaw6lmBHQ3P9Da9MhaP8nb400R00gWU" primaryColor="#155dfc" thumbnailTime={0} hotkeys="noc nok nom nof noarrowleft noarrowright" preload="none" class="absolute left-0 right-0 h-full w-full pointer-events-auto z-[1]" />
+  <MuxPlayer id="bgPlayer" playbackId="oH900N4ZEOj7xTzGaw6lmBHQ3P9Da9MhaP8nb400R00gWU" primaryColor="#155dfc" thumbnailTime={0} hotkeys="noc nok nom nof noarrowleft noarrowright" preload="none" class="absolute left-0 right-0 h-full w-full pointer-events-auto z-1" />
 
   <div class="absolute inset-0 skeleton z-8"></div>
-  <CldImage src="cover-min_oxufkc_azdl5p" version="1763807656" id="hero" alt="" aria-hidden="true" class="absolute left-0 right-0 h-full object-cover w-full transition-opacity duration-300 poster z-6" sizes="100vw" loading="eager" decoding="async" fetchpriority="high" draggable="false" onload="this.style.opacity=''; this.parentElement?.setAttribute('data-loaded','true');" />
+  <CldImage src="cover-min_oxufkc_azdl5p" version="1763807656" id="hero" alt="bilde av studenter ute i en snøbakke" aria-hidden="true" class="absolute left-0 right-0 h-full object-cover w-full transition-opacity duration-300 poster z-6" sizes="100vw" loading="eager" decoding="async" fetchpriority="high" draggable="false" onload="this.style.opacity=''; this.parentElement?.setAttribute('data-loaded','true');" />
 
   <!-- Dark overlay while paused (non-interactive) -->
   <div aria-hidden="true" class="absolute inset-0 opacity-100 pause-overlay z-7 bg-black/45 pointer-events-none"></div>
 
   <!-- HERO -->
-  <section class="hero-overlay relative z-10 flex flex-col items-center min-w-screen min-h-svh gap-4 px-8 mt-50 lg:mt-40 text-center">
+  <section class="hero-overlay relative z-10 flex flex-col items-center min-w-screen min-h-dvh gap-4 px-8 align-middle justify-center text-center">
     <TitleSvg aria-label={titleAriaLabel} class="hero-tit w-[20%] min-w-[170px] drop-shadow-[0_2px_12px_rgba(0,0,0,0.35)] transition-all duration-300 group-[.is-playing]:opacity-0 group-[.is-playing]:translate-y-2" />
 
     <h2 class="hero-sub mt-5 uppercase text-white/95 font-medium text-[clamp(1.75rem,4vw,2.25rem)]">{subtitle}</h2>
@@ -154,7 +154,6 @@ const { titleAriaLabel, subtitle, ctaLabel } = heroEntry.data;
   /* Enable player controls; fit media to cover */
   mux-player {
     --dialog: none;
-    --loading-indicator: none;
     --play-button: none;
     --live-button: none;
     --seek-backward-button: none;
