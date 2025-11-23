@@ -1,32 +1,18 @@
 /* eslint-env browser */
 
-import type { Ticket } from "./api";
-
-export type StatusTone = "info" | "error";
-
-// Allow using window.CLOUDINARY_CLOUD_NAME safely
-declare global {
-  interface Window {
-    CLOUDINARY_CLOUD_NAME?: string;
-  }
-}
-
 // Helper to get elements by id
-const getEl = (id: string): HTMLElement | null =>
-  document.getElementById(id);
+const getEl = (id) => document.getElementById(id);
 
 // Show status text above the ticket box
-export function setStatus(msg: string, tone: StatusTone = "info"): void {
+export function setStatus(msg, tone = "info") {
   const el = getEl("status");
   if (!el) return;
   el.textContent = msg || "";
-  el.className = `mb-4 text-sm ${
-    tone === "error" ? "text-red-600" : "text-neutral-600"
-  }`;
+  el.className = `mb-4 text-sm ${tone === "error" ? "text-red-600" : "text-neutral-600"}`;
 }
 
 // Render ticket data into the DOM
-export function renderTicket(ticket: Ticket): void {
+export function renderTicket(ticket) {
   const productEl = getEl("ticket-product");
   const idEl = getEl("ticket-id");
   const ownerEl = getEl("ticket-owner");
@@ -42,9 +28,9 @@ export function renderTicket(ticket: Ticket): void {
   if (ticket.phone) {
     const phoneEl = getEl("ticket-phone");
     if (phoneEl) phoneEl.textContent = ticket.phone;
-    phoneRow?.classList.remove("hidden");
-  } else {
-    phoneRow?.classList.add("hidden");
+    if (phoneRow) phoneRow.classList.remove("hidden");
+  } else if (phoneRow) {
+    phoneRow.classList.add("hidden");
   }
 
   // Original owner row
@@ -52,9 +38,9 @@ export function renderTicket(ticket: Ticket): void {
   if (ticket.originalOwner) {
     const origEl = getEl("ticket-original");
     if (origEl) origEl.textContent = ticket.originalOwner;
-    origRow?.classList.remove("hidden");
-  } else {
-    origRow?.classList.add("hidden");
+    if (origRow) origRow.classList.remove("hidden");
+  } else if (origRow) {
+    origRow.classList.add("hidden");
   }
 
   // Status badge
@@ -63,26 +49,17 @@ export function renderTicket(ticket: Ticket): void {
   if (badge) {
     const label = status || "ACTIVE";
     badge.textContent = label;
-    badge.className =
-      "inline-flex items-center rounded-full px-3 py-1 text-xs font-medium " +
-      (label === "ACTIVE"
-        ? "bg-emerald-100 text-emerald-800"
-        : label === "USED"
-        ? "bg-amber-100 text-amber-800"
-        : "bg-neutral-100 text-neutral-800");
+    badge.className = "inline-flex items-center rounded-full px-3 py-1 text-xs font-medium " + (label === "ACTIVE" ? "bg-emerald-100 text-emerald-800" : label === "USED" ? "bg-amber-100 text-amber-800" : "bg-neutral-100 text-neutral-800");
   }
 
   // QR generation
   const qr = getEl("ticket-qr");
   if (qr && qr instanceof HTMLImageElement) {
     const payload = encodeURIComponent(ticket.id || "");
-    const cloudName = window.CLOUDINARY_CLOUD_NAME || "";
+    // Optional: set window.CLOUDINARY_CLOUD_NAME in a small inline script if you want Cloudinary fetch
+    const cloudName = (typeof window !== "undefined" && window.CLOUDINARY_CLOUD_NAME) || "";
     const qrRemote = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${payload}`;
-    const cldFetch = cloudName
-      ? `https://res.cloudinary.com/${cloudName}/image/fetch/f_auto,q_auto/${encodeURIComponent(
-          qrRemote
-        )}`
-      : qrRemote;
+    const cldFetch = cloudName ? `https://res.cloudinary.com/${cloudName}/image/fetch/f_auto,q_auto/${encodeURIComponent(qrRemote)}` : qrRemote;
 
     qr.src = cldFetch;
     qr.alt = `QR-kode for billett ${ticket.id}`;
@@ -91,8 +68,8 @@ export function renderTicket(ticket: Ticket): void {
   // Show result, hide placeholder
   const resultEl = getEl("result");
   const placeholderEl = getEl("placeholder");
-  resultEl?.classList.remove("hidden");
-  placeholderEl?.classList.add("hidden");
+  if (resultEl) resultEl.classList.remove("hidden");
+  if (placeholderEl) placeholderEl.classList.add("hidden");
 
   // Copy button
   const copyBtn = getEl("copy-id");
@@ -116,7 +93,7 @@ export function renderTicket(ticket: Ticket): void {
 }
 
 // Small helper for dialog close animation
-function animateClose(dlg: HTMLDialogElement | null): void {
+function animateClose(dlg) {
   if (!dlg || !dlg.hasAttribute("open")) return;
   dlg.classList.add("closing");
   setTimeout(() => {
@@ -130,32 +107,21 @@ function animateClose(dlg: HTMLDialogElement | null): void {
 }
 
 // QR dialog + transfer dialog
-export function initTicketDialogs(
-  setStatusFn: (msg: string, tone?: StatusTone) => void
-): void {
-  const qrSmall = document.getElementById("ticket-qr") as
-    | HTMLImageElement
-    | null;
-  const qrDlg = document.getElementById("qr-dialog") as
-    | HTMLDialogElement
-    | null;
-  const qrBig = document.getElementById("qr-big") as HTMLImageElement | null;
-
-  const transferBtn = document.getElementById(
-    "btn-transfer"
-  ) as HTMLButtonElement | null;
-  const transferDlg = document.getElementById("transfer-dialog") as
-    | HTMLDialogElement
-    | null;
-  const transferForm = document.getElementById("transfer-form") as
-    | HTMLFormElement
-    | null;
+export function initTicketDialogs(setStatusFn) {
+  const qrSmall = document.getElementById("ticket-qr");
+  const qrDlg = document.getElementById("qr-dialog");
+  const qrBig = document.getElementById("qr-big");
+  const transferBtn = document.getElementById("btn-transfer");
+  const transferDlg = document.getElementById("transfer-dialog");
+  const transferForm = document.getElementById("transfer-form");
 
   // QR enlarge dialog
   if (qrSmall) {
     qrSmall.addEventListener("click", () => {
       if (!qrDlg || !qrBig) return;
-      qrBig.src = qrSmall.getAttribute("src") || "";
+      if (qrBig instanceof HTMLImageElement && qrSmall instanceof HTMLImageElement) {
+        qrBig.src = qrSmall.getAttribute("src") || "";
+      }
       try {
         qrDlg.showModal();
       } catch {
@@ -166,24 +132,17 @@ export function initTicketDialogs(
 
   // Close when clicking outside the modal panel
   if (qrDlg) {
-    qrDlg.addEventListener("click", (event: MouseEvent) => {
-      const panel = qrDlg.querySelector(".modal-panel") as
-        | HTMLElement
-        | null;
+    qrDlg.addEventListener("click", (event) => {
+      const panel = qrDlg.querySelector(".modal-panel");
       if (!panel) return;
-
-      const target = event.target as Node;
-      if (!panel.contains(target)) {
+      const target = event.target;
+      if (target instanceof Node && !panel.contains(target)) {
         animateClose(qrDlg);
       }
     });
 
     // Close on explicit "Lukk" button
-    qrDlg
-      .querySelectorAll("[data-close]")
-      .forEach((btn) =>
-        btn.addEventListener("click", () => animateClose(qrDlg))
-      );
+    qrDlg.querySelectorAll("[data-close]").forEach((btn) => btn.addEventListener("click", () => animateClose(qrDlg)));
 
     // Prevent ESC default flash
     qrDlg.addEventListener("cancel", (event) => {
@@ -209,11 +168,7 @@ export function initTicketDialogs(
       if (event.target === transferDlg) animateClose(transferDlg);
     });
 
-    transferDlg
-      .querySelectorAll("[data-close]")
-      .forEach((btn) =>
-        btn.addEventListener("click", () => animateClose(transferDlg))
-      );
+    transferDlg.querySelectorAll("[data-close]").forEach((btn) => btn.addEventListener("click", () => animateClose(transferDlg)));
 
     transferDlg.addEventListener("cancel", (event) => {
       event.preventDefault();
@@ -225,27 +180,19 @@ export function initTicketDialogs(
   if (transferForm) {
     transferForm.addEventListener("submit", (event) => {
       event.preventDefault();
+      const nameEl = document.getElementById("newName");
+      const emailEl = document.getElementById("newEmail");
+      const phoneElInput = document.getElementById("newPhone");
 
-      const nameEl = document.getElementById(
-        "newName"
-      ) as HTMLInputElement | null;
-      const emailEl = document.getElementById(
-        "newEmail"
-      ) as HTMLInputElement | null;
-      const phoneElInput = document.getElementById(
-        "newPhone"
-      ) as HTMLInputElement | null;
-
-      const name = nameEl?.value.trim() || "";
-      const email = emailEl?.value.trim() || "";
-      const phone = phoneElInput?.value.trim() || "";
+      const name = nameEl && "value" in nameEl ? String(nameEl.value || "").trim() : "";
+      const email = emailEl && "value" in emailEl ? String(emailEl.value || "").trim() : "";
+      const phone = phoneElInput && "value" in phoneElInput ? String(phoneElInput.value || "").trim() : "";
 
       if (!name || !email) return;
 
       const origRow = document.getElementById("row-original");
       const origEl = document.getElementById("ticket-original");
-      const currentOwner =
-        document.getElementById("ticket-owner")?.textContent || "";
+      const currentOwner = document.getElementById("ticket-owner")?.textContent || "";
 
       if (currentOwner && origEl && origRow && !origEl.textContent) {
         origEl.textContent = currentOwner;
@@ -259,11 +206,13 @@ export function initTicketDialogs(
       if (ownerEl) ownerEl.textContent = name;
       if (phone) {
         if (phoneEl) phoneEl.textContent = phone;
-        phoneRow2?.classList.remove("hidden");
+        if (phoneRow2) phoneRow2.classList.remove("hidden");
       }
 
       animateClose(transferDlg);
-      setStatusFn("Billetten er overført (demo).", "info");
+      if (typeof setStatusFn === "function") {
+        setStatusFn("Billetten er overført (demo).", "info");
+      }
     });
   }
 }

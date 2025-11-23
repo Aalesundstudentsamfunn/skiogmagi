@@ -5,9 +5,6 @@ import GlassPanel from "../components/ui/GlassPanel.astro";
 
 const title = "Billett";
 const desc = "Programmet slippes snart - hold av dagene 5-8. februar og bli med på vintermagien.";
-
-// Let Vite/Astro build page.ts -> JS file and give us the URL
-const ticketScript = await import("../scripts/ticket/page.ts?url");
 ---
 
 <PageLayout title={title} description={desc}>
@@ -152,8 +149,7 @@ const ticketScript = await import("../scripts/ticket/page.ts?url");
   <Footer />
 </div>
 
-<!-- Let Vite-built JS run as a proper ESM module -->
-<script type="module" src={ticketScript.default}></script>
+<script type="module" src="/scripts/ticket/page.js"></script>
 
 <style is:global>
   /* shared container for hero + ticket so widths always match */
