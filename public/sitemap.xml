@@ -10,14 +10,14 @@
 
   <!-- Program page -->
   <url>
-    <loc>https://skiogmagi.no/program</loc>
+    <loc>https://skiogmagi.no/program/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
 
   <!-- Ticket page -->
   <url>
-    <loc>https://skiogmagi.no/billett</loc>
+    <loc>https://skiogmagi.no/billett/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
