@@ -3,7 +3,7 @@ import PageLayout from "../layouts/PageLayout.astro";
 import Footer from "../components/Footer.astro";
 import GlassPanel from "../components/ui/GlassPanel.astro";
 
-const title = "Rombooking";
+const title = "Booking";
 const desc = "Send inn romønsket ditt. Vi kontakter romansvarlig med bekreftelse og detaljer.";
 const roomTypes = [
   { value: "1", label: "1 person" },
@@ -36,14 +36,13 @@ const countryCodes = [
 
 <PageLayout title={title} description={desc}>
   <section id="hero" class="hero relative isolate overflow-hidden mt-20 sm:mt-24">
-    <div class="mx-auto max-w-5xl px-6 pt-16 sm:pt-20 text-white">
-      <p class="text-sm uppercase tracking-[0.35em] text-white/70">Booking</p>
-      <h1 class="mt-3 text-4xl font-extrabold drop-shadow sm:text-5xl">{title}</h1>
+    <div class="mx-auto max-w-6xl px-6 pt-16 sm:pt-20 text-white">
+      <h1 class="text-4xl font-extrabold drop-shadow sm:text-5xl">{title}</h1>
       <p class="mt-3 text-white/85 max-w-2xl">{desc}</p>
     </div>
   </section>
 
-  <section class="mx-auto w-full max-w-4xl px-6 pb-16 pt-8 text-white">
+  <section class="mx-auto w-full max-w-6xl px-6 pb-16 pt-8 text-white">
     <GlassPanel class="text-white overflow-visible">
       <div id="booking-success" hidden class="rounded-2xl border border-white/15 bg-white/10 p-6 text-white">
         <h2 class="text-2xl font-bold">Takk for innsendingen!</h2>
@@ -103,8 +102,8 @@ const countryCodes = [
             </div>
             <div>
               <label for="roomManagerPhone" class="text-sm text-white/80">Telefon</label>
-              <div class="mt-1 flex gap-2">
-                <div class="relative w-32 sm:w-36" data-select data-default="+47" data-placeholder="+47">
+              <div class="mt-1 flex flex-col gap-2 sm:flex-row sm:items-center">
+                <div class="relative w-full sm:w-32" data-select data-default="+47" data-placeholder="+47">
                   <input id="roomManagerCountryCode" name="roomManagerCountryCode" type="hidden" value="+47" data-select-value required />
                   <button type="button" data-select-trigger aria-label="Landkode" aria-haspopup="listbox" aria-expanded="false" class="flex w-full items-center justify-between gap-2 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-left text-white/90 outline-none focus:ring-2 focus:ring-white/60">
                     <span data-select-label class="whitespace-nowrap">+47</span>
@@ -124,7 +123,7 @@ const countryCodes = [
                     }
                   </ul>
                 </div>
-                <input id="roomManagerPhone" name="roomManagerPhone" type="tel" inputmode="numeric" autocomplete="tel" minlength="8" maxlength="8" pattern="\\d{8}" required class="min-w-0 flex-1 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
+                <input id="roomManagerPhone" name="roomManagerPhone" type="tel" inputmode="numeric" autocomplete="tel" minlength="8" maxlength="8" pattern="\\d{8}" required class="w-full min-w-0 flex-1 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
               </div>
             </div>
           </div>
@@ -143,8 +142,8 @@ const countryCodes = [
             </div>
             <div>
               <label for="guest2Phone" class="text-sm text-white/80">Telefon</label>
-              <div class="mt-1 flex gap-2">
-                <div class="relative w-32 sm:w-36" data-select data-default="+47" data-placeholder="+47">
+              <div class="mt-1 flex flex-col gap-2 sm:flex-row sm:items-center">
+                <div class="relative w-full sm:w-32" data-select data-default="+47" data-placeholder="+47">
                   <input id="guest2CountryCode" name="guest2CountryCode" type="hidden" value="+47" data-select-value required />
                   <button type="button" data-select-trigger aria-label="Landkode" aria-haspopup="listbox" aria-expanded="false" class="flex w-full items-center justify-between gap-2 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-left text-white/90 outline-none focus:ring-2 focus:ring-white/60">
                     <span data-select-label class="whitespace-nowrap">+47</span>
@@ -164,7 +163,7 @@ const countryCodes = [
                     }
                   </ul>
                 </div>
-                <input id="guest2Phone" name="guest2Phone" type="tel" inputmode="numeric" autocomplete="tel" minlength="8" maxlength="8" pattern="\\d{8}" required class="min-w-0 flex-1 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
+                <input id="guest2Phone" name="guest2Phone" type="tel" inputmode="numeric" autocomplete="tel" minlength="8" maxlength="8" pattern="\\d{8}" required class="w-full min-w-0 flex-1 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
               </div>
             </div>
           </div>
@@ -183,8 +182,8 @@ const countryCodes = [
             </div>
             <div>
               <label for="guest3Phone" class="text-sm text-white/80">Telefon</label>
-              <div class="mt-1 flex gap-2">
-                <div class="relative w-32 sm:w-36" data-select data-default="+47" data-placeholder="+47">
+              <div class="mt-1 flex flex-col gap-2 sm:flex-row sm:items-center">
+                <div class="relative w-full sm:w-32" data-select data-default="+47" data-placeholder="+47">
                   <input id="guest3CountryCode" name="guest3CountryCode" type="hidden" value="+47" data-select-value required />
                   <button type="button" data-select-trigger aria-label="Landkode" aria-haspopup="listbox" aria-expanded="false" class="flex w-full items-center justify-between gap-2 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-left text-white/90 outline-none focus:ring-2 focus:ring-white/60">
                     <span data-select-label class="whitespace-nowrap">+47</span>
@@ -204,7 +203,7 @@ const countryCodes = [
                     }
                   </ul>
                 </div>
-                <input id="guest3Phone" name="guest3Phone" type="tel" inputmode="numeric" autocomplete="tel" minlength="8" maxlength="8" pattern="\\d{8}" required class="min-w-0 flex-1 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
+                <input id="guest3Phone" name="guest3Phone" type="tel" inputmode="numeric" autocomplete="tel" minlength="8" maxlength="8" pattern="\\d{8}" required class="w-full min-w-0 flex-1 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
               </div>
             </div>
           </div>
@@ -223,8 +222,8 @@ const countryCodes = [
             </div>
             <div>
               <label for="guest4Phone" class="text-sm text-white/80">Telefon</label>
-              <div class="mt-1 flex gap-2">
-                <div class="relative w-32 sm:w-36" data-select data-default="+47" data-placeholder="+47">
+              <div class="mt-1 flex flex-col gap-2 sm:flex-row sm:items-center">
+                <div class="relative w-full sm:w-32" data-select data-default="+47" data-placeholder="+47">
                   <input id="guest4CountryCode" name="guest4CountryCode" type="hidden" value="+47" data-select-value required />
                   <button type="button" data-select-trigger aria-label="Landkode" aria-haspopup="listbox" aria-expanded="false" class="flex w-full items-center justify-between gap-2 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-left text-white/90 outline-none focus:ring-2 focus:ring-white/60">
                     <span data-select-label class="whitespace-nowrap">+47</span>
@@ -244,7 +243,7 @@ const countryCodes = [
                     }
                   </ul>
                 </div>
-                <input id="guest4Phone" name="guest4Phone" type="tel" inputmode="numeric" autocomplete="tel" minlength="8" maxlength="8" pattern="\\d{8}" required class="min-w-0 flex-1 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
+                <input id="guest4Phone" name="guest4Phone" type="tel" inputmode="numeric" autocomplete="tel" minlength="8" maxlength="8" pattern="\\d{8}" required class="w-full min-w-0 flex-1 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
               </div>
             </div>
           </div>
