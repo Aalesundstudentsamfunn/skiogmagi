@@ -5,6 +5,33 @@ import GlassPanel from "../components/ui/GlassPanel.astro";
 
 const title = "Rombooking";
 const desc = "Send inn romønsket ditt. Vi kontakter romansvarlig med bekreftelse og detaljer.";
+const roomTypes = [
+  { value: "1", label: "1 person" },
+  { value: "2", label: "2 personer" },
+  { value: "3", label: "3 personer" },
+  { value: "4", label: "4 personer" },
+];
+const countryCodes = [
+  { value: "+47", label: "🇳🇴 +47" },
+  { value: "+46", label: "🇸🇪 +46" },
+  { value: "+45", label: "🇩🇰 +45" },
+  { value: "+358", label: "🇫🇮 +358" },
+  { value: "+44", label: "🇬🇧 +44" },
+  { value: "+49", label: "🇩🇪 +49" },
+  { value: "+31", label: "🇳🇱 +31" },
+  { value: "+33", label: "🇫🇷 +33" },
+  { value: "+34", label: "🇪🇸 +34" },
+  { value: "+39", label: "🇮🇹 +39" },
+  { value: "+48", label: "🇵🇱 +48" },
+  { value: "+370", label: "🇱🇹 +370" },
+  { value: "+371", label: "🇱🇻 +371" },
+  { value: "+372", label: "🇪🇪 +372" },
+  { value: "+40", label: "🇷🇴 +40" },
+  { value: "+359", label: "🇧🇬 +359" },
+  { value: "+91", label: "🇮🇳 +91" },
+  { value: "+63", label: "🇵🇭 +63" },
+  { value: "+1", label: "🇺🇸 🇨🇦 +1" },
+];
 ---
 
 <PageLayout title={title} description={desc}>
@@ -17,8 +44,18 @@ const desc = "Send inn romønsket ditt. Vi kontakter romansvarlig med bekreftels
   </section>
 
   <section class="mx-auto w-full max-w-4xl px-6 pb-16 pt-8 text-white">
-    <GlassPanel class="text-white">
-      <form name="room-booking" method="POST" data-netlify="true" netlify-honeypot="bot-field" class="grid gap-6">
+    <GlassPanel class="text-white overflow-visible">
+      <div id="booking-success" hidden class="rounded-2xl border border-white/15 bg-white/10 p-6 text-white">
+        <h2 class="text-2xl font-bold">Takk for innsendingen!</h2>
+        <p class="mt-2 text-white/85">Vi har mottatt rombookingen din og tar kontakt med romansvarlig snart.</p>
+      </div>
+
+      <div id="booking-error" hidden class="rounded-2xl border border-rose-300/40 bg-rose-500/10 p-4 text-rose-50">
+        <p class="font-semibold">Noe gikk galt.</p>
+        <p class="mt-1 text-sm text-rose-100/90">Prøv igjen om litt, eller ta kontakt hvis problemet fortsetter.</p>
+      </div>
+
+      <form id="booking-form" name="room-booking" method="POST" data-netlify="true" netlify-honeypot="bot-field" class="grid gap-6">
         <input type="hidden" name="form-name" value="room-booking" />
         <p class="hidden">
           <label>
@@ -28,14 +65,28 @@ const desc = "Send inn romønsket ditt. Vi kontakter romansvarlig med bekreftels
         </p>
 
         <div>
-          <label for="roomType" class="text-sm font-semibold text-white/80">Antall personer per rom</label>
-          <select id="roomType" name="roomType" required class="mt-1 w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white outline-none focus:ring-2 focus:ring-white/60">
-            <option value="" disabled selected>Velg romtype</option>
-            <option value="1">1 person</option>
-            <option value="2">2 personer</option>
-            <option value="3">3 personer</option>
-            <option value="4">4 personer</option>
-          </select>
+          <span id="roomTypeLabel" class="text-sm font-semibold text-white/80">Antall personer per rom</span>
+          <div class="relative mt-1" data-select data-placeholder="Velg romtype" data-select-id="roomType">
+            <input id="roomType" name="roomType" type="hidden" data-select-value required />
+            <button type="button" data-select-trigger data-roomtype-trigger aria-labelledby="roomTypeLabel roomTypeValue" aria-haspopup="listbox" aria-expanded="false" class="flex w-full items-center justify-between gap-2 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-left text-white/90 outline-none focus:ring-2 focus:ring-white/60">
+              <span id="roomTypeValue" data-select-label class="truncate">Velg romtype</span>
+              <svg data-select-chevron viewBox="0 0 20 20" aria-hidden="true" class="h-4 w-4 text-white/70 transition-transform">
+                <path d="M5 7.5l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </button>
+            <ul data-select-menu role="listbox" aria-label="Romtype" hidden class="absolute left-0 right-0 z-20 mt-2 max-h-64 overflow-auto rounded-xl border border-white/20 bg-slate-900/80 backdrop-blur-md shadow-lg">
+              {
+                roomTypes.map((type) => (
+                  <li>
+                    <button type="button" role="option" data-select-option data-value={type.value} data-label={type.label} class="w-full whitespace-nowrap text-left px-3 py-2 text-sm text-white/90 hover:bg-white/10 focus:bg-white/10">
+                      {type.label}
+                    </button>
+                  </li>
+                ))
+              }
+            </ul>
+          </div>
+          <p id="roomTypeError" hidden class="mt-2 text-sm text-rose-100">Velg romtype før du sender inn.</p>
           <p class="mt-2 text-sm text-white/70">Velg antall personer, så åpnes feltene for alle i rommet.</p>
         </div>
 
@@ -52,7 +103,29 @@ const desc = "Send inn romønsket ditt. Vi kontakter romansvarlig med bekreftels
             </div>
             <div>
               <label for="roomManagerPhone" class="text-sm text-white/80">Telefon</label>
-              <input id="roomManagerPhone" name="roomManagerPhone" type="tel" autocomplete="tel" required class="mt-1 w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
+              <div class="mt-1 flex gap-2">
+                <div class="relative w-32 sm:w-36" data-select data-default="+47" data-placeholder="+47">
+                  <input id="roomManagerCountryCode" name="roomManagerCountryCode" type="hidden" value="+47" data-select-value required />
+                  <button type="button" data-select-trigger aria-label="Landkode" aria-haspopup="listbox" aria-expanded="false" class="flex w-full items-center justify-between gap-2 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-left text-white/90 outline-none focus:ring-2 focus:ring-white/60">
+                    <span data-select-label class="whitespace-nowrap">+47</span>
+                    <svg data-select-chevron viewBox="0 0 20 20" aria-hidden="true" class="h-4 w-4 text-white/70 transition-transform">
+                      <path d="M5 7.5l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                  </button>
+                  <ul data-select-menu role="listbox" aria-label="Landkode" hidden class="absolute left-0 right-0 z-20 mt-2 max-h-64 overflow-auto rounded-xl border border-white/20 bg-slate-900/80 backdrop-blur-md shadow-lg">
+                    {
+                      countryCodes.map((code) => (
+                        <li>
+                          <button type="button" role="option" data-select-option data-value={code.value} data-label={code.value} class="w-full whitespace-nowrap text-left px-3 py-2 text-sm text-white/90 hover:bg-white/10 focus:bg-white/10">
+                            {code.label}
+                          </button>
+                        </li>
+                      ))
+                    }
+                  </ul>
+                </div>
+                <input id="roomManagerPhone" name="roomManagerPhone" type="tel" inputmode="numeric" autocomplete="tel" minlength="8" maxlength="8" pattern="\\d{8}" required class="min-w-0 flex-1 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
+              </div>
             </div>
           </div>
         </fieldset>
@@ -70,7 +143,29 @@ const desc = "Send inn romønsket ditt. Vi kontakter romansvarlig med bekreftels
             </div>
             <div>
               <label for="guest2Phone" class="text-sm text-white/80">Telefon</label>
-              <input id="guest2Phone" name="guest2Phone" type="tel" autocomplete="tel" required class="mt-1 w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
+              <div class="mt-1 flex gap-2">
+                <div class="relative w-32 sm:w-36" data-select data-default="+47" data-placeholder="+47">
+                  <input id="guest2CountryCode" name="guest2CountryCode" type="hidden" value="+47" data-select-value required />
+                  <button type="button" data-select-trigger aria-label="Landkode" aria-haspopup="listbox" aria-expanded="false" class="flex w-full items-center justify-between gap-2 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-left text-white/90 outline-none focus:ring-2 focus:ring-white/60">
+                    <span data-select-label class="whitespace-nowrap">+47</span>
+                    <svg data-select-chevron viewBox="0 0 20 20" aria-hidden="true" class="h-4 w-4 text-white/70 transition-transform">
+                      <path d="M5 7.5l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                  </button>
+                  <ul data-select-menu role="listbox" aria-label="Landkode" hidden class="absolute left-0 right-0 z-20 mt-2 max-h-64 overflow-auto rounded-xl border border-white/20 bg-slate-900/80 backdrop-blur-md shadow-lg">
+                    {
+                      countryCodes.map((code) => (
+                        <li>
+                          <button type="button" role="option" data-select-option data-value={code.value} data-label={code.value} class="w-full whitespace-nowrap text-left px-3 py-2 text-sm text-white/90 hover:bg-white/10 focus:bg-white/10">
+                            {code.label}
+                          </button>
+                        </li>
+                      ))
+                    }
+                  </ul>
+                </div>
+                <input id="guest2Phone" name="guest2Phone" type="tel" inputmode="numeric" autocomplete="tel" minlength="8" maxlength="8" pattern="\\d{8}" required class="min-w-0 flex-1 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
+              </div>
             </div>
           </div>
         </fieldset>
@@ -88,7 +183,29 @@ const desc = "Send inn romønsket ditt. Vi kontakter romansvarlig med bekreftels
             </div>
             <div>
               <label for="guest3Phone" class="text-sm text-white/80">Telefon</label>
-              <input id="guest3Phone" name="guest3Phone" type="tel" autocomplete="tel" required class="mt-1 w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
+              <div class="mt-1 flex gap-2">
+                <div class="relative w-32 sm:w-36" data-select data-default="+47" data-placeholder="+47">
+                  <input id="guest3CountryCode" name="guest3CountryCode" type="hidden" value="+47" data-select-value required />
+                  <button type="button" data-select-trigger aria-label="Landkode" aria-haspopup="listbox" aria-expanded="false" class="flex w-full items-center justify-between gap-2 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-left text-white/90 outline-none focus:ring-2 focus:ring-white/60">
+                    <span data-select-label class="whitespace-nowrap">+47</span>
+                    <svg data-select-chevron viewBox="0 0 20 20" aria-hidden="true" class="h-4 w-4 text-white/70 transition-transform">
+                      <path d="M5 7.5l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                  </button>
+                  <ul data-select-menu role="listbox" aria-label="Landkode" hidden class="absolute left-0 right-0 z-20 mt-2 max-h-64 overflow-auto rounded-xl border border-white/20 bg-slate-900/80 backdrop-blur-md shadow-lg">
+                    {
+                      countryCodes.map((code) => (
+                        <li>
+                          <button type="button" role="option" data-select-option data-value={code.value} data-label={code.value} class="w-full whitespace-nowrap text-left px-3 py-2 text-sm text-white/90 hover:bg-white/10 focus:bg-white/10">
+                            {code.label}
+                          </button>
+                        </li>
+                      ))
+                    }
+                  </ul>
+                </div>
+                <input id="guest3Phone" name="guest3Phone" type="tel" inputmode="numeric" autocomplete="tel" minlength="8" maxlength="8" pattern="\\d{8}" required class="min-w-0 flex-1 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
+              </div>
             </div>
           </div>
         </fieldset>
@@ -106,18 +223,47 @@ const desc = "Send inn romønsket ditt. Vi kontakter romansvarlig med bekreftels
             </div>
             <div>
               <label for="guest4Phone" class="text-sm text-white/80">Telefon</label>
-              <input id="guest4Phone" name="guest4Phone" type="tel" autocomplete="tel" required class="mt-1 w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
+              <div class="mt-1 flex gap-2">
+                <div class="relative w-32 sm:w-36" data-select data-default="+47" data-placeholder="+47">
+                  <input id="guest4CountryCode" name="guest4CountryCode" type="hidden" value="+47" data-select-value required />
+                  <button type="button" data-select-trigger aria-label="Landkode" aria-haspopup="listbox" aria-expanded="false" class="flex w-full items-center justify-between gap-2 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-left text-white/90 outline-none focus:ring-2 focus:ring-white/60">
+                    <span data-select-label class="whitespace-nowrap">+47</span>
+                    <svg data-select-chevron viewBox="0 0 20 20" aria-hidden="true" class="h-4 w-4 text-white/70 transition-transform">
+                      <path d="M5 7.5l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                  </button>
+                  <ul data-select-menu role="listbox" aria-label="Landkode" hidden class="absolute left-0 right-0 z-20 mt-2 max-h-64 overflow-auto rounded-xl border border-white/20 bg-slate-900/80 backdrop-blur-md shadow-lg">
+                    {
+                      countryCodes.map((code) => (
+                        <li>
+                          <button type="button" role="option" data-select-option data-value={code.value} data-label={code.value} class="w-full whitespace-nowrap text-left px-3 py-2 text-sm text-white/90 hover:bg-white/10 focus:bg-white/10">
+                            {code.label}
+                          </button>
+                        </li>
+                      ))
+                    }
+                  </ul>
+                </div>
+                <input id="guest4Phone" name="guest4Phone" type="tel" inputmode="numeric" autocomplete="tel" minlength="8" maxlength="8" pattern="\\d{8}" required class="min-w-0 flex-1 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
+              </div>
             </div>
           </div>
         </fieldset>
 
-        <label class="flex items-start gap-3 text-sm text-white/90">
-          <input id="terms" name="terms" type="checkbox" required class="mt-1 h-4 w-4 rounded border-white/30 bg-white/10 text-white focus:ring-2 focus:ring-white/60" />
-          <span>Jeg forstår og godtar vilkårene for booking.</span>
-        </label>
 
-        <button type="submit" class="inline-flex items-center justify-center rounded-full bg-white/95 px-6 py-3 text-sm font-semibold text-sky-900 shadow-lg shadow-sky-500/20 transition hover:bg-white">
-          Send inn rombooking
+        <div class="flex items-start gap-3 text-sm text-white/90">
+          <input id="terms" name="terms" type="checkbox" required class="mt-1 h-4 w-4 rounded border-white/30 bg-white/10 text-white focus:ring-2 focus:ring-white/60" />
+          <p class="mt-0.5">
+            <label for="terms">Jeg forstår og godtar</label>
+            <button type="button" data-terms-open class="ml-1 inline-flex items-center underline decoration-white/50 underline-offset-2 transition hover:decoration-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60">
+              vilkårene for booking
+            </button>
+            .
+          </p>
+        </div>
+
+        <button id="booking-submit" type="submit" class="inline-flex items-center justify-center rounded-full bg-white/95 px-6 py-3 text-sm font-semibold text-sky-900 shadow-lg shadow-sky-500/20 transition hover:bg-white">
+          <span data-label>Send inn rombooking</span>
         </button>
       </form>
     </GlassPanel>
@@ -128,12 +274,227 @@ const desc = "Send inn romønsket ditt. Vi kontakter romansvarlig med bekreftels
   </div>
 </PageLayout>
 
+<dialog id="terms-dialog" class="modal" aria-labelledby="terms-title">
+  <div class="modal-container fixed inset-0 grid place-items-center p-4">
+    <div class="modal-panel relative w-full max-w-2xl overflow-hidden rounded-2xl border border-black/10 bg-white text-neutral-900 shadow-2xl ring-1 ring-black/5">
+      <header class="flex items-start justify-between gap-4 border-b border-neutral-200 px-5 py-4">
+        <div>
+          <h2 id="terms-title" class="text-xl font-bold text-neutral-900">Vilkår for booking</h2>
+          <p class="mt-1 text-sm text-neutral-600">Standard hotellregler gjelder.</p>
+        </div>
+        <button type="button" class="rounded-full p-2 text-neutral-600 transition hover:bg-neutral-100 hover:text-neutral-900" aria-label="Lukk" data-terms-close>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5">
+            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 0 1 1.414 0L10 8.586l4.293-4.293a1 1 0 1 1 1.414 1.414L11.414 10l4.293 4.293a1 1 0 0 1-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 0 1-1.414-1.414L8.586 10 4.293 5.707a1 1 0 0 1 0-1.414Z" clip-rule="evenodd"></path>
+          </svg>
+        </button>
+      </header>
+      <div class="p-5 text-sm text-neutral-700">
+        <p class="font-semibold text-neutral-900">Ansvar og eierskap</p>
+        <ul class="mt-2 list-disc pl-5 space-y-2">
+          <li>Romansvarlig (person 1) er kontaktpunktet for rommet og holdes ansvarlig ved brudd på regler eller skader.</li>
+          <li>Alle på rommet skal følge hotellregler, husordensregler og lokale retningslinjer.</li>
+          <li>Skader eller mangler på rommet meldes fra så snart som mulig.</li>
+          <li>Ved skade/ødeleggelse kan kostnader bli fakturert romansvarlig.</li>
+        </ul>
+
+        <p class="mt-5 font-semibold text-neutral-900">Ro og sikkerhet</p>
+        <ul class="mt-2 list-disc pl-5 space-y-2">
+          <li>Respekter ro-tider og vis hensyn til andre gjester.</li>
+          <li>Ikke røyk, bruk åpen ild eller gjør endringer på rommet som kan skade inventar.</li>
+          <li>Brudd på regler kan medføre bortvisning uten refusjon.</li>
+        </ul>
+
+        <p class="mt-5 text-xs text-neutral-500">Ved å sende inn booking bekrefter du at alle i rommet er informert og samtykker.</p>
+      </div>
+      <footer class="flex justify-end gap-3 border-t border-neutral-200 px-5 py-4">
+        <button type="button" class="inline-flex items-center rounded-lg bg-neutral-900 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-neutral-800" data-terms-close>
+          Lukk
+        </button>
+      </footer>
+    </div>
+  </div>
+</dialog>
+
 <script is:inline>
   const roomType = document.getElementById("roomType");
+  const roomTypeError = document.getElementById("roomTypeError");
+  const roomTypeTrigger = document.querySelector("[data-roomtype-trigger]");
   const personSections = Array.from(document.querySelectorAll("[data-person]"));
+  const form = document.getElementById("booking-form");
+  const submitBtn = document.getElementById("booking-submit");
+  const successPanel = document.getElementById("booking-success");
+  const errorPanel = document.getElementById("booking-error");
+  const selectEls = Array.from(document.querySelectorAll("[data-select]"));
+  const termsDialog = document.getElementById("terms-dialog");
+  const termsOpeners = Array.from(document.querySelectorAll("[data-terms-open]"));
+  const termsClosers = termsDialog ? Array.from(termsDialog.querySelectorAll("[data-terms-close]")) : [];
+
+  const closeTerms = () => {
+    if (!termsDialog?.hasAttribute("open")) return;
+    termsDialog.classList.add("closing");
+    setTimeout(() => {
+      try {
+        termsDialog.close();
+      } catch {
+        termsDialog.removeAttribute("open");
+      }
+      termsDialog.classList.remove("closing");
+    }, 150);
+  };
+
+  const openTerms = () => {
+    if (!termsDialog) return;
+    try {
+      termsDialog.showModal();
+    } catch {
+      termsDialog.setAttribute("open", "true");
+    }
+  };
+
+  const closeSelect = (select) => {
+    const trigger = select.querySelector("[data-select-trigger]");
+    const menu = select.querySelector("[data-select-menu]");
+    const chevron = select.querySelector("[data-select-chevron]");
+    if (menu) menu.hidden = true;
+    select.dataset.open = "false";
+    if (trigger) trigger.setAttribute("aria-expanded", "false");
+    if (chevron) chevron.style.transform = "";
+  };
+
+  const closeAllSelects = (except) => {
+    selectEls.forEach((select) => {
+      if (select !== except) closeSelect(select);
+    });
+  };
+
+  const openSelect = (select) => {
+    const trigger = select.querySelector("[data-select-trigger]");
+    const menu = select.querySelector("[data-select-menu]");
+    const chevron = select.querySelector("[data-select-chevron]");
+    if (!menu) return;
+    closeAllSelects(select);
+    menu.hidden = false;
+    select.dataset.open = "true";
+    if (trigger) trigger.setAttribute("aria-expanded", "true");
+    if (chevron) chevron.style.transform = "rotate(180deg)";
+  };
+
+  const setSelectValue = (select, value, labelText, fireChange = true) => {
+    const input = select.querySelector("[data-select-value]");
+    const label = select.querySelector("[data-select-label]");
+    const options = Array.from(select.querySelectorAll("[data-select-option]"));
+    if (input) input.value = value || "";
+    if (label) label.textContent = labelText || select.dataset.placeholder || "";
+    options.forEach((opt) => {
+      opt.setAttribute("aria-selected", opt.dataset.value === value ? "true" : "false");
+    });
+    if (fireChange && input) input.dispatchEvent(new Event("change", { bubbles: true }));
+  };
+
+  const syncSelectToValue = (select, fireChange = false) => {
+    const input = select.querySelector("[data-select-value]");
+    const options = Array.from(select.querySelectorAll("[data-select-option]"));
+    const value = input?.value || select.dataset.default || "";
+    const match = options.find((opt) => opt.dataset.value === value);
+    if (match) {
+      const labelText = match.dataset.label || match.textContent?.trim() || value;
+      setSelectValue(select, value, labelText, fireChange);
+    } else {
+      const label = select.querySelector("[data-select-label]");
+      if (label) label.textContent = select.dataset.placeholder || "Velg";
+    }
+  };
+
+  selectEls.forEach((select) => {
+    const trigger = select.querySelector("[data-select-trigger]");
+    const menu = select.querySelector("[data-select-menu]");
+    const options = Array.from(select.querySelectorAll("[data-select-option]"));
+    syncSelectToValue(select, false);
+
+    if (trigger) {
+      trigger.addEventListener("click", (event) => {
+        event.preventDefault();
+        const isOpen = select.dataset.open === "true";
+        if (isOpen) {
+          closeSelect(select);
+        } else {
+          openSelect(select);
+        }
+      });
+
+      trigger.addEventListener("keydown", (event) => {
+        if (event.key === "ArrowDown" || event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          openSelect(select);
+          options[0]?.focus();
+        }
+      });
+    }
+
+    options.forEach((opt) => {
+      opt.addEventListener("click", (event) => {
+        event.preventDefault();
+        const value = opt.dataset.value || "";
+        const labelText = opt.dataset.label || opt.textContent?.trim() || value;
+        setSelectValue(select, value, labelText, true);
+        closeSelect(select);
+        trigger?.focus();
+      });
+    });
+
+    menu?.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closeSelect(select);
+        trigger?.focus();
+      }
+    });
+  });
+
+  document.addEventListener("click", (event) => {
+    selectEls.forEach((select) => {
+      if (!select.contains(event.target)) closeSelect(select);
+    });
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") closeAllSelects();
+  });
+
+  termsOpeners.forEach((btn) => {
+    btn.addEventListener("click", (event) => {
+      event.preventDefault();
+      openTerms();
+    });
+  });
+
+  termsClosers.forEach((btn) => {
+    btn.addEventListener("click", (event) => {
+      event.preventDefault();
+      closeTerms();
+    });
+  });
+
+  if (termsDialog) {
+    termsDialog.addEventListener("cancel", (event) => {
+      event.preventDefault();
+      closeTerms();
+    });
+
+    termsDialog.addEventListener("click", (event) => {
+      const panel = termsDialog.querySelector(".modal-panel");
+      if (panel && !panel.contains(event.target)) closeTerms();
+    });
+  }
+
+  const clearRoomTypeError = () => {
+    if (roomTypeError) roomTypeError.hidden = true;
+    if (roomTypeTrigger) roomTypeTrigger.removeAttribute("aria-invalid");
+  };
 
   const updateGuests = () => {
-    const count = Number(roomType?.value || 1);
+    const count = Number(roomType?.value || 0);
+    if (roomType?.value) clearRoomTypeError();
     personSections.forEach((section) => {
       const idx = Number(section.dataset.person || 0);
       const show = count >= idx;
@@ -141,13 +502,18 @@ const desc = "Send inn romønsket ditt. Vi kontakter romansvarlig med bekreftels
       section.disabled = !show;
       section.setAttribute("aria-hidden", show ? "false" : "true");
       section.querySelectorAll("input").forEach((input) => {
+        const isSelectValue = input.matches("[data-select-value]");
         if (show) {
           input.removeAttribute("disabled");
           input.setAttribute("required", "");
+          if (isSelectValue && !input.value) {
+            const select = input.closest("[data-select]");
+            if (select) syncSelectToValue(select, false);
+          }
         } else {
           input.setAttribute("disabled", "");
           input.removeAttribute("required");
-          input.value = "";
+          if (!isSelectValue) input.value = "";
         }
       });
     });
@@ -156,5 +522,61 @@ const desc = "Send inn romønsket ditt. Vi kontakter romansvarlig med bekreftels
   if (roomType) {
     roomType.addEventListener("change", updateGuests);
     updateGuests();
+  }
+
+  const setSubmitting = (isSubmitting) => {
+    if (!submitBtn) return;
+    submitBtn.disabled = isSubmitting;
+    const label = submitBtn.querySelector("[data-label]");
+    if (label) label.textContent = isSubmitting ? "Sender..." : "Send inn rombooking";
+  };
+
+  const showError = () => {
+    if (errorPanel) errorPanel.hidden = false;
+  };
+
+  if (form) {
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      if (errorPanel) errorPanel.hidden = true;
+      setSubmitting(true);
+
+      if (!roomType?.value) {
+        if (roomTypeError) roomTypeError.hidden = false;
+        if (roomTypeTrigger) {
+          roomTypeTrigger.setAttribute("aria-invalid", "true");
+          roomTypeTrigger.focus();
+        }
+        setSubmitting(false);
+        return;
+      }
+
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        setSubmitting(false);
+        return;
+      }
+
+      try {
+        const formData = new FormData(form);
+        const payload = new URLSearchParams(formData).toString();
+        const response = await fetch(form.getAttribute("action") || window.location.pathname, {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: payload,
+        });
+
+        if (!response.ok) throw new Error("Form submit failed");
+
+        form.reset();
+        selectEls.forEach((select) => syncSelectToValue(select, false));
+        if (successPanel) successPanel.hidden = false;
+        form.hidden = true;
+      } catch (err) {
+        showError();
+      } finally {
+        setSubmitting(false);
+      }
+    });
   }
 </script>
