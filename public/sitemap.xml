@@ -22,4 +22,11 @@
     <priority>0.8</priority>
   </url>
 
+  <!-- Booking page -->
+  <url>
+    <loc>https://skiogmagi.no/booking/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
+  </url>
+
 </urlset>

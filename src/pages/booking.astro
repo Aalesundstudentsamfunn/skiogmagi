@@ -4,7 +4,7 @@ import Footer from "../components/Footer.astro";
 import GlassPanel from "../components/ui/GlassPanel.astro";
 
 const title = "Booking";
-const desc = "Send inn romønsket ditt. Vi kontakter romansvarlig med bekreftelse og detaljer.";
+const desc = "Book rom til Ski & Magi i Sogndal. Fyll inn romtype, romansvarlig og kontaktinfo for alle på rommet.";
 const roomTypes = [
   { value: "1", label: "1 person" },
   { value: "2", label: "2 personer" },
@@ -253,14 +253,11 @@ const countryCodes = [
         <div class="flex items-start gap-3 text-sm text-white/90">
           <input id="terms" name="terms" type="checkbox" required class="mt-1 h-4 w-4 rounded border-white/30 bg-white/10 text-white focus:ring-2 focus:ring-white/60" />
           <p class="mt-0.5">
-            <label for="terms">Jeg forstår og godtar</label>
-            <button type="button" data-terms-open class="ml-1 inline-flex items-center underline decoration-white/50 underline-offset-2 transition hover:decoration-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60">
+            <label for="terms">Jeg forstår og godtar</label><button type="button" data-terms-open class="ml-1 inline-flex items-center underline decoration-white/50 underline-offset-2 transition hover:decoration-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60">
             vilkårene for booking
-            </button>
-            .
+            </button>.
           </p>
         </div>
-
         <button id="booking-submit" type="submit" class="inline-flex items-center justify-center rounded-full bg-white/95 px-6 py-3 text-sm font-semibold text-sky-900 shadow-lg shadow-sky-500/20 transition hover:bg-white">
           <span data-label>Send inn rombooking</span>
         </button>
