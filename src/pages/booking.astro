@@ -1,0 +1,160 @@
+---
+import PageLayout from "../layouts/PageLayout.astro";
+import Footer from "../components/Footer.astro";
+import GlassPanel from "../components/ui/GlassPanel.astro";
+
+const title = "Rombooking";
+const desc = "Send inn romønsket ditt. Vi kontakter romansvarlig med bekreftelse og detaljer.";
+---
+
+<PageLayout title={title} description={desc}>
+  <section id="hero" class="hero relative isolate overflow-hidden mt-20 sm:mt-24">
+    <div class="mx-auto max-w-5xl px-6 pt-16 sm:pt-20 text-white">
+      <p class="text-sm uppercase tracking-[0.35em] text-white/70">Booking</p>
+      <h1 class="mt-3 text-4xl font-extrabold drop-shadow sm:text-5xl">{title}</h1>
+      <p class="mt-3 text-white/85 max-w-2xl">{desc}</p>
+    </div>
+  </section>
+
+  <section class="mx-auto w-full max-w-4xl px-6 pb-16 pt-8 text-white">
+    <GlassPanel class="text-white">
+      <form name="room-booking" method="POST" data-netlify="true" netlify-honeypot="bot-field" class="grid gap-6">
+        <input type="hidden" name="form-name" value="room-booking" />
+        <p class="hidden">
+          <label>
+            Ikke fyll ut dette feltet:
+            <input name="bot-field" />
+          </label>
+        </p>
+
+        <div>
+          <label for="roomType" class="text-sm font-semibold text-white/80">Antall personer per rom</label>
+          <select id="roomType" name="roomType" required class="mt-1 w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white outline-none focus:ring-2 focus:ring-white/60">
+            <option value="" disabled selected>Velg romtype</option>
+            <option value="1">Single - 1 person</option>
+            <option value="2">Double - 2 personer</option>
+            <option value="3">Triple - 3 personer</option>
+            <option value="4">Quad - 4 personer</option>
+          </select>
+          <p class="mt-2 text-sm text-white/70">Velg antall personer, så åpnes feltene for alle i rommet.</p>
+        </div>
+
+        <fieldset class="rounded-2xl border border-white/15 bg-white/5 p-4 sm:p-5">
+          <legend class="px-2 text-sm font-semibold text-white/80">Romansvarlig (person 1)</legend>
+          <div class="grid gap-4 sm:grid-cols-2">
+            <div class="sm:col-span-2">
+              <label for="roomManagerName" class="text-sm text-white/80">Fullt navn</label>
+              <input id="roomManagerName" name="roomManagerName" autocomplete="name" required class="mt-1 w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
+            </div>
+            <div>
+              <label for="roomManagerEmail" class="text-sm text-white/80">E-post</label>
+              <input id="roomManagerEmail" name="roomManagerEmail" type="email" autocomplete="email" required class="mt-1 w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
+            </div>
+            <div>
+              <label for="roomManagerPhone" class="text-sm text-white/80">Telefon</label>
+              <input id="roomManagerPhone" name="roomManagerPhone" type="tel" autocomplete="tel" required class="mt-1 w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset data-person="2" hidden disabled class="rounded-2xl border border-white/15 bg-white/5 p-4 sm:p-5">
+          <legend class="px-2 text-sm font-semibold text-white/80">Person 2</legend>
+          <div class="grid gap-4 sm:grid-cols-2">
+            <div class="sm:col-span-2">
+              <label for="guest2Name" class="text-sm text-white/80">Fullt navn</label>
+              <input id="guest2Name" name="guest2Name" autocomplete="name" required class="mt-1 w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
+            </div>
+            <div>
+              <label for="guest2Email" class="text-sm text-white/80">E-post</label>
+              <input id="guest2Email" name="guest2Email" type="email" autocomplete="email" required class="mt-1 w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
+            </div>
+            <div>
+              <label for="guest2Phone" class="text-sm text-white/80">Telefon</label>
+              <input id="guest2Phone" name="guest2Phone" type="tel" autocomplete="tel" required class="mt-1 w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset data-person="3" hidden disabled class="rounded-2xl border border-white/15 bg-white/5 p-4 sm:p-5">
+          <legend class="px-2 text-sm font-semibold text-white/80">Person 3</legend>
+          <div class="grid gap-4 sm:grid-cols-2">
+            <div class="sm:col-span-2">
+              <label for="guest3Name" class="text-sm text-white/80">Fullt navn</label>
+              <input id="guest3Name" name="guest3Name" autocomplete="name" required class="mt-1 w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
+            </div>
+            <div>
+              <label for="guest3Email" class="text-sm text-white/80">E-post</label>
+              <input id="guest3Email" name="guest3Email" type="email" autocomplete="email" required class="mt-1 w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
+            </div>
+            <div>
+              <label for="guest3Phone" class="text-sm text-white/80">Telefon</label>
+              <input id="guest3Phone" name="guest3Phone" type="tel" autocomplete="tel" required class="mt-1 w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset data-person="4" hidden disabled class="rounded-2xl border border-white/15 bg-white/5 p-4 sm:p-5">
+          <legend class="px-2 text-sm font-semibold text-white/80">Person 4</legend>
+          <div class="grid gap-4 sm:grid-cols-2">
+            <div class="sm:col-span-2">
+              <label for="guest4Name" class="text-sm text-white/80">Fullt navn</label>
+              <input id="guest4Name" name="guest4Name" autocomplete="name" required class="mt-1 w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
+            </div>
+            <div>
+              <label for="guest4Email" class="text-sm text-white/80">E-post</label>
+              <input id="guest4Email" name="guest4Email" type="email" autocomplete="email" required class="mt-1 w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
+            </div>
+            <div>
+              <label for="guest4Phone" class="text-sm text-white/80">Telefon</label>
+              <input id="guest4Phone" name="guest4Phone" type="tel" autocomplete="tel" required class="mt-1 w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
+            </div>
+          </div>
+        </fieldset>
+
+        <label class="flex items-start gap-3 text-sm text-white/90">
+          <input id="terms" name="terms" type="checkbox" required class="mt-1 h-4 w-4 rounded border-white/30 bg-white/10 text-white focus:ring-2 focus:ring-white/60" />
+          <span>Jeg forstår og godtar vilkårene for booking.</span>
+        </label>
+
+        <button type="submit" class="inline-flex items-center justify-center rounded-full bg-white/95 px-6 py-3 text-sm font-semibold text-sky-900 shadow-lg shadow-sky-500/20 transition hover:bg-white">
+          Send inn rombooking
+        </button>
+      </form>
+    </GlassPanel>
+  </section>
+
+  <div class="mt-auto">
+    <Footer />
+  </div>
+</PageLayout>
+
+<script is:inline>
+  const roomType = document.getElementById("roomType");
+  const personSections = Array.from(document.querySelectorAll("[data-person]"));
+
+  const updateGuests = () => {
+    const count = Number(roomType?.value || 1);
+    personSections.forEach((section) => {
+      const idx = Number(section.dataset.person || 0);
+      const show = count >= idx;
+      section.hidden = !show;
+      section.disabled = !show;
+      section.setAttribute("aria-hidden", show ? "false" : "true");
+      section.querySelectorAll("input").forEach((input) => {
+        if (show) {
+          input.removeAttribute("disabled");
+          input.setAttribute("required", "");
+        } else {
+          input.setAttribute("disabled", "");
+          input.removeAttribute("required");
+          input.value = "";
+        }
+      });
+    });
+  };
+
+  if (roomType) {
+    roomType.addEventListener("change", updateGuests);
+    updateGuests();
+  }
+</script>
