@@ -4,6 +4,9 @@
   functions = "netlify/functions"
   publish = "dist"
 
+[build.environment]
+  NODE_VERSION = "20.12.2"
+
 ## Headers: caching and performance
 ## Fingerprinted assets from Astro (`/_astro/*`) can be cached for a year
 [[headers]]

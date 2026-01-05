@@ -28,11 +28,22 @@ const normalizeState = (state) => {
 
 const loadState = async () => {
   const store = getStore("room-booking");
-  const stored = await store.get("room-counts", { type: "json" });
-  const state = normalizeState(stored || {});
-  if (!stored || JSON.stringify(stored) !== JSON.stringify(state)) {
-    await store.set("room-counts", state);
+  let stored = null;
+  let raw = null;
+
+  try {
+    raw = await store.get("room-counts", { type: "text" });
+    if (raw) stored = JSON.parse(raw);
+  } catch {
+    stored = null;
   }
+
+  const state = normalizeState(stored || {});
+  const nextRaw = JSON.stringify(state);
+  if (!raw || raw !== nextRaw) {
+    await store.set("room-counts", nextRaw);
+  }
+
   return { store, state };
 };
 
@@ -76,6 +87,6 @@ export default async (req) => {
   }
 
   const nextState = { counts, limits: state.limits };
-  await store.set("room-counts", nextState);
+  await store.set("room-counts", JSON.stringify(nextState));
   return jsonResponse({ ok: true, counts });
 };
