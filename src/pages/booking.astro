@@ -351,6 +351,8 @@ const countryCodes = [
   let ticketValidated = false;
   let ticketData = null;
   const ticketCheckLabel = ticketCheckBtn?.textContent || "Sjekk billett";
+  const submitLabel = submitBtn?.querySelector("[data-label]");
+  const termsCheckbox = document.getElementById("terms");
 
   const closeTerms = () => {
     if (!termsDialog?.hasAttribute("open")) return;
@@ -471,6 +473,18 @@ const countryCodes = [
     applyDotStatus(triggerDot, match?.dataset.status || "unknown");
   };
 
+  const updateSubmitState = () => {
+    if (!submitBtn) return;
+    const ready = Boolean(ticketValidated && roomType?.value && form?.checkValidity());
+    submitBtn.disabled = !ready;
+    if (!submitLabel) return;
+    if (!ready) {
+      submitLabel.textContent = "Fyll ut alle felter";
+    } else {
+      submitLabel.textContent = "Send inn rombooking";
+    }
+  };
+
   const applyAvailability = (counts) => {
     if (!counts) return;
     latestCounts = counts;
@@ -494,6 +508,7 @@ const countryCodes = [
     const roomTypeSelect = roomType?.closest("[data-select]");
     if (roomTypeSelect) syncSelectToValue(roomTypeSelect, false);
     updateRoomTypeTriggerDot();
+    updateSubmitState();
   };
 
   const fetchAvailability = async () => {
@@ -719,6 +734,7 @@ const countryCodes = [
       setTicketStatus(ticket.ownerName ? `Billett funnet: ${ticket.ownerName}` : "Billett funnet.", "success");
       setBookingEnabled(true);
       prefillPerson1(ticket);
+      updateSubmitState();
     } catch (err) {
       const code = err && err.code ? err.code : 0;
       if (code === 404 || err?.message === "NOT_FOUND") {
@@ -734,6 +750,7 @@ const countryCodes = [
         ticketCheckBtn.disabled = false;
         ticketCheckBtn.textContent = ticketCheckLabel;
       }
+      updateSubmitState();
     }
   };
 
@@ -754,6 +771,7 @@ const countryCodes = [
     ticketInput.addEventListener("input", () => {
       setTicketStatus("");
       resetTicketState();
+      updateSubmitState();
     });
   }
 
@@ -783,6 +801,7 @@ const countryCodes = [
     const count = Number(roomType?.value || 0);
     if (roomType?.value) clearRoomTypeError();
     if (termsBlock) termsBlock.hidden = count <= 0;
+    if (termsCheckbox) termsCheckbox.disabled = count <= 0;
     personSections.forEach((section) => {
       const idx = Number(section.dataset.person || 0);
       const show = count >= idx;
@@ -806,9 +825,11 @@ const countryCodes = [
       });
     });
     updateRoomTypeTriggerDot();
+    updateSubmitState();
   };
 
   setBookingEnabled(false);
+  updateSubmitState();
 
   if (roomType) {
     roomType.addEventListener("change", updateGuests);
@@ -823,6 +844,8 @@ const countryCodes = [
   };
 
   if (form) {
+    form.addEventListener("input", updateSubmitState);
+    form.addEventListener("change", updateSubmitState);
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
       if (errorPanel) errorPanel.hidden = true;
@@ -879,6 +902,7 @@ const countryCodes = [
         setError("Noe gikk galt.", "Innsendingen feilet. Prøv igjen om litt, eller ta kontakt hvis problemet fortsetter.");
       } finally {
         setSubmitting(false);
+        updateSubmitState();
       }
     });
   }
