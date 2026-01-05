@@ -7,8 +7,21 @@ const getEl = (id) => document.getElementById(id);
 export function setStatus(msg, tone = "info") {
   const el = getEl("status");
   if (!el) return;
-  el.textContent = msg || "";
-  el.className = `mb-4 text-sm ${tone === "error" ? "text-red-600" : "text-neutral-600"}`;
+  if (!msg) {
+    el.textContent = "";
+    el.className = "mb-3 text-sm text-white/85";
+    return;
+  }
+
+  const toneClass =
+    tone === "error"
+      ? "mb-3 rounded-lg border border-rose-300/30 bg-rose-500/15 px-3 py-2 text-sm text-rose-100"
+      : tone === "success"
+        ? "mb-3 rounded-lg border border-emerald-300/30 bg-emerald-500/15 px-3 py-2 text-sm text-emerald-100"
+        : "mb-3 text-sm text-white/85";
+
+  el.textContent = msg;
+  el.className = toneClass;
 }
 
 // Render ticket data into the DOM
@@ -239,8 +252,11 @@ export function initTicketDialogs(setStatusFn) {
         animateClose(transferDlg);
         transferForm.reset();
         if (typeof setStatusFn === "function") {
-          setStatusFn("Takk! Vi har mottatt informasjon om ny eier.", "info");
+          setStatusFn("Takk! Vi har mottatt informasjon om ny eier.", "success");
         }
+
+        const resultEl = document.getElementById("result");
+        if (resultEl) resultEl.classList.add("hidden");
       } catch (err) {
         if (typeof setStatusFn === "function") {
           setStatusFn("Kunne ikke sende inn skjemaet akkurat nå.", "error");
