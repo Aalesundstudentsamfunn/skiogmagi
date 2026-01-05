@@ -253,7 +253,7 @@ const countryCodes = [
         </fieldset>
 
 
-        <div data-person="terms" hidden class="flex items-start gap-3 text-sm text-white/90">
+        <div data-terms hidden class="flex items-start gap-3 text-sm text-white/90">
           <input id="terms" name="terms" type="checkbox" required class="mt-1 h-4 w-4 rounded border-white/30 bg-white/10 text-white focus:ring-2 focus:ring-white/60" />
           <p class="mt-0.5">
             <label for="terms">Jeg forstår og godtar</label><button type="button" data-terms-open class="ml-1 inline-flex items-center underline decoration-white/50 underline-offset-2 transition hover:decoration-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60">
@@ -363,7 +363,7 @@ const countryCodes = [
   };
 
   const formatAvailabilityLabel = (baseLabel, count) => {
-    if (count <= 0) return `${baseLabel} · Utsolgt`;
+    if (count <= 0) return `${baseLabel} · Utilgjenglig`;
     const suffix = count === 1 ? "ledig" : "ledige";
     return `${baseLabel} · ${count} ${suffix}`;
   };
@@ -615,7 +615,7 @@ const countryCodes = [
     if (roomTypeTrigger) roomTypeTrigger.removeAttribute("aria-invalid");
   };
 
-  const termsBlock = document.querySelector("[data-person='terms']");
+  const termsBlock = document.querySelector("[data-terms]");
 
   const updateGuests = () => {
     const count = Number(roomType?.value || 0);
