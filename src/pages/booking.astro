@@ -41,8 +41,8 @@ const countryCodes = [
     </div>
   </section>
 
-  <section class="mx-auto w-full max-w-6xl px-6 pb-16 pt-8 text-white">
-    <GlassPanel class="text-white overflow-visible">
+  <section class="mx-auto w-full max-w-6xl px-6 pb-16 pt-8 text-white relative z-10">
+    <GlassPanel class="text-white !overflow-visible" style="overflow: visible;">
       <div id="booking-success" hidden class="rounded-2xl border border-white/15 bg-white/10 p-6 text-white">
         <h2 class="text-2xl font-bold">Takk for innsendingen!</h2>
         <p class="mt-2 text-white/85">Vi har mottatt rombookingen din og tar kontakt med romansvarlig snart.</p>
@@ -64,20 +64,24 @@ const countryCodes = [
 
         <div>
           <span id="roomTypeLabel" class="text-sm font-semibold text-white/80">Antall personer per rom</span>
-          <div class="relative mt-1" data-select data-placeholder="Velg romtype" data-select-id="roomType">
+          <div class="relative mt-1" data-select data-placeholder="Velg romtype" data-select-id="roomType" data-roomtype-select>
             <input id="roomType" name="roomType" type="hidden" data-select-value required />
             <button type="button" data-select-trigger data-roomtype-trigger aria-labelledby="roomTypeLabel roomTypeValue" aria-haspopup="listbox" aria-expanded="false" class="flex w-full items-center justify-between gap-2 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-left text-white/90 outline-none focus:ring-2 focus:ring-white/60">
-              <span id="roomTypeValue" data-select-label class="truncate">Velg romtype</span>
+              <span id="roomTypeValue" data-select-label class="flex items-center gap-2">
+                <span data-roomtype-dot class="h-2 w-2 rounded-full bg-white/30"></span>
+                <span data-select-text class="truncate">Velg romtype</span>
+              </span>
               <svg data-select-chevron viewBox="0 0 20 20" aria-hidden="true" class="h-4 w-4 text-white/70 transition-transform">
                 <path d="M5 7.5l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
               </svg>
             </button>
-            <ul data-select-menu role="listbox" aria-label="Romtype" hidden class="absolute left-0 right-0 z-20 mt-2 max-h-64 overflow-auto rounded-xl border border-white/20 bg-slate-900/80 backdrop-blur-md shadow-lg">
+            <ul data-select-menu role="listbox" aria-label="Romtype" hidden class="absolute left-0 right-0 z-50 mt-2 max-h-64 overflow-auto rounded-xl border border-white/20 bg-slate-900/80 backdrop-blur-md shadow-lg">
               {
                 roomTypes.map((type) => (
                   <li>
-                    <button type="button" role="option" data-select-option data-roomtype-option data-value={type.value} data-label={type.label} data-base-label={type.label} class="w-full whitespace-nowrap text-left px-3 py-2 text-sm text-white/90 hover:bg-white/10 focus:bg-white/10">
-                      {type.label}
+                    <button type="button" role="option" data-select-option data-roomtype-option data-value={type.value} data-label={type.label} data-base-label={type.label} class="flex w-full items-center gap-2 whitespace-nowrap px-3 py-2 text-left text-sm text-white/90 hover:bg-white/10 focus:bg-white/10">
+                      <span data-roomtype-dot class="h-2 w-2 rounded-full bg-white/30"></span>
+                      <span data-roomtype-label>{type.label}</span>
                     </button>
                   </li>
                 ))
@@ -85,11 +89,10 @@ const countryCodes = [
             </ul>
           </div>
           <p id="roomTypeError" hidden class="mt-2 text-sm text-rose-100">Velg romtype før du sender inn.</p>
-          <p id="roomTypeAvailability" class="mt-2 text-sm text-white/70">Henter tilgjengelighet...</p>
           <p class="mt-2 text-sm text-white/70">Velg antall personer, så åpnes feltene for alle i rommet.</p>
         </div>
 
-        <fieldset class="rounded-2xl border border-white/15 bg-white/5 p-4 sm:p-5">
+        <fieldset data-person="1" hidden disabled class="rounded-2xl border border-white/15 bg-white/5 p-4 sm:p-5">
           <legend class="px-2 text-sm font-semibold text-white/80">Romansvarlig (person 1)</legend>
           <div class="grid gap-4 sm:grid-cols-2">
             <div class="sm:col-span-2">
@@ -111,7 +114,7 @@ const countryCodes = [
                       <path d="M5 7.5l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
                   </button>
-                  <ul data-select-menu role="listbox" aria-label="Landkode" hidden class="absolute left-0 right-0 z-20 mt-2 max-h-64 overflow-auto rounded-xl border border-white/20 bg-slate-900/80 backdrop-blur-md shadow-lg">
+                  <ul data-select-menu role="listbox" aria-label="Landkode" hidden class="absolute left-0 right-0 z-50 mt-2 max-h-64 overflow-auto rounded-xl border border-white/20 bg-slate-900/80 backdrop-blur-md shadow-lg">
                     {
                       countryCodes.map((code) => (
                         <li>
@@ -151,7 +154,7 @@ const countryCodes = [
                       <path d="M5 7.5l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
                   </button>
-                  <ul data-select-menu role="listbox" aria-label="Landkode" hidden class="absolute left-0 right-0 z-20 mt-2 max-h-64 overflow-auto rounded-xl border border-white/20 bg-slate-900/80 backdrop-blur-md shadow-lg">
+                  <ul data-select-menu role="listbox" aria-label="Landkode" hidden class="absolute left-0 right-0 z-50 mt-2 max-h-64 overflow-auto rounded-xl border border-white/20 bg-slate-900/80 backdrop-blur-md shadow-lg">
                     {
                       countryCodes.map((code) => (
                         <li>
@@ -191,7 +194,7 @@ const countryCodes = [
                       <path d="M5 7.5l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
                   </button>
-                  <ul data-select-menu role="listbox" aria-label="Landkode" hidden class="absolute left-0 right-0 z-20 mt-2 max-h-64 overflow-auto rounded-xl border border-white/20 bg-slate-900/80 backdrop-blur-md shadow-lg">
+                  <ul data-select-menu role="listbox" aria-label="Landkode" hidden class="absolute left-0 right-0 z-50 mt-2 max-h-64 overflow-auto rounded-xl border border-white/20 bg-slate-900/80 backdrop-blur-md shadow-lg">
                     {
                       countryCodes.map((code) => (
                         <li>
@@ -231,7 +234,7 @@ const countryCodes = [
                       <path d="M5 7.5l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
                   </button>
-                  <ul data-select-menu role="listbox" aria-label="Landkode" hidden class="absolute left-0 right-0 z-20 mt-2 max-h-64 overflow-auto rounded-xl border border-white/20 bg-slate-900/80 backdrop-blur-md shadow-lg">
+                  <ul data-select-menu role="listbox" aria-label="Landkode" hidden class="absolute left-0 right-0 z-50 mt-2 max-h-64 overflow-auto rounded-xl border border-white/20 bg-slate-900/80 backdrop-blur-md shadow-lg">
                     {
                       countryCodes.map((code) => (
                         <li>
@@ -250,7 +253,7 @@ const countryCodes = [
         </fieldset>
 
 
-        <div class="flex items-start gap-3 text-sm text-white/90">
+        <div data-person="terms" hidden class="flex items-start gap-3 text-sm text-white/90">
           <input id="terms" name="terms" type="checkbox" required class="mt-1 h-4 w-4 rounded border-white/30 bg-white/10 text-white focus:ring-2 focus:ring-white/60" />
           <p class="mt-0.5">
             <label for="terms">Jeg forstår og godtar</label><button type="button" data-terms-open class="ml-1 inline-flex items-center underline decoration-white/50 underline-offset-2 transition hover:decoration-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60">
@@ -322,7 +325,6 @@ const countryCodes = [
   const errorPanel = document.getElementById("booking-error");
   const errorTitle = document.getElementById("booking-error-title");
   const errorMessage = document.getElementById("booking-error-message");
-  const availabilityNote = document.getElementById("roomTypeAvailability");
   const roomTypeOptions = Array.from(document.querySelectorAll("[data-roomtype-option]"));
   const selectEls = Array.from(document.querySelectorAll("[data-select]"));
   const termsDialog = document.getElementById("terms-dialog");
@@ -357,12 +359,36 @@ const countryCodes = [
     if (errorTitle && title) errorTitle.textContent = title;
     if (errorMessage && message) errorMessage.textContent = message;
     if (errorPanel) errorPanel.hidden = false;
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const formatAvailabilityLabel = (baseLabel, count) => {
     if (count <= 0) return `${baseLabel} · Utsolgt`;
     const suffix = count === 1 ? "ledig" : "ledige";
     return `${baseLabel} · ${count} ${suffix}`;
+  };
+
+  const statusForCount = (count) => {
+    if (count <= 0) return "none";
+    if (count < 5) return "low";
+    return "ok";
+  };
+
+  const applyDotStatus = (dot, status) => {
+    if (!dot) return;
+    dot.classList.remove("bg-emerald-400", "bg-amber-400", "bg-rose-400", "bg-white/30");
+    if (status === "ok") dot.classList.add("bg-emerald-400");
+    else if (status === "low") dot.classList.add("bg-amber-400");
+    else if (status === "none") dot.classList.add("bg-rose-400");
+    else dot.classList.add("bg-white/30");
+  };
+
+  const updateRoomTypeTriggerDot = () => {
+    const roomSelect = document.querySelector("[data-roomtype-select]");
+    const triggerDot = roomSelect?.querySelector("[data-roomtype-dot]");
+    const selected = roomType?.value || "";
+    const match = roomTypeOptions.find((opt) => opt.dataset.value === selected);
+    applyDotStatus(triggerDot, match?.dataset.status || "unknown");
   };
 
   const applyAvailability = (counts) => {
@@ -373,28 +399,21 @@ const countryCodes = [
       const baseLabel = opt.dataset.baseLabel || opt.textContent?.trim() || value;
       const available = Number(counts[value] ?? 0);
       const label = formatAvailabilityLabel(baseLabel, available);
+      const status = statusForCount(available);
       opt.dataset.label = label;
-      opt.textContent = label;
+      opt.dataset.status = status;
+      const labelEl = opt.querySelector("[data-roomtype-label]");
+      if (labelEl) labelEl.textContent = label;
       opt.disabled = available <= 0;
       opt.setAttribute("aria-disabled", available <= 0 ? "true" : "false");
       opt.classList.toggle("opacity-50", available <= 0);
       opt.classList.toggle("cursor-not-allowed", available <= 0);
+      applyDotStatus(opt.querySelector("[data-roomtype-dot]"), status);
     });
 
     const roomTypeSelect = roomType?.closest("[data-select]");
     if (roomTypeSelect) syncSelectToValue(roomTypeSelect, false);
-
-    if (availabilityNote) {
-      const summary = roomTypeOptions
-        .map((opt) => {
-          const value = opt.dataset.value || "";
-          const baseLabel = opt.dataset.baseLabel || value;
-          const available = Number(counts[value] ?? 0);
-          return `${baseLabel}: ${available}`;
-        })
-        .join(" · ");
-      availabilityNote.textContent = `Ledige rom: ${summary}`;
-    }
+    updateRoomTypeTriggerDot();
   };
 
   const fetchAvailability = async () => {
@@ -404,9 +423,7 @@ const countryCodes = [
       const data = await response.json();
       applyAvailability(data.counts || data);
     } catch (err) {
-      if (availabilityNote) {
-        availabilityNote.textContent = "Kunne ikke hente tilgjengelighet akkurat nå.";
-      }
+      setError("Kunne ikke hente tilgjengelighet", "Prøv igjen om litt, eller ta kontakt hvis problemet fortsetter.");
     }
   };
 
@@ -477,9 +494,14 @@ const countryCodes = [
   const setSelectValue = (select, value, labelText, fireChange = true) => {
     const input = select.querySelector("[data-select-value]");
     const label = select.querySelector("[data-select-label]");
+    const labelTextEl = label?.querySelector?.("[data-select-text]");
     const options = Array.from(select.querySelectorAll("[data-select-option]"));
     if (input) input.value = value || "";
-    if (label) label.textContent = labelText || select.dataset.placeholder || "";
+    if (labelTextEl) {
+      labelTextEl.textContent = labelText || select.dataset.placeholder || "";
+    } else if (label) {
+      label.textContent = labelText || select.dataset.placeholder || "";
+    }
     options.forEach((opt) => {
       opt.setAttribute("aria-selected", opt.dataset.value === value ? "true" : "false");
     });
@@ -496,7 +518,12 @@ const countryCodes = [
       setSelectValue(select, value, labelText, fireChange);
     } else {
       const label = select.querySelector("[data-select-label]");
-      if (label) label.textContent = select.dataset.placeholder || "Velg";
+      const labelTextEl = label?.querySelector?.("[data-select-text]");
+      if (labelTextEl) {
+        labelTextEl.textContent = select.dataset.placeholder || "Velg";
+      } else if (label) {
+        label.textContent = select.dataset.placeholder || "Velg";
+      }
     }
   };
 
@@ -588,9 +615,12 @@ const countryCodes = [
     if (roomTypeTrigger) roomTypeTrigger.removeAttribute("aria-invalid");
   };
 
+  const termsBlock = document.querySelector("[data-person='terms']");
+
   const updateGuests = () => {
     const count = Number(roomType?.value || 0);
     if (roomType?.value) clearRoomTypeError();
+    if (termsBlock) termsBlock.hidden = count <= 0;
     personSections.forEach((section) => {
       const idx = Number(section.dataset.person || 0);
       const show = count >= idx;
@@ -613,6 +643,7 @@ const countryCodes = [
         }
       });
     });
+    updateRoomTypeTriggerDot();
   };
 
   if (roomType) {
