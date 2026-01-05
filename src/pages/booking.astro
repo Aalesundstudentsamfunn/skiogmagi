@@ -358,8 +358,9 @@ const countryCodes = [
   };
 
   const formatAvailabilityLabel = (baseLabel, count) => {
-    if (count <= 0) return `${baseLabel} · Utilgjengelig`;
-    return `${baseLabel} · ${count} Tilgjengelig`;
+    if (count <= 0) return `${baseLabel} ·Utilgjengelig`;
+    const suffix = count === 1 ? "ledig" : "ledige";
+    return `${baseLabel} · ${count} Rom ${suffix}`;
   };
 
   const statusForCount = (count) => {
