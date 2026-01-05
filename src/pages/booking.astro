@@ -363,7 +363,7 @@ const countryCodes = [
   };
 
   const formatAvailabilityLabel = (baseLabel, count) => {
-    if (count <= 0) return `${baseLabel} · Utilgjenglig`;
+    if (count <= 0) return `${baseLabel} ·Utilgjengelig`;
     const suffix = count === 1 ? "ledig" : "ledige";
     return `${baseLabel} · ${count} ${suffix}`;
   };
