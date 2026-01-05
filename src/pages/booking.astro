@@ -6,7 +6,6 @@ import GlassPanel from "../components/ui/GlassPanel.astro";
 const title = "Booking";
 const desc = "Book rom til Ski & Magi i Sogndal. Fyll inn romtype, romansvarlig og kontaktinfo for alle på rommet.";
 const roomTypes = [
-  { value: "1", label: "1 person" },
   { value: "2", label: "2 personer" },
   { value: "3", label: "3 personer" },
   { value: "4", label: "4 personer" },
@@ -50,8 +49,8 @@ const countryCodes = [
       </div>
 
       <div id="booking-error" hidden class="rounded-2xl border border-rose-300/40 bg-rose-500/10 p-4 text-rose-50">
-        <p class="font-semibold">Noe gikk galt.</p>
-        <p class="mt-1 text-sm text-rose-100/90">Prøv igjen om litt, eller ta kontakt hvis problemet fortsetter.</p>
+        <p id="booking-error-title" class="font-semibold">Noe gikk galt.</p>
+        <p id="booking-error-message" class="mt-1 text-sm text-rose-100/90">Prøv igjen om litt, eller ta kontakt hvis problemet fortsetter.</p>
       </div>
 
       <form id="booking-form" name="room-booking" method="POST" data-netlify="true" netlify-honeypot="bot-field" class="grid gap-6">
@@ -77,7 +76,7 @@ const countryCodes = [
               {
                 roomTypes.map((type) => (
                   <li>
-                    <button type="button" role="option" data-select-option data-value={type.value} data-label={type.label} class="w-full whitespace-nowrap text-left px-3 py-2 text-sm text-white/90 hover:bg-white/10 focus:bg-white/10">
+                    <button type="button" role="option" data-select-option data-roomtype-option data-value={type.value} data-label={type.label} data-base-label={type.label} class="w-full whitespace-nowrap text-left px-3 py-2 text-sm text-white/90 hover:bg-white/10 focus:bg-white/10">
                       {type.label}
                     </button>
                   </li>
@@ -86,6 +85,7 @@ const countryCodes = [
             </ul>
           </div>
           <p id="roomTypeError" hidden class="mt-2 text-sm text-rose-100">Velg romtype før du sender inn.</p>
+          <p id="roomTypeAvailability" class="mt-2 text-sm text-white/70">Henter tilgjengelighet...</p>
           <p class="mt-2 text-sm text-white/70">Velg antall personer, så åpnes feltene for alle i rommet.</p>
         </div>
 
@@ -320,10 +320,16 @@ const countryCodes = [
   const submitBtn = document.getElementById("booking-submit");
   const successPanel = document.getElementById("booking-success");
   const errorPanel = document.getElementById("booking-error");
+  const errorTitle = document.getElementById("booking-error-title");
+  const errorMessage = document.getElementById("booking-error-message");
+  const availabilityNote = document.getElementById("roomTypeAvailability");
+  const roomTypeOptions = Array.from(document.querySelectorAll("[data-roomtype-option]"));
   const selectEls = Array.from(document.querySelectorAll("[data-select]"));
   const termsDialog = document.getElementById("terms-dialog");
   const termsOpeners = Array.from(document.querySelectorAll("[data-terms-open]"));
   const termsClosers = termsDialog ? Array.from(termsDialog.querySelectorAll("[data-terms-close]")) : [];
+  const availabilityUrl = "/.netlify/functions/room-availability";
+  let latestCounts = null;
 
   const closeTerms = () => {
     if (!termsDialog?.hasAttribute("open")) return;
@@ -344,6 +350,99 @@ const countryCodes = [
       termsDialog.showModal();
     } catch {
       termsDialog.setAttribute("open", "true");
+    }
+  };
+
+  const setError = (title, message) => {
+    if (errorTitle && title) errorTitle.textContent = title;
+    if (errorMessage && message) errorMessage.textContent = message;
+    if (errorPanel) errorPanel.hidden = false;
+  };
+
+  const formatAvailabilityLabel = (baseLabel, count) => {
+    if (count <= 0) return `${baseLabel} · Utsolgt`;
+    const suffix = count === 1 ? "ledig" : "ledige";
+    return `${baseLabel} · ${count} ${suffix}`;
+  };
+
+  const applyAvailability = (counts) => {
+    if (!counts) return;
+    latestCounts = counts;
+    roomTypeOptions.forEach((opt) => {
+      const value = opt.dataset.value || "";
+      const baseLabel = opt.dataset.baseLabel || opt.textContent?.trim() || value;
+      const available = Number(counts[value] ?? 0);
+      const label = formatAvailabilityLabel(baseLabel, available);
+      opt.dataset.label = label;
+      opt.textContent = label;
+      opt.disabled = available <= 0;
+      opt.setAttribute("aria-disabled", available <= 0 ? "true" : "false");
+      opt.classList.toggle("opacity-50", available <= 0);
+      opt.classList.toggle("cursor-not-allowed", available <= 0);
+    });
+
+    const roomTypeSelect = roomType?.closest("[data-select]");
+    if (roomTypeSelect) syncSelectToValue(roomTypeSelect, false);
+
+    if (availabilityNote) {
+      const summary = roomTypeOptions
+        .map((opt) => {
+          const value = opt.dataset.value || "";
+          const baseLabel = opt.dataset.baseLabel || value;
+          const available = Number(counts[value] ?? 0);
+          return `${baseLabel}: ${available}`;
+        })
+        .join(" · ");
+      availabilityNote.textContent = `Ledige rom: ${summary}`;
+    }
+  };
+
+  const fetchAvailability = async () => {
+    try {
+      const response = await fetch(availabilityUrl, { headers: { Accept: "application/json" } });
+      if (!response.ok) throw new Error("Failed to load availability");
+      const data = await response.json();
+      applyAvailability(data.counts || data);
+    } catch (err) {
+      if (availabilityNote) {
+        availabilityNote.textContent = "Kunne ikke hente tilgjengelighet akkurat nå.";
+      }
+    }
+  };
+
+  const reserveRoom = async (roomTypeValue) => {
+    if (!roomTypeValue) return { ok: false, error: "invalid" };
+    try {
+      const payload = { action: "reserve", roomType: roomTypeValue };
+      const response = await fetch(availabilityUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        applyAvailability(data.counts || latestCounts || {});
+        return { ok: false, error: data.error || "unknown" };
+      }
+      applyAvailability(data.counts || latestCounts || {});
+      return { ok: true };
+    } catch (err) {
+      return { ok: false, error: "unavailable" };
+    }
+  };
+
+  const releaseRoom = async (roomTypeValue) => {
+    if (!roomTypeValue) return;
+    try {
+      const response = await fetch(availabilityUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({ action: "release", roomType: roomTypeValue }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (response.ok) applyAvailability(data.counts || latestCounts || {});
+    } catch (err) {
+      // ignore release errors
     }
   };
 
@@ -430,6 +529,7 @@ const countryCodes = [
     options.forEach((opt) => {
       opt.addEventListener("click", (event) => {
         event.preventDefault();
+        if (opt.disabled || opt.getAttribute("aria-disabled") === "true") return;
         const value = opt.dataset.value || "";
         const labelText = opt.dataset.label || opt.textContent?.trim() || value;
         setSelectValue(select, value, labelText, true);
@@ -527,10 +627,6 @@ const countryCodes = [
     if (label) label.textContent = isSubmitting ? "Sender..." : "Send inn rombooking";
   };
 
-  const showError = () => {
-    if (errorPanel) errorPanel.hidden = false;
-  };
-
   if (form) {
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
@@ -553,6 +649,18 @@ const countryCodes = [
         return;
       }
 
+      const roomTypeValue = roomType?.value || "";
+      const reservation = await reserveRoom(roomTypeValue);
+      if (!reservation.ok) {
+        const message =
+          reservation.error === "sold_out"
+            ? "Denne romtypen er utsolgt akkurat nå."
+            : "Kunne ikke reservere rom. Prøv igjen om litt.";
+        setError("Ingen ledige rom", message);
+        setSubmitting(false);
+        return;
+      }
+
       try {
         const formData = new FormData(form);
         const payload = new URLSearchParams(formData).toString();
@@ -569,10 +677,13 @@ const countryCodes = [
         if (successPanel) successPanel.hidden = false;
         form.hidden = true;
       } catch (err) {
-        showError();
+        await releaseRoom(roomTypeValue);
+        setError("Noe gikk galt.", "Innsendingen feilet. Prøv igjen om litt, eller ta kontakt hvis problemet fortsetter.");
       } finally {
         setSubmitting(false);
       }
     });
   }
+
+  fetchAvailability();
 </script>

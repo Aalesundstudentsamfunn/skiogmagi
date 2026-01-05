@@ -17,6 +17,7 @@
     "@iconify-json/mdi": "^1.2.3",
     "@mux/mux-player-astro": "^3.8.0",
     "@mux/mux-video": "^0.27.2",
+    "@netlify/blobs": "^10.5.0",
     "@skeletonlabs/skeleton": "^4.3.0",
     "@tailwindcss/vite": "^4.1.16",
     "@tailwindplus/elements": "^1.0.18",
