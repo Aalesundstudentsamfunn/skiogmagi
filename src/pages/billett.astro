@@ -74,6 +74,9 @@ const desc = "Se detaljer om billetten din til vintermagien Sogndal, i en senere
             </p>
           </div>
           <div class="flex items-center gap-2">
+            <button id="btn-transfer" type="button" class="rounded-md px-3 py-1 text-xs font-semibold text-white ring-1 ring-white/20 transition hover:bg-white/10">
+              Meld ny eier
+            </button>
             <span id="ticket-status" class="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium"></span>
           </div>
         </header>
@@ -121,14 +124,22 @@ const desc = "Se detaljer om billetten din til vintermagien Sogndal, i en senere
   </dialog>
 
   <!-- Transfer dialog -->
-  <dialog id="transfer-dialog" class="modal" aria-label="Gi bort billett">
+  <dialog id="transfer-dialog" class="modal" aria-label="Meld inn ny eier">
     <div class="modal-container fixed inset-0 grid place-items-center p-4">
-      <form id="transfer-form" class="modal-panel relative w-full max-w-lg overflow-hidden rounded-2xl border border-black/10 bg-white text-neutral-900 shadow-2xl ring-1 ring-black/5 p-5">
-        <h3 class="text-lg font-semibold text-neutral-900">Gi bort billett</h3>
-        <p class="mt-1 text-sm text-neutral-600">Fyll ut ny eier. Dette er en demo - ingen faktisk overføring skjer.</p>
+      <form id="transfer-form" name="ticket-transfer" method="POST" data-netlify="true" netlify-honeypot="bot-field" class="modal-panel relative w-full max-w-lg overflow-hidden rounded-2xl border border-black/10 bg-white text-neutral-900 shadow-2xl ring-1 ring-black/5 p-5">
+        <input type="hidden" name="form-name" value="ticket-transfer" />
+        <input type="hidden" name="ticketId" id="transferTicketId" />
+        <p class="hidden">
+          <label>
+            Ikke fyll ut dette feltet:
+            <input name="bot-field" />
+          </label>
+        </p>
+        <h3 class="text-lg font-semibold text-neutral-900">Meld inn ny eier</h3>
+        <p class="mt-1 text-sm text-neutral-600">Fyll ut kontaktinfo for personen som har kjøpt billetten.</p>
         <div class="mt-4 grid gap-3 sm:grid-cols-2">
           <div class="sm:col-span-2">
-            <label for="newName" class="text-sm text-neutral-700">Navn</label>
+            <label for="newName" class="text-sm text-neutral-700">Fullt navn</label>
             <input id="newName" name="newName" required class="mt-1 w-full rounded-lg border border-black/15 bg-white px-3 py-2 text-neutral-900 outline-none focus:ring-2 focus:ring-indigo-500/60" />
           </div>
           <div class="sm:col-span-2">
@@ -136,13 +147,13 @@ const desc = "Se detaljer om billetten din til vintermagien Sogndal, i en senere
             <input id="newEmail" name="newEmail" type="email" required class="mt-1 w-full rounded-lg border border-black/15 bg-white px-3 py-2 text-neutral-900 outline-none focus:ring-2 focus:ring-indigo-500/60" />
           </div>
           <div class="sm:col-span-2">
-            <label for="newPhone" class="text-sm text-neutral-700"> Telefon (valgfritt) </label>
-            <input id="newPhone" name="newPhone" class="mt-1 w-full rounded-lg border border-black/15 bg-white px-3 py-2 text-neutral-900 outline-none focus:ring-2 focus:ring-indigo-500/60" />
+            <label for="newPhone" class="text-sm text-neutral-700">Telefon</label>
+            <input id="newPhone" name="newPhone" required class="mt-1 w-full rounded-lg border border-black/15 bg-white px-3 py-2 text-neutral-900 outline-none focus:ring-2 focus:ring-indigo-500/60" />
           </div>
         </div>
         <div class="mt-5 flex justify-end gap-2">
           <button type="button" data-close class="rounded-md px-3 py-2 text-sm font-medium text-neutral-700 ring-1 ring-black/10 hover:bg-neutral-100">Avbryt</button>
-          <button type="submit" class="rounded-md px-3 py-2 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700">Overfør</button>
+          <button type="submit" data-transfer-submit class="rounded-md px-3 py-2 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700">Send inn</button>
         </div>
       </form>
     </div>

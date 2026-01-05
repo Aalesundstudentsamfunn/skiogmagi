@@ -17,11 +17,15 @@ export function renderTicket(ticket) {
   const idEl = getEl("ticket-id");
   const ownerEl = getEl("ticket-owner");
   const emailEl = getEl("ticket-email");
+  const transferIdInput = getEl("transferTicketId");
 
   if (productEl) productEl.textContent = ticket.product || "Billett";
   if (idEl) idEl.textContent = ticket.id || "";
   if (ownerEl) ownerEl.textContent = ticket.ownerName || "";
   if (emailEl) emailEl.textContent = ticket.email || "";
+  if (transferIdInput && "value" in transferIdInput) {
+    transferIdInput.value = ticket.id || "";
+  }
 
   // Phone row
   const phoneRow = getEl("row-phone");
@@ -178,40 +182,74 @@ export function initTicketDialogs(setStatusFn) {
 
   // Transfer form submit (demo only – frontend-side)
   if (transferForm) {
-    transferForm.addEventListener("submit", (event) => {
+    transferForm.addEventListener("submit", async (event) => {
       event.preventDefault();
       const nameEl = document.getElementById("newName");
       const emailEl = document.getElementById("newEmail");
       const phoneElInput = document.getElementById("newPhone");
+      const submitBtn = transferForm.querySelector("[data-transfer-submit]");
 
       const name = nameEl && "value" in nameEl ? String(nameEl.value || "").trim() : "";
       const email = emailEl && "value" in emailEl ? String(emailEl.value || "").trim() : "";
       const phone = phoneElInput && "value" in phoneElInput ? String(phoneElInput.value || "").trim() : "";
 
-      if (!name || !email) return;
+      if (!name || !email || !phone) {
+        if (typeof setStatusFn === "function") {
+          setStatusFn("Fyll ut fullt navn, e-post og telefonnummer.", "error");
+        }
+        return;
+      }
+
+      if (submitBtn) {
+        submitBtn.setAttribute("disabled", "true");
+        submitBtn.classList.add("opacity-70", "cursor-not-allowed");
+      }
 
       const origRow = document.getElementById("row-original");
       const origEl = document.getElementById("ticket-original");
       const currentOwner = document.getElementById("ticket-owner")?.textContent || "";
+      const ticketId = document.getElementById("ticket-id")?.textContent || "";
 
-      if (currentOwner && origEl && origRow && !origEl.textContent) {
-        origEl.textContent = currentOwner;
-        origRow.classList.remove("hidden");
-      }
+      try {
+        const formData = new FormData(transferForm);
+        formData.set("form-name", "ticket-transfer");
+        if (ticketId) formData.set("ticketId", ticketId);
 
-      const ownerEl = document.getElementById("ticket-owner");
-      const phoneRow2 = document.getElementById("row-phone");
-      const phoneEl = document.getElementById("ticket-phone");
+        await fetch("/", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams(formData).toString(),
+        });
 
-      if (ownerEl) ownerEl.textContent = name;
-      if (phone) {
-        if (phoneEl) phoneEl.textContent = phone;
-        if (phoneRow2) phoneRow2.classList.remove("hidden");
-      }
+        if (currentOwner && origEl && origRow && !origEl.textContent) {
+          origEl.textContent = currentOwner;
+          origRow.classList.remove("hidden");
+        }
 
-      animateClose(transferDlg);
-      if (typeof setStatusFn === "function") {
-        setStatusFn("Billetten er overført (demo).", "info");
+        const ownerEl = document.getElementById("ticket-owner");
+        const phoneRow2 = document.getElementById("row-phone");
+        const phoneEl = document.getElementById("ticket-phone");
+
+        if (ownerEl) ownerEl.textContent = name;
+        if (phone) {
+          if (phoneEl) phoneEl.textContent = phone;
+          if (phoneRow2) phoneRow2.classList.remove("hidden");
+        }
+
+        animateClose(transferDlg);
+        transferForm.reset();
+        if (typeof setStatusFn === "function") {
+          setStatusFn("Takk! Vi har mottatt informasjon om ny eier.", "info");
+        }
+      } catch (err) {
+        if (typeof setStatusFn === "function") {
+          setStatusFn("Kunne ikke sende inn skjemaet akkurat nå.", "error");
+        }
+      } finally {
+        if (submitBtn) {
+          submitBtn.removeAttribute("disabled");
+          submitBtn.classList.remove("opacity-70", "cursor-not-allowed");
+        }
       }
     });
   }
