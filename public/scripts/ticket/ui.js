@@ -1,10 +1,11 @@
 /* eslint-env browser */
 
-// Helper to get elements by id
+// Helper to get elements by id.
 const getEl = (id) => document.getElementById(id);
 
 let selectsInitialized = false;
 
+// Apply value + label to a custom select and update option states.
 function setSelectValue(select, value, labelText, fireChange = true) {
   const input = select.querySelector("[data-select-value]");
   const label = select.querySelector("[data-select-label]");
@@ -17,6 +18,7 @@ function setSelectValue(select, value, labelText, fireChange = true) {
   if (fireChange && input) input.dispatchEvent(new Event("change", { bubbles: true }));
 }
 
+// Sync the select UI to the current hidden input value or default.
 function syncSelectToValue(select, fireChange = false) {
   const input = select.querySelector("[data-select-value]");
   const options = Array.from(select.querySelectorAll("[data-select-option]"));
@@ -31,6 +33,7 @@ function syncSelectToValue(select, fireChange = false) {
   }
 }
 
+// Close a custom select dropdown.
 function closeSelect(select) {
   const trigger = select.querySelector("[data-select-trigger]");
   const menu = select.querySelector("[data-select-menu]");
@@ -41,12 +44,14 @@ function closeSelect(select) {
   if (chevron) chevron.style.transform = "";
 }
 
+// Close all selects except the provided one.
 function closeAllSelects(selects, except) {
   selects.forEach((select) => {
     if (select !== except) closeSelect(select);
   });
 }
 
+// Open a select dropdown and rotate its chevron.
 function openSelect(select, selects) {
   const trigger = select.querySelector("[data-select-trigger]");
   const menu = select.querySelector("[data-select-menu]");
@@ -59,6 +64,7 @@ function openSelect(select, selects) {
   if (chevron) chevron.style.transform = "rotate(180deg)";
 }
 
+// Initialize lightweight custom selects used in the ticket transfer dialog.
 function initCustomSelects() {
   if (selectsInitialized) return;
   const selects = Array.from(document.querySelectorAll("[data-select]"));
@@ -114,11 +120,12 @@ function initCustomSelects() {
   });
 }
 
+// Reset all custom selects to their current values after form resets.
 function syncAllSelects() {
   document.querySelectorAll("[data-select]").forEach((select) => syncSelectToValue(select, false));
 }
 
-// Show status text above the ticket box
+// Show status text above the ticket box.
 export function setStatus(msg, tone = "info") {
   const el = getEl("status");
   if (!el) return;
@@ -139,7 +146,7 @@ export function setStatus(msg, tone = "info") {
   el.className = toneClass;
 }
 
-// Render ticket data into the DOM
+// Render ticket data into the DOM and prep the transfer form.
 export function renderTicket(ticket) {
   const productEl = getEl("ticket-product");
   const idEl = getEl("ticket-id");
@@ -225,7 +232,7 @@ export function renderTicket(ticket) {
   }
 }
 
-// Small helper for dialog close animation
+// Small helper for dialog close animation.
 function animateClose(dlg) {
   if (!dlg || !dlg.hasAttribute("open")) return;
   dlg.classList.add("closing");
@@ -276,10 +283,10 @@ export function initTicketDialogs(setStatusFn) {
       }
     });
 
-    // Close on explicit "Lukk" button
+  // Close on explicit "Lukk" button
     qrDlg.querySelectorAll("[data-close]").forEach((btn) => btn.addEventListener("click", () => animateClose(qrDlg)));
 
-    // Prevent ESC default flash
+  // Prevent ESC default flash
     qrDlg.addEventListener("cancel", (event) => {
       event.preventDefault();
       animateClose(qrDlg);
@@ -316,7 +323,7 @@ export function initTicketDialogs(setStatusFn) {
     });
   }
 
-  // Transfer form submit (demo only – frontend-side)
+  // Transfer form submit (Netlify form post).
   if (transferForm) {
     transferForm.addEventListener("submit", async (event) => {
       event.preventDefault();

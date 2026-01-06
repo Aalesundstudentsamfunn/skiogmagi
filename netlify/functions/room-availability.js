@@ -81,6 +81,7 @@ export default async (req) => {
 
   if (action === "reserve") {
     if (roomType === "2" && isSolo) {
+      // Solo bookings pair two people into one 2-person room via pendingSolo.
       if (pendingSolo === 1) {
         pendingSolo = 0;
       } else {
@@ -99,6 +100,7 @@ export default async (req) => {
   } else if (action === "release") {
     const limit = state.limits[roomType];
     if (roomType === "2" && isSolo) {
+      // Undo solo pairing or free the reserved room slot.
       if (pendingSolo === 1) {
         counts[roomType] = Math.min(limit, counts[roomType] + 1);
         pendingSolo = 0;
