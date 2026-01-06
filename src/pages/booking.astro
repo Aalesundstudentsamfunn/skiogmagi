@@ -461,6 +461,7 @@ const countryCodes = [
   const termsCheckbox = document.getElementById("termsToggle");
   const termsValueInput = document.getElementById("termsValue");
 
+  // Close the terms modal with a short fade-out animation.
   const closeTerms = () => {
     if (!termsDialog?.hasAttribute("open")) return;
     termsDialog.classList.add("closing");
@@ -474,6 +475,7 @@ const countryCodes = [
     }, 150);
   };
 
+  // Open the terms modal with dialog fallback for older browsers.
   const openTerms = () => {
     if (!termsDialog) return;
     try {
@@ -483,6 +485,7 @@ const countryCodes = [
     }
   };
 
+  // Collapse ticket help hints except the currently toggled one.
   const closeAllHelp = (exceptId = "") => {
     helpPanels.forEach((panel) => {
       if (panel.id !== exceptId) panel.hidden = true;
@@ -493,6 +496,7 @@ const countryCodes = [
     });
   };
 
+  // Show the top-level error panel and move focus to it.
   const setError = (title, message) => {
     if (errorTitle && title) errorTitle.textContent = title;
     if (errorMessage && message) errorMessage.textContent = message;
@@ -500,12 +504,14 @@ const countryCodes = [
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  // Update the inline status text for a ticket lookup slot.
   const setTicketStatus = (slot, message, tone = "info") => {
     if (!slot?.status) return;
     slot.status.textContent = message || "";
     slot.status.className = `mt-2 text-sm ${tone === "error" ? "text-rose-100" : tone === "success" ? "text-emerald-200" : "text-white/75"}`;
   };
 
+  // Lock or unlock the ticket ref input after a successful lookup.
   const setSlotLocked = (slot, locked) => {
     if (!slot?.input) return;
     slot.input.readOnly = locked;
@@ -515,6 +521,7 @@ const countryCodes = [
     slot.input.classList.toggle("bg-white/5", locked);
   };
 
+  // Reset ticket slot state, optionally clearing the ref input.
   const resetTicketSlot = (slot, clearInput = false, keepStatus = false) => {
     if (!slot) return;
     slot.validated = false;
@@ -533,6 +540,7 @@ const countryCodes = [
     if (clearInput && slot.input) slot.input.value = "";
   };
 
+  // Sync skeleton/details visibility with slot state.
   const updateSlotVisual = (slot) => {
     if (!slot) return;
     if (slot.skeleton) slot.skeleton.hidden = !slot.loading;
@@ -549,12 +557,14 @@ const countryCodes = [
     }
   };
 
+  // Solo booking in a 2-person room only needs one ticket.
   const getEffectiveCount = () => {
     const count = Number(roomType?.value || 0);
     if (count === 2 && soloCheckbox?.checked) return 1;
     return count;
   };
 
+  // Split a phone string into country code + local digits for prefilling.
   const parseTicketPhone = (raw, selectEl) => {
     const cleaned = String(raw || "").replace(/\s+/g, "");
     if (!cleaned) return null;
@@ -572,8 +582,10 @@ const countryCodes = [
     return { code: "", local: cleaned.replace(/\D/g, "") };
   };
 
+  // Gate room booking to only "Grunnpakke" tickets.
   const allowedTicketType = "grunnpakke";
 
+  // Normalize ticket type labels for comparison.
   const normalizeTicketType = (value) =>
     String(value || "")
       .trim()
@@ -581,8 +593,10 @@ const countryCodes = [
 
   const isAllowedTicketType = (value) => normalizeTicketType(value).includes(allowedTicketType);
 
+  // Ticket API returns slightly different shapes depending on endpoint/version.
   const getTicketType = (ticket) => ticket?.product || ticket?.name || ticket?.ticket?.name || ticket?.ticket?.title || "";
 
+  // Extract the database ticket id so we can store it on form submit.
   const getTicketDbId = (ticket) =>
     ticket?.ticket_id || ticket?.ticket?.ticket_id || ticket?.ticketId || ticket?.ticket?.id || "";
 
@@ -593,6 +607,7 @@ const countryCodes = [
     4: { name: "person4Name", email: "person4Email", phone: "person4Phone", country: "person4CountryCode" },
   };
 
+  // Pre-fill the matching person fields with data from the ticket lookup.
   const prefillPerson = (index, ticket) => {
     if (!ticket) return;
     const fields = personFieldIds[index];
@@ -689,12 +704,14 @@ const countryCodes = [
     }
   };
 
+  // Human-readable room availability labels for the dropdown.
   const formatAvailabilityLabel = (baseLabel, count) => {
     if (count <= 0) return `${baseLabel} · Utilgjengelig`;
     const suffix = count === 1 ? "ledig" : "ledige";
     return `${baseLabel} · ${count} rom ${suffix}`;
   };
 
+  // Map available counts to UI status colors.
   const statusForCount = (count, soloAvailable = false) => {
     if (count <= 0 && soloAvailable) return "low";
     if (count <= 0) return "none";
@@ -702,6 +719,7 @@ const countryCodes = [
     return "ok";
   };
 
+  // Update status dot color based on availability.
   const applyDotStatus = (dot, status) => {
     if (!dot) return;
     dot.classList.remove("bg-emerald-400", "bg-amber-400", "bg-rose-400", "bg-white/30");
@@ -711,6 +729,7 @@ const countryCodes = [
     else dot.classList.add("bg-white/30");
   };
 
+  // Keep the trigger dot synced with the currently selected option.
   const updateRoomTypeTriggerDot = () => {
     const roomSelect = document.querySelector("[data-roomtype-select]");
     const triggerDot = roomSelect?.querySelector("[data-roomtype-dot]");
@@ -719,12 +738,14 @@ const countryCodes = [
     applyDotStatus(triggerDot, match?.dataset.status || "unknown");
   };
 
+  // Verify all required ticket slots have passed validation.
   const allTicketsValidated = () => {
     const count = getEffectiveCount();
     if (!count) return false;
     return ticketSlots.filter((slot) => slot.idx <= count).every((slot) => slot.validated);
   };
 
+  // Enable the submit button only when all requirements are satisfied.
   const updateSubmitState = () => {
     if (!submitBtn) return;
     const ready = Boolean(roomType?.value && allTicketsValidated() && form?.checkValidity());
@@ -737,6 +758,7 @@ const countryCodes = [
     }
   };
 
+  // Apply availability counts to room type options and triggers.
   const applyAvailability = (counts, pendingSolo = 0) => {
     if (!counts) return;
     latestCounts = counts;
@@ -768,6 +790,7 @@ const countryCodes = [
     updateSubmitState();
   };
 
+  // Load current availability from the Netlify function.
   const fetchAvailability = async () => {
     try {
       const response = await fetch(availabilityUrl, { headers: { Accept: "application/json" } });
@@ -779,6 +802,7 @@ const countryCodes = [
     }
   };
 
+  // Reserve a room before submitting the booking to avoid oversell.
   const reserveRoom = async (roomTypeValue, isSolo = false) => {
     if (!roomTypeValue) return { ok: false, error: "invalid" };
     try {
@@ -800,6 +824,7 @@ const countryCodes = [
     }
   };
 
+  // Release a reservation when the form submission fails.
   const releaseRoom = async (roomTypeValue, isSolo = false) => {
     if (!roomTypeValue) return;
     try {
@@ -815,6 +840,7 @@ const countryCodes = [
     }
   };
 
+  // Custom select: close dropdown and reset chevron state.
   const closeSelect = (select) => {
     const trigger = select.querySelector("[data-select-trigger]");
     const menu = select.querySelector("[data-select-menu]");
@@ -825,12 +851,14 @@ const countryCodes = [
     if (chevron) chevron.style.transform = "";
   };
 
+  // Close all selects except the one interacting.
   const closeAllSelects = (except) => {
     selectEls.forEach((select) => {
       if (select !== except) closeSelect(select);
     });
   };
 
+  // Custom select: open dropdown and rotate chevron.
   const openSelect = (select) => {
     const trigger = select.querySelector("[data-select-trigger]");
     const menu = select.querySelector("[data-select-menu]");
@@ -843,6 +871,7 @@ const countryCodes = [
     if (chevron) chevron.style.transform = "rotate(180deg)";
   };
 
+  // Update the hidden input + visible label for the custom select.
   const setSelectValue = (select, value, labelText, fireChange = true) => {
     const input = select.querySelector("[data-select-value]");
     const label = select.querySelector("[data-select-label]");
@@ -860,6 +889,7 @@ const countryCodes = [
     if (fireChange && input) input.dispatchEvent(new Event("change", { bubbles: true }));
   };
 
+  // Sync the custom select UI to its current value.
   const syncSelectToValue = (select, fireChange = false) => {
     const input = select.querySelector("[data-select-value]");
     const options = Array.from(select.querySelectorAll("[data-select-option]"));
@@ -1009,6 +1039,7 @@ const countryCodes = [
     }
   });
 
+  // Clear the "select a room type" error state.
   const clearRoomTypeError = () => {
     if (roomTypeError) roomTypeError.hidden = true;
     if (roomTypeTrigger) roomTypeTrigger.removeAttribute("aria-invalid");
@@ -1095,6 +1126,7 @@ const countryCodes = [
     });
   }
 
+  // Toggle submit button state and label during submission.
   const setSubmitting = (isSubmitting) => {
     if (!submitBtn) return;
     submitBtn.disabled = isSubmitting;
