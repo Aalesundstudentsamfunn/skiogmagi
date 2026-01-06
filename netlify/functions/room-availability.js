@@ -18,12 +18,15 @@ const jsonResponse = (body, status = 200) =>
 const normalizeState = (state) => {
   const limits = { ...DEFAULT_LIMITS, ...(state?.limits || {}) };
   const counts = { ...limits, ...(state?.counts || {}) };
+  let pendingSolo = Number(state?.pendingSolo || 0);
+  if (!Number.isFinite(pendingSolo) || pendingSolo < 0) pendingSolo = 0;
+  pendingSolo = pendingSolo >= 1 ? 1 : 0;
   Object.keys(limits).forEach((key) => {
     if (!Number.isFinite(counts[key])) counts[key] = limits[key];
     if (counts[key] > limits[key]) counts[key] = limits[key];
     if (counts[key] < 0) counts[key] = 0;
   });
-  return { counts, limits };
+  return { counts, limits, pendingSolo };
 };
 
 const loadState = async () => {
@@ -50,7 +53,7 @@ const loadState = async () => {
 export default async (req) => {
   if (req.method === "GET") {
     const { state } = await loadState();
-    return jsonResponse({ counts: state.counts, limits: state.limits });
+    return jsonResponse({ counts: state.counts, limits: state.limits, pendingSolo: state.pendingSolo });
   }
 
   if (req.method !== "POST") {
@@ -66,6 +69,7 @@ export default async (req) => {
 
   const action = body.action || "reserve";
   const roomType = String(body.roomType || "");
+  const isSolo = Boolean(body.solo);
 
   if (!roomType || !Object.prototype.hasOwnProperty.call(DEFAULT_LIMITS, roomType)) {
     return jsonResponse({ error: "invalid_room_type" }, 400);
@@ -73,20 +77,42 @@ export default async (req) => {
 
   const { store, state } = await loadState();
   const counts = { ...state.counts };
+  let pendingSolo = state.pendingSolo || 0;
 
   if (action === "reserve") {
-    if (counts[roomType] <= 0) {
-      return jsonResponse({ error: "sold_out", counts }, 409);
+    if (roomType === "2" && isSolo) {
+      if (pendingSolo === 1) {
+        pendingSolo = 0;
+      } else {
+        if (counts[roomType] <= 0) {
+          return jsonResponse({ error: "sold_out", counts, pendingSolo }, 409);
+        }
+        counts[roomType] = Math.max(0, counts[roomType] - 1);
+        pendingSolo = 1;
+      }
+    } else {
+      if (counts[roomType] <= 0) {
+        return jsonResponse({ error: "sold_out", counts, pendingSolo }, 409);
+      }
+      counts[roomType] = Math.max(0, counts[roomType] - 1);
     }
-    counts[roomType] = Math.max(0, counts[roomType] - 1);
   } else if (action === "release") {
     const limit = state.limits[roomType];
-    counts[roomType] = Math.min(limit, counts[roomType] + 1);
+    if (roomType === "2" && isSolo) {
+      if (pendingSolo === 1) {
+        counts[roomType] = Math.min(limit, counts[roomType] + 1);
+        pendingSolo = 0;
+      } else {
+        pendingSolo = 1;
+      }
+    } else {
+      counts[roomType] = Math.min(limit, counts[roomType] + 1);
+    }
   } else {
     return jsonResponse({ error: "invalid_action" }, 400);
   }
 
-  const nextState = { counts, limits: state.limits };
+  const nextState = { counts, limits: state.limits, pendingSolo };
   await store.set("room-counts", JSON.stringify(nextState));
-  return jsonResponse({ ok: true, counts });
+  return jsonResponse({ ok: true, counts, pendingSolo });
 };

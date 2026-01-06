@@ -651,7 +651,8 @@ const countryCodes = [
     return `${baseLabel} · ${count} rom ${suffix}`;
   };
 
-  const statusForCount = (count) => {
+  const statusForCount = (count, soloAvailable = false) => {
+    if (count <= 0 && soloAvailable) return "low";
     if (count <= 0) return "none";
     if (count <= 5) return "low";
     return "ok";
@@ -692,23 +693,28 @@ const countryCodes = [
     }
   };
 
-  const applyAvailability = (counts) => {
+  const applyAvailability = (counts, pendingSolo = 0) => {
     if (!counts) return;
     latestCounts = counts;
     roomTypeOptions.forEach((opt) => {
       const value = opt.dataset.value || "";
       const baseLabel = opt.dataset.baseLabel || opt.textContent?.trim() || value;
       const available = Number(counts[value] ?? 0);
-      const label = formatAvailabilityLabel(baseLabel, available);
-      const status = statusForCount(available);
+      const soloAvailable = value === "2" && Number(pendingSolo) === 1;
+      const label =
+        value === "2" && soloAvailable && available <= 0
+          ? `${baseLabel} · 1 plass i delt rom`
+          : formatAvailabilityLabel(baseLabel, available);
+      const status = statusForCount(available, soloAvailable);
       opt.dataset.label = label;
       opt.dataset.status = status;
       const labelEl = opt.querySelector("[data-roomtype-label]");
       if (labelEl) labelEl.textContent = label;
-      opt.disabled = available <= 0;
-      opt.setAttribute("aria-disabled", available <= 0 ? "true" : "false");
-      opt.classList.toggle("opacity-50", available <= 0);
-      opt.classList.toggle("cursor-not-allowed", available <= 0);
+      const canSelect = available > 0 || soloAvailable;
+      opt.disabled = !canSelect;
+      opt.setAttribute("aria-disabled", !canSelect ? "true" : "false");
+      opt.classList.toggle("opacity-50", !canSelect);
+      opt.classList.toggle("cursor-not-allowed", !canSelect);
       applyDotStatus(opt.querySelector("[data-roomtype-dot]"), status);
     });
 
@@ -723,16 +729,16 @@ const countryCodes = [
       const response = await fetch(availabilityUrl, { headers: { Accept: "application/json" } });
       if (!response.ok) throw new Error("Failed to load availability");
       const data = await response.json();
-      applyAvailability(data.counts || data);
+      applyAvailability(data.counts || data, data.pendingSolo ?? 0);
     } catch (err) {
       setError("Kunne ikke hente tilgjengelighet", "Prøv igjen om litt, eller ta kontakt hvis problemet fortsetter.");
     }
   };
 
-  const reserveRoom = async (roomTypeValue) => {
+  const reserveRoom = async (roomTypeValue, isSolo = false) => {
     if (!roomTypeValue) return { ok: false, error: "invalid" };
     try {
-      const payload = { action: "reserve", roomType: roomTypeValue };
+      const payload = { action: "reserve", roomType: roomTypeValue, solo: isSolo };
       const response = await fetch(availabilityUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json", Accept: "application/json" },
@@ -740,26 +746,26 @@ const countryCodes = [
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) {
-        applyAvailability(data.counts || latestCounts || {});
+        applyAvailability(data.counts || latestCounts || {}, data.pendingSolo ?? 0);
         return { ok: false, error: data.error || "unknown" };
       }
-      applyAvailability(data.counts || latestCounts || {});
+      applyAvailability(data.counts || latestCounts || {}, data.pendingSolo ?? 0);
       return { ok: true };
     } catch (err) {
       return { ok: false, error: "unavailable" };
     }
   };
 
-  const releaseRoom = async (roomTypeValue) => {
+  const releaseRoom = async (roomTypeValue, isSolo = false) => {
     if (!roomTypeValue) return;
     try {
       const response = await fetch(availabilityUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json", Accept: "application/json" },
-        body: JSON.stringify({ action: "release", roomType: roomTypeValue }),
+        body: JSON.stringify({ action: "release", roomType: roomTypeValue, solo: isSolo }),
       });
       const data = await response.json().catch(() => ({}));
-      if (response.ok) applyAvailability(data.counts || latestCounts || {});
+      if (response.ok) applyAvailability(data.counts || latestCounts || {}, data.pendingSolo ?? 0);
     } catch (err) {
       // ignore release errors
     }
@@ -1041,7 +1047,8 @@ const countryCodes = [
       }
 
       const roomTypeValue = roomType?.value || "";
-      const reservation = await reserveRoom(roomTypeValue);
+      const isSolo = roomTypeValue === "2" && soloCheckbox?.checked;
+      const reservation = await reserveRoom(roomTypeValue, isSolo);
       if (!reservation.ok) {
         const message = reservation.error === "sold_out" ? "Denne romtypen er utsolgt akkurat nå." : "Kunne ikke reservere rom. Prøv igjen om litt.";
         setError("Ingen ledige rom", message);
@@ -1065,7 +1072,7 @@ const countryCodes = [
         if (successPanel) successPanel.hidden = false;
         form.hidden = true;
       } catch (err) {
-        await releaseRoom(roomTypeValue);
+        await releaseRoom(roomTypeValue, isSolo);
         setError("Noe gikk galt.", "Innsendingen feilet. Prøv igjen om litt, eller ta kontakt hvis problemet fortsetter.");
       } finally {
         setSubmitting(false);
