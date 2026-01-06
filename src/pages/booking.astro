@@ -97,12 +97,13 @@ const countryCodes = [
             <legend class="px-2 text-sm font-semibold text-white/80">Romansvarlig (person 1)</legend>
             <div class="grid gap-4">
               <div>
-                <label for="ticketId1" class="text-sm text-white/80">
-                  <span class="inline-flex items-center justify-center gap-2">
-                    <span>Billett-ID</span>
-                    <span title={ticketIdHelp} aria-label={ticketIdHelp} tabindex="0" class="inline-flex h-5 w-5 items-center justify-center rounded-full border border-white/30 text-[11px] text-white/80"> ? </span>
-                  </span>
-                </label>
+                <div class="flex items-center gap-2 text-sm text-white/80">
+                  <label for="ticketId1">Billett-ID</label>
+                  <button type="button" data-help-toggle aria-controls="ticketIdHelp1" aria-expanded="false" aria-label={ticketIdHelp} class="inline-flex h-5 w-5 items-center justify-center rounded-full border border-white/30 text-[11px] text-white/80">
+                    ?
+                  </button>
+                </div>
+                <p id="ticketIdHelp1" data-help-panel hidden class="mt-2 text-xs text-white/70">{ticketIdHelp}</p>
                 <div class="mt-1 grid gap-3 sm:grid-cols-[1fr_auto]">
                   <input id="ticketId1" name="ticketId1" data-ticket-input="1" inputmode="text" autocomplete="off" placeholder="F.eks. ABC123" required class="w-full rounded-lg border border-white/20 bg-white/10 px-4 py-3 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
                   <button type="button" data-ticket-check="1" class="inline-flex items-center justify-center rounded-lg bg-white/90 text-sky-900 px-6 py-3 font-semibold shadow-sm transition hover:bg-white"> Hent detaljer </button>
@@ -165,12 +166,13 @@ const countryCodes = [
             <legend class="px-2 text-sm font-semibold text-white/80">Person 2</legend>
             <div class="grid gap-4">
               <div>
-                <label for="ticketId2" class="text-sm text-white/80">
-                  <span class="inline-flex items-center justify-center gap-2">
-                    <span>Billett-ID</span>
-                    <span title={ticketIdHelp} aria-label={ticketIdHelp} tabindex="0" class="inline-flex h-5 w-5 items-center justify-center rounded-full border border-white/30 text-[11px] text-white/80"> ? </span>
-                  </span>
-                </label>
+                <div class="flex items-center gap-2 text-sm text-white/80">
+                  <label for="ticketId2">Billett-ID</label>
+                  <button type="button" data-help-toggle aria-controls="ticketIdHelp2" aria-expanded="false" aria-label={ticketIdHelp} class="inline-flex h-5 w-5 items-center justify-center rounded-full border border-white/30 text-[11px] text-white/80">
+                    ?
+                  </button>
+                </div>
+                <p id="ticketIdHelp2" data-help-panel hidden class="mt-2 text-xs text-white/70">{ticketIdHelp}</p>
                 <div class="mt-1 grid gap-3 sm:grid-cols-[1fr_auto]">
                   <input id="ticketId2" name="ticketId2" data-ticket-input="2" inputmode="text" autocomplete="off" placeholder="F.eks. ABC123" required class="w-full rounded-lg border border-white/20 bg-white/10 px-4 py-3 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
                   <button type="button" data-ticket-check="2" class="inline-flex items-center justify-center rounded-lg bg-white/90 text-sky-900 px-6 py-3 font-semibold shadow-sm transition hover:bg-white"> Hent detaljer </button>
@@ -227,12 +229,13 @@ const countryCodes = [
             <legend class="px-2 text-sm font-semibold text-white/80">Person 3</legend>
             <div class="grid gap-4">
               <div>
-                <label for="ticketId3" class="text-sm text-white/80">
-                  <span class="inline-flex items-center justify-center gap-2">
-                    <span>Billett-ID</span>
-                    <span title={ticketIdHelp} aria-label={ticketIdHelp} tabindex="0" class="inline-flex h-5 w-5 items-center justify-center rounded-full border border-white/30 text-[11px] text-white/80"> ? </span>
-                  </span>
-                </label>
+                <div class="flex items-center gap-2 text-sm text-white/80">
+                  <label for="ticketId3">Billett-ID</label>
+                  <button type="button" data-help-toggle aria-controls="ticketIdHelp3" aria-expanded="false" aria-label={ticketIdHelp} class="inline-flex h-5 w-5 items-center justify-center rounded-full border border-white/30 text-[11px] text-white/80">
+                    ?
+                  </button>
+                </div>
+                <p id="ticketIdHelp3" data-help-panel hidden class="mt-2 text-xs text-white/70">{ticketIdHelp}</p>
                 <div class="mt-1 grid gap-3 sm:grid-cols-[1fr_auto]">
                   <input id="ticketId3" name="ticketId3" data-ticket-input="3" inputmode="text" autocomplete="off" placeholder="F.eks. ABC123" required class="w-full rounded-lg border border-white/20 bg-white/10 px-4 py-3 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
                   <button type="button" data-ticket-check="3" class="inline-flex items-center justify-center rounded-lg bg-white/90 text-sky-900 px-6 py-3 font-semibold shadow-sm transition hover:bg-white"> Hent detaljer </button>
@@ -289,12 +292,13 @@ const countryCodes = [
             <legend class="px-2 text-sm font-semibold text-white/80">Person 4</legend>
             <div class="grid gap-4">
               <div>
-                <label for="ticketId4" class="text-sm text-white/80">
-                  <span class="inline-flex items-center justify-center gap-2">
-                    <span>Billett-ID</span>
-                    <span title={ticketIdHelp} aria-label={ticketIdHelp} tabindex="0" class="inline-flex h-5 w-5 items-center justify-center rounded-full border border-white/30 text-[11px] text-white/80"> ? </span>
-                  </span>
-                </label>
+                <div class="flex items-center gap-2 text-sm text-white/80">
+                  <label for="ticketId4">Billett-ID</label>
+                  <button type="button" data-help-toggle aria-controls="ticketIdHelp4" aria-expanded="false" aria-label={ticketIdHelp} class="inline-flex h-5 w-5 items-center justify-center rounded-full border border-white/30 text-[11px] text-white/80">
+                    ?
+                  </button>
+                </div>
+                <p id="ticketIdHelp4" data-help-panel hidden class="mt-2 text-xs text-white/70">{ticketIdHelp}</p>
                 <div class="mt-1 grid gap-3 sm:grid-cols-[1fr_auto]">
                   <input id="ticketId4" name="ticketId4" data-ticket-input="4" inputmode="text" autocomplete="off" placeholder="F.eks. ABC123" required class="w-full rounded-lg border border-white/20 bg-white/10 px-4 py-3 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
                   <button type="button" data-ticket-check="4" class="inline-flex items-center justify-center rounded-lg bg-white/90 text-sky-900 px-6 py-3 font-semibold shadow-sm transition hover:bg-white"> Hent detaljer </button>
@@ -443,6 +447,8 @@ const countryCodes = [
   const termsDialog = document.getElementById("terms-dialog");
   const termsOpeners = Array.from(document.querySelectorAll("[data-terms-open]"));
   const termsClosers = termsDialog ? Array.from(termsDialog.querySelectorAll("[data-terms-close]")) : [];
+  const helpToggles = Array.from(document.querySelectorAll("[data-help-toggle]"));
+  const helpPanels = Array.from(document.querySelectorAll("[data-help-panel]"));
   const soloCheckbox = document.getElementById("soloRoom");
   const soloOption = document.querySelector("[data-solo-option]");
   const availabilityUrl = "/.netlify/functions/room-availability";
@@ -470,6 +476,16 @@ const countryCodes = [
     } catch {
       termsDialog.setAttribute("open", "true");
     }
+  };
+
+  const closeAllHelp = (exceptId = "") => {
+    helpPanels.forEach((panel) => {
+      if (panel.id !== exceptId) panel.hidden = true;
+    });
+    helpToggles.forEach((btn) => {
+      const targetId = btn.getAttribute("aria-controls") || "";
+      if (targetId !== exceptId) btn.setAttribute("aria-expanded", "false");
+    });
   };
 
   const setError = (title, message) => {
@@ -908,10 +924,27 @@ const countryCodes = [
     selectEls.forEach((select) => {
       if (!select.contains(event.target)) closeSelect(select);
     });
+    const target = event.target;
+    if (!(target instanceof Node)) return;
+    if (target.closest("[data-help-toggle]") || target.closest("[data-help-panel]")) return;
+    closeAllHelp();
   });
 
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape") closeAllSelects();
+  });
+
+  helpToggles.forEach((btn) => {
+    btn.addEventListener("click", (event) => {
+      event.preventDefault();
+      const targetId = btn.getAttribute("aria-controls") || "";
+      const panel = targetId ? document.getElementById(targetId) : null;
+      if (!panel) return;
+      const willOpen = panel.hidden;
+      closeAllHelp();
+      panel.hidden = !willOpen;
+      btn.setAttribute("aria-expanded", String(willOpen));
+    });
   });
 
   termsOpeners.forEach((btn) => {
