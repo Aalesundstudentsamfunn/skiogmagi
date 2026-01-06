@@ -485,12 +485,22 @@ const countryCodes = [
     slot.status.className = `mt-2 text-sm ${tone === "error" ? "text-rose-100" : tone === "success" ? "text-emerald-200" : "text-white/75"}`;
   };
 
+  const setSlotLocked = (slot, locked) => {
+    if (!slot?.input) return;
+    slot.input.readOnly = locked;
+    slot.input.setAttribute("aria-readonly", locked ? "true" : "false");
+    slot.input.classList.toggle("opacity-70", locked);
+    slot.input.classList.toggle("cursor-not-allowed", locked);
+    slot.input.classList.toggle("bg-white/5", locked);
+  };
+
   const resetTicketSlot = (slot, clearInput = false, keepStatus = false) => {
     if (!slot) return;
     slot.validated = false;
     slot.ticket = null;
     slot.loading = false;
     if (!keepStatus) setTicketStatus(slot, "", "info");
+    setSlotLocked(slot, false);
     if (slot.skeleton) slot.skeleton.hidden = true;
     if (slot.details) {
       slot.details.hidden = true;
@@ -552,6 +562,9 @@ const countryCodes = [
 
   const getTicketType = (ticket) => ticket?.product || ticket?.name || ticket?.ticket?.name || ticket?.ticket?.title || "";
 
+  const getTicketDbId = (ticket) =>
+    ticket?.ticket_id || ticket?.ticket?.ticket_id || ticket?.ticketId || ticket?.ticket?.id || "";
+
   const personFieldIds = {
     1: { name: "roomManagerName", email: "roomManagerEmail", phone: "roomManagerPhone", country: "roomManagerCountryCode" },
     2: { name: "guest2Name", email: "guest2Email", phone: "guest2Phone", country: "guest2CountryCode" },
@@ -593,6 +606,10 @@ const countryCodes = [
       updateSubmitState();
       return;
     }
+    if (slot?.input?.readOnly) {
+      setTicketStatus(slot, "Billett er allerede hentet.", "info");
+      return;
+    }
 
     resetTicketSlot(slot);
     slot.loading = true;
@@ -617,7 +634,12 @@ const countryCodes = [
       slot.ticket = ticket;
       slot.validated = true;
       slot.loading = false;
-      if (slot.input) slot.input.value = ticket.id || id.toUpperCase();
+      if (slot.input) {
+        const refId = ticket.ref_id || ticket.id || id.toUpperCase();
+        const ticketDbId = getTicketDbId(ticket);
+        slot.input.value = ticketDbId ? String(ticketDbId) : refId;
+        setSlotLocked(slot, true);
+      }
       setTicketStatus(slot, ticket.ownerName ? `Billett funnet: ${ticket.ownerName}` : "Billett funnet.", "success");
       prefillPerson(slot.idx, ticket);
       updateSlotVisual(slot);
@@ -639,7 +661,7 @@ const countryCodes = [
     } finally {
       if (slot?.button) {
         slot.button.disabled = false;
-        slot.button.textContent = slot.label;
+        slot.button.textContent = slot.validated ? "Endre" : slot.label;
       }
       updateSubmitState();
     }
@@ -922,6 +944,13 @@ const countryCodes = [
     if (slot.button) {
       slot.button.addEventListener("click", (event) => {
         event.preventDefault();
+        if (slot.validated) {
+          resetTicketSlot(slot, true);
+          slot.button.textContent = slot.label;
+          slot.input?.focus();
+          updateSubmitState();
+          return;
+        }
         void handleTicketCheck(slot);
       });
     }
@@ -930,6 +959,7 @@ const countryCodes = [
       slot.input.addEventListener("keydown", (event) => {
         if (event.key === "Enter") {
           event.preventDefault();
+          if (slot.validated) return;
           void handleTicketCheck(slot);
         }
       });
