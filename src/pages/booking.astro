@@ -121,7 +121,7 @@ const countryCodes = [
                 <div data-solo-option class="sm:col-span-2" hidden>
                   <input id="soloBooking" name="soloBooking" type="hidden" value="no" />
                   <label class="inline-flex items-center gap-2 text-sm text-white/80">
-                    <input id="soloBookingToggle" name="soloBookingToggle" type="checkbox" class="h-4 w-4 rounded border-white/30 bg-white/10 text-white focus:ring-2 focus:ring-white/60" />
+                    <input id="soloBookingToggle" type="checkbox" class="h-4 w-4 rounded border-white/30 bg-white/10 text-white focus:ring-2 focus:ring-white/60" />
                     <span>Jeg reiser alene (ingen person 2)</span>
                   </label>
                 </div>
@@ -353,8 +353,8 @@ const countryCodes = [
           </fieldset>
 
           <div data-terms hidden class="flex items-start gap-3 text-sm text-white/90">
-            <input id="termsValue" name="terms" type="hidden" value="no" />
-            <input id="termsToggle" name="termsToggle" type="checkbox" required class="mt-1 h-4 w-4 rounded border-white/30 bg-white/10 text-white focus:ring-2 focus:ring-white/60" />
+            <input id="termsValue" name="termsAgreed" type="hidden" value="no" />
+            <input id="termsToggle" type="checkbox" required class="mt-1 h-4 w-4 rounded border-white/30 bg-white/10 text-white focus:ring-2 focus:ring-white/60" />
             <p class="mt-0.5">
               <label for="termsToggle">Jeg forstår og godtar</label><button type="button" data-terms-open class="ml-1 inline-flex items-center underline decoration-white/50 underline-offset-2 transition hover:decoration-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60"> vilkårene for booking </button>.
             </p>
@@ -418,6 +418,7 @@ const countryCodes = [
   const roomTypeError = document.getElementById("roomTypeError");
   const roomTypeTrigger = document.querySelector("[data-roomtype-trigger]");
   const personSections = Array.from(document.querySelectorAll("[data-person]"));
+  // Map per-person UI controls (ticket lookup + details) for easier updates.
   const ticketSlots = personSections.map((section) => {
     const idx = Number(section.dataset.person || 0);
     const input = section.querySelector("[data-ticket-input]");
@@ -618,6 +619,7 @@ const countryCodes = [
     }
   };
 
+  // Fetch ticket, validate type, prefill person data, and lock the ref field.
   const handleTicketCheck = async (slot) => {
     const id = String(slot?.input?.value || "").trim();
     if (!id) {
@@ -1014,6 +1016,7 @@ const countryCodes = [
 
   const termsBlock = document.querySelector("[data-terms]");
 
+  // Toggle person sections based on room size and solo flag, keep hidden values in sync.
   const updateGuests = () => {
     const count = Number(roomType?.value || 0);
     if (roomType?.value) clearRoomTypeError();
