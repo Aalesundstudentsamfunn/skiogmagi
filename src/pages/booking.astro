@@ -119,24 +119,25 @@ const countryCodes = [
 
               <div data-person-details hidden class="grid gap-4 sm:grid-cols-2">
                 <div data-solo-option class="sm:col-span-2" hidden>
+                  <input id="soloBooking" name="soloBooking" type="hidden" value="no" />
                   <label class="inline-flex items-center gap-2 text-sm text-white/80">
-                    <input id="soloRoom" name="soloRoom" type="checkbox" class="h-4 w-4 rounded border-white/30 bg-white/10 text-white focus:ring-2 focus:ring-white/60" />
+                    <input id="soloBookingToggle" name="soloBookingToggle" type="checkbox" class="h-4 w-4 rounded border-white/30 bg-white/10 text-white focus:ring-2 focus:ring-white/60" />
                     <span>Jeg reiser alene (ingen person 2)</span>
                   </label>
                 </div>
                 <div class="sm:col-span-2">
-                  <label for="roomManagerName" class="text-sm text-white/80">Fullt navn</label>
-                  <input id="roomManagerName" name="roomManagerName" autocomplete="name" required class="mt-1 w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
+                  <label for="romansvarligName" class="text-sm text-white/80">Fullt navn</label>
+                  <input id="romansvarligName" name="romansvarligName" autocomplete="name" required class="mt-1 w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
                 </div>
                 <div>
-                  <label for="roomManagerEmail" class="text-sm text-white/80">E-post</label>
-                  <input id="roomManagerEmail" name="roomManagerEmail" type="email" autocomplete="email" required class="mt-1 w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
+                  <label for="romansvarligEmail" class="text-sm text-white/80">E-post</label>
+                  <input id="romansvarligEmail" name="romansvarligEmail" type="email" autocomplete="email" required class="mt-1 w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
                 </div>
                 <div>
-                  <label for="roomManagerPhone" class="text-sm text-white/80">Telefon</label>
+                  <label for="romansvarligPhone" class="text-sm text-white/80">Telefon</label>
                   <div class="mt-1 flex flex-col gap-2 sm:flex-row sm:items-center">
                     <div class="relative w-full sm:w-32" data-select data-default="+47" data-placeholder="+47">
-                      <input id="roomManagerCountryCode" name="roomManagerCountryCode" type="hidden" value="+47" data-select-value required />
+                      <input id="romansvarligCountryCode" name="romansvarligCountryCode" type="hidden" value="+47" data-select-value required />
                       <button type="button" data-select-trigger aria-label="Landkode" aria-haspopup="listbox" aria-expanded="false" class="flex w-full items-center justify-between gap-2 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-left text-white/90 outline-none focus:ring-2 focus:ring-white/60">
                         <span data-select-label class="whitespace-nowrap">+47</span>
                         <svg data-select-chevron viewBox="0 0 20 20" aria-hidden="true" class="h-4 w-4 text-white/70 transition-transform">
@@ -155,7 +156,7 @@ const countryCodes = [
                         }
                       </ul>
                     </div>
-                    <input id="roomManagerPhone" name="roomManagerPhone" type="tel" inputmode="numeric" autocomplete="tel" minlength="8" maxlength="8" pattern="\\d{8}" required class="w-full min-w-0 flex-1 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
+                    <input id="romansvarligPhone" name="romansvarligPhone" type="tel" inputmode="numeric" autocomplete="tel" minlength="8" maxlength="8" pattern="\\d{8}" required class="w-full min-w-0 flex-1 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
                   </div>
                 </div>
               </div>
@@ -188,18 +189,18 @@ const countryCodes = [
 
               <div data-person-details hidden class="grid gap-4 sm:grid-cols-2">
                 <div class="sm:col-span-2">
-                  <label for="guest2Name" class="text-sm text-white/80">Fullt navn</label>
-                  <input id="guest2Name" name="guest2Name" autocomplete="name" required class="mt-1 w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
+                  <label for="person2Name" class="text-sm text-white/80">Fullt navn</label>
+                  <input id="person2Name" name="person2Name" autocomplete="name" required class="mt-1 w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
                 </div>
                 <div>
-                  <label for="guest2Email" class="text-sm text-white/80">E-post</label>
-                  <input id="guest2Email" name="guest2Email" type="email" autocomplete="email" required class="mt-1 w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
+                  <label for="person2Email" class="text-sm text-white/80">E-post</label>
+                  <input id="person2Email" name="person2Email" type="email" autocomplete="email" required class="mt-1 w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
                 </div>
                 <div>
-                  <label for="guest2Phone" class="text-sm text-white/80">Telefon</label>
+                  <label for="person2Phone" class="text-sm text-white/80">Telefon</label>
                   <div class="mt-1 flex flex-col gap-2 sm:flex-row sm:items-center">
                     <div class="relative w-full sm:w-32" data-select data-default="+47" data-placeholder="+47">
-                      <input id="guest2CountryCode" name="guest2CountryCode" type="hidden" value="+47" data-select-value required />
+                      <input id="person2CountryCode" name="person2CountryCode" type="hidden" value="+47" data-select-value required />
                       <button type="button" data-select-trigger aria-label="Landkode" aria-haspopup="listbox" aria-expanded="false" class="flex w-full items-center justify-between gap-2 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-left text-white/90 outline-none focus:ring-2 focus:ring-white/60">
                         <span data-select-label class="whitespace-nowrap">+47</span>
                         <svg data-select-chevron viewBox="0 0 20 20" aria-hidden="true" class="h-4 w-4 text-white/70 transition-transform">
@@ -218,7 +219,7 @@ const countryCodes = [
                         }
                       </ul>
                     </div>
-                    <input id="guest2Phone" name="guest2Phone" type="tel" inputmode="numeric" autocomplete="tel" minlength="8" maxlength="8" pattern="\\d{8}" required class="w-full min-w-0 flex-1 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
+                    <input id="person2Phone" name="person2Phone" type="tel" inputmode="numeric" autocomplete="tel" minlength="8" maxlength="8" pattern="\\d{8}" required class="w-full min-w-0 flex-1 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
                   </div>
                 </div>
               </div>
@@ -251,18 +252,18 @@ const countryCodes = [
 
               <div data-person-details hidden class="grid gap-4 sm:grid-cols-2">
                 <div class="sm:col-span-2">
-                  <label for="guest3Name" class="text-sm text-white/80">Fullt navn</label>
-                  <input id="guest3Name" name="guest3Name" autocomplete="name" required class="mt-1 w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
+                  <label for="person3Name" class="text-sm text-white/80">Fullt navn</label>
+                  <input id="person3Name" name="person3Name" autocomplete="name" required class="mt-1 w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
                 </div>
                 <div>
-                  <label for="guest3Email" class="text-sm text-white/80">E-post</label>
-                  <input id="guest3Email" name="guest3Email" type="email" autocomplete="email" required class="mt-1 w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
+                  <label for="person3Email" class="text-sm text-white/80">E-post</label>
+                  <input id="person3Email" name="person3Email" type="email" autocomplete="email" required class="mt-1 w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
                 </div>
                 <div>
-                  <label for="guest3Phone" class="text-sm text-white/80">Telefon</label>
+                  <label for="person3Phone" class="text-sm text-white/80">Telefon</label>
                   <div class="mt-1 flex flex-col gap-2 sm:flex-row sm:items-center">
                     <div class="relative w-full sm:w-32" data-select data-default="+47" data-placeholder="+47">
-                      <input id="guest3CountryCode" name="guest3CountryCode" type="hidden" value="+47" data-select-value required />
+                      <input id="person3CountryCode" name="person3CountryCode" type="hidden" value="+47" data-select-value required />
                       <button type="button" data-select-trigger aria-label="Landkode" aria-haspopup="listbox" aria-expanded="false" class="flex w-full items-center justify-between gap-2 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-left text-white/90 outline-none focus:ring-2 focus:ring-white/60">
                         <span data-select-label class="whitespace-nowrap">+47</span>
                         <svg data-select-chevron viewBox="0 0 20 20" aria-hidden="true" class="h-4 w-4 text-white/70 transition-transform">
@@ -281,7 +282,7 @@ const countryCodes = [
                         }
                       </ul>
                     </div>
-                    <input id="guest3Phone" name="guest3Phone" type="tel" inputmode="numeric" autocomplete="tel" minlength="8" maxlength="8" pattern="\\d{8}" required class="w-full min-w-0 flex-1 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
+                    <input id="person3Phone" name="person3Phone" type="tel" inputmode="numeric" autocomplete="tel" minlength="8" maxlength="8" pattern="\\d{8}" required class="w-full min-w-0 flex-1 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
                   </div>
                 </div>
               </div>
@@ -314,18 +315,18 @@ const countryCodes = [
 
               <div data-person-details hidden class="grid gap-4 sm:grid-cols-2">
                 <div class="sm:col-span-2">
-                  <label for="guest4Name" class="text-sm text-white/80">Fullt navn</label>
-                  <input id="guest4Name" name="guest4Name" autocomplete="name" required class="mt-1 w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
+                  <label for="person4Name" class="text-sm text-white/80">Fullt navn</label>
+                  <input id="person4Name" name="person4Name" autocomplete="name" required class="mt-1 w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
                 </div>
                 <div>
-                  <label for="guest4Email" class="text-sm text-white/80">E-post</label>
-                  <input id="guest4Email" name="guest4Email" type="email" autocomplete="email" required class="mt-1 w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
+                  <label for="person4Email" class="text-sm text-white/80">E-post</label>
+                  <input id="person4Email" name="person4Email" type="email" autocomplete="email" required class="mt-1 w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
                 </div>
                 <div>
-                  <label for="guest4Phone" class="text-sm text-white/80">Telefon</label>
+                  <label for="person4Phone" class="text-sm text-white/80">Telefon</label>
                   <div class="mt-1 flex flex-col gap-2 sm:flex-row sm:items-center">
                     <div class="relative w-full sm:w-32" data-select data-default="+47" data-placeholder="+47">
-                      <input id="guest4CountryCode" name="guest4CountryCode" type="hidden" value="+47" data-select-value required />
+                      <input id="person4CountryCode" name="person4CountryCode" type="hidden" value="+47" data-select-value required />
                       <button type="button" data-select-trigger aria-label="Landkode" aria-haspopup="listbox" aria-expanded="false" class="flex w-full items-center justify-between gap-2 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-left text-white/90 outline-none focus:ring-2 focus:ring-white/60">
                         <span data-select-label class="whitespace-nowrap">+47</span>
                         <svg data-select-chevron viewBox="0 0 20 20" aria-hidden="true" class="h-4 w-4 text-white/70 transition-transform">
@@ -344,7 +345,7 @@ const countryCodes = [
                         }
                       </ul>
                     </div>
-                    <input id="guest4Phone" name="guest4Phone" type="tel" inputmode="numeric" autocomplete="tel" minlength="8" maxlength="8" pattern="\\d{8}" required class="w-full min-w-0 flex-1 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
+                    <input id="person4Phone" name="person4Phone" type="tel" inputmode="numeric" autocomplete="tel" minlength="8" maxlength="8" pattern="\\d{8}" required class="w-full min-w-0 flex-1 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
                   </div>
                 </div>
               </div>
@@ -352,9 +353,10 @@ const countryCodes = [
           </fieldset>
 
           <div data-terms hidden class="flex items-start gap-3 text-sm text-white/90">
-            <input id="terms" name="terms" type="checkbox" required class="mt-1 h-4 w-4 rounded border-white/30 bg-white/10 text-white focus:ring-2 focus:ring-white/60" />
+            <input id="termsValue" name="terms" type="hidden" value="no" />
+            <input id="termsToggle" name="termsToggle" type="checkbox" required class="mt-1 h-4 w-4 rounded border-white/30 bg-white/10 text-white focus:ring-2 focus:ring-white/60" />
             <p class="mt-0.5">
-              <label for="terms">Jeg forstår og godtar</label><button type="button" data-terms-open class="ml-1 inline-flex items-center underline decoration-white/50 underline-offset-2 transition hover:decoration-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60"> vilkårene for booking </button>.
+              <label for="termsToggle">Jeg forstår og godtar</label><button type="button" data-terms-open class="ml-1 inline-flex items-center underline decoration-white/50 underline-offset-2 transition hover:decoration-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60"> vilkårene for booking </button>.
             </p>
           </div>
           <button id="booking-submit" type="submit" class="inline-flex items-center justify-center rounded-full bg-white/95 px-6 py-3 text-sm font-semibold text-sky-900 shadow-lg shadow-sky-500/20 transition hover:bg-white">
@@ -449,12 +451,14 @@ const countryCodes = [
   const termsClosers = termsDialog ? Array.from(termsDialog.querySelectorAll("[data-terms-close]")) : [];
   const helpToggles = Array.from(document.querySelectorAll("[data-help-toggle]"));
   const helpPanels = Array.from(document.querySelectorAll("[data-help-panel]"));
-  const soloCheckbox = document.getElementById("soloRoom");
+  const soloCheckbox = document.getElementById("soloBookingToggle");
   const soloOption = document.querySelector("[data-solo-option]");
+  const soloValueInput = document.getElementById("soloBooking");
   const availabilityUrl = "/.netlify/functions/room-availability";
   let latestCounts = null;
   const submitLabel = submitBtn?.querySelector("[data-label]");
-  const termsCheckbox = document.getElementById("terms");
+  const termsCheckbox = document.getElementById("termsToggle");
+  const termsValueInput = document.getElementById("termsValue");
 
   const closeTerms = () => {
     if (!termsDialog?.hasAttribute("open")) return;
@@ -582,10 +586,10 @@ const countryCodes = [
     ticket?.ticket_id || ticket?.ticket?.ticket_id || ticket?.ticketId || ticket?.ticket?.id || "";
 
   const personFieldIds = {
-    1: { name: "roomManagerName", email: "roomManagerEmail", phone: "roomManagerPhone", country: "roomManagerCountryCode" },
-    2: { name: "guest2Name", email: "guest2Email", phone: "guest2Phone", country: "guest2CountryCode" },
-    3: { name: "guest3Name", email: "guest3Email", phone: "guest3Phone", country: "guest3CountryCode" },
-    4: { name: "guest4Name", email: "guest4Email", phone: "guest4Phone", country: "guest4CountryCode" },
+    1: { name: "romansvarligName", email: "romansvarligEmail", phone: "romansvarligPhone", country: "romansvarligCountryCode" },
+    2: { name: "person2Name", email: "person2Email", phone: "person2Phone", country: "person2CountryCode" },
+    3: { name: "person3Name", email: "person3Email", phone: "person3Phone", country: "person3CountryCode" },
+    4: { name: "person4Name", email: "person4Email", phone: "person4Phone", country: "person4CountryCode" },
   };
 
   const prefillPerson = (index, ticket) => {
@@ -1015,6 +1019,10 @@ const countryCodes = [
     if (roomType?.value) clearRoomTypeError();
     if (termsBlock) termsBlock.hidden = count <= 0;
     if (termsCheckbox) termsCheckbox.disabled = count <= 0;
+    if (termsValueInput) {
+      termsValueInput.value = termsCheckbox && termsCheckbox.checked ? "yes" : "no";
+      if (count <= 0) termsValueInput.value = "no";
+    }
 
     if (soloOption && soloCheckbox) {
       if (count === 2) {
@@ -1025,6 +1033,9 @@ const countryCodes = [
         soloCheckbox.checked = false;
         soloCheckbox.setAttribute("disabled", "");
       }
+    }
+    if (soloValueInput) {
+      soloValueInput.value = count === 2 && soloCheckbox?.checked ? "yes" : "no";
     }
 
     const effectiveCount = getEffectiveCount();
@@ -1070,6 +1081,15 @@ const countryCodes = [
 
   if (soloCheckbox) {
     soloCheckbox.addEventListener("change", updateGuests);
+  }
+
+  if (termsCheckbox) {
+    termsCheckbox.addEventListener("change", () => {
+      if (termsValueInput) {
+        termsValueInput.value = termsCheckbox.checked ? "yes" : "no";
+      }
+      updateSubmitState();
+    });
   }
 
   const setSubmitting = (isSubmitting) => {
