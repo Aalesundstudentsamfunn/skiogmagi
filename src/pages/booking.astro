@@ -4,7 +4,8 @@ import Footer from "../components/Footer.astro";
 import GlassPanel from "../components/ui/GlassPanel.astro";
 
 const title = "Booking";
-const desc = "Book rom til Ski & Magi i Sogndal. Fyll inn romtype, romansvarlig og kontaktinfo for alle på rommet.";
+const desc = "Send inn romønsker til Ski & Magi i Sogndal. Fyll inn romtype, romansvarlig og kontaktinfo for alle på rommet.";
+const ticketIdHelp = "Finnes på Tikkio under billetter eller i e-posten din fra Tikkio. Referanse-ID er det samme.";
 const roomTypes = [
   { value: "2", label: "2 personer" },
   { value: "3", label: "3 personer" },
@@ -55,26 +56,13 @@ const countryCodes = [
 
       <form id="booking-form" name="room-booking" method="POST" data-netlify="true" netlify-honeypot="bot-field" class="grid gap-6">
         <input type="hidden" name="form-name" value="room-booking" />
-        <input type="hidden" name="ticketId" id="bookingTicketIdHidden" />
         <p class="hidden">
           <label>
             Ikke fyll ut dette feltet:
             <input name="bot-field" />
           </label>
         </p>
-
-        <div class="rounded-2xl border border-white/15 bg-white/5 p-4 sm:p-5">
-          <h2 class="text-lg font-semibold text-white">Bekreft billett</h2>
-          <p class="mt-1 text-sm text-white/70">Skriv inn billett-ID for å åpne rombooking.</p>
-          <div class="mt-4 grid gap-3 sm:grid-cols-[1fr_auto]">
-            <label for="bookingTicketId" class="sr-only">Billett-ID</label>
-            <input id="bookingTicketId" name="bookingTicketId" inputmode="text" autocomplete="off" placeholder="F.eks. ABC123" class="w-full rounded-lg border border-white/20 bg-white/10 px-4 py-3 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
-            <button id="bookingTicketCheck" type="button" class="inline-flex items-center justify-center rounded-lg bg-white/90 text-sky-900 px-6 py-3 font-semibold shadow-sm transition hover:bg-white"> Sjekk billett </button>
-          </div>
-          <p id="bookingTicketStatus" class="mt-2 text-sm text-white/75"></p>
-        </div>
-
-        <div data-booking-details hidden class="grid gap-6">
+        <div data-booking-details class="grid gap-4">
           <div>
             <span id="roomTypeLabel" class="text-sm font-semibold text-white/80">Antall personer per rom</span>
             <div class="relative mt-1" data-select data-placeholder="Velg romtype" data-select-id="roomType" data-roomtype-select>
@@ -107,39 +95,67 @@ const countryCodes = [
 
           <fieldset data-person="1" hidden disabled class="rounded-2xl border border-white/15 bg-white/5 p-4 sm:p-5">
             <legend class="px-2 text-sm font-semibold text-white/80">Romansvarlig (person 1)</legend>
-            <div class="grid gap-4 sm:grid-cols-2">
-              <div class="sm:col-span-2">
-                <label for="roomManagerName" class="text-sm text-white/80">Fullt navn</label>
-                <input id="roomManagerName" name="roomManagerName" autocomplete="name" required class="mt-1 w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
-              </div>
+            <div class="grid gap-4">
               <div>
-                <label for="roomManagerEmail" class="text-sm text-white/80">E-post</label>
-                <input id="roomManagerEmail" name="roomManagerEmail" type="email" autocomplete="email" required class="mt-1 w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
+                <label for="ticketId1" class="text-sm text-white/80">
+                  <span class="inline-flex items-center justify-center gap-2">
+                    <span>Billett-ID</span>
+                    <span title={ticketIdHelp} aria-label={ticketIdHelp} tabindex="0" class="inline-flex h-5 w-5 items-center justify-center rounded-full border border-white/30 text-[11px] text-white/80"> ? </span>
+                  </span>
+                </label>
+                <div class="mt-1 grid gap-3 sm:grid-cols-[1fr_auto]">
+                  <input id="ticketId1" name="ticketId1" data-ticket-input="1" inputmode="text" autocomplete="off" placeholder="F.eks. ABC123" required class="w-full rounded-lg border border-white/20 bg-white/10 px-4 py-3 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
+                  <button type="button" data-ticket-check="1" class="inline-flex items-center justify-center rounded-lg bg-white/90 text-sky-900 px-6 py-3 font-semibold shadow-sm transition hover:bg-white"> Hent detaljer </button>
+                </div>
+                <p data-ticket-status="1" class="mt-2 text-sm text-white/75"></p>
               </div>
-              <div>
-                <label for="roomManagerPhone" class="text-sm text-white/80">Telefon</label>
-                <div class="mt-1 flex flex-col gap-2 sm:flex-row sm:items-center">
-                  <div class="relative w-full sm:w-32" data-select data-default="+47" data-placeholder="+47">
-                    <input id="roomManagerCountryCode" name="roomManagerCountryCode" type="hidden" value="+47" data-select-value required />
-                    <button type="button" data-select-trigger aria-label="Landkode" aria-haspopup="listbox" aria-expanded="false" class="flex w-full items-center justify-between gap-2 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-left text-white/90 outline-none focus:ring-2 focus:ring-white/60">
-                      <span data-select-label class="whitespace-nowrap">+47</span>
-                      <svg data-select-chevron viewBox="0 0 20 20" aria-hidden="true" class="h-4 w-4 text-white/70 transition-transform">
-                        <path d="M5 7.5l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                      </svg>
-                    </button>
-                    <ul data-select-menu role="listbox" aria-label="Landkode" hidden class="absolute left-0 right-0 z-50 mt-2 max-h-64 overflow-auto rounded-xl border border-white/20 bg-slate-900/80 backdrop-blur-md shadow-lg">
-                      {
-                        countryCodes.map((code) => (
-                          <li>
-                            <button type="button" role="option" data-select-option data-value={code.value} data-label={code.label} class="w-full whitespace-nowrap text-left px-3 py-2 text-sm text-white/90 hover:bg-white/10 focus:bg-white/10">
-                              {code.label}
-                            </button>
-                          </li>
-                        ))
-                      }
-                    </ul>
+
+              <div data-ticket-skeleton hidden class="grid gap-3 sm:grid-cols-2">
+                <div class="h-10 rounded-lg skeleton sm:col-span-2"></div>
+                <div class="h-10 rounded-lg skeleton"></div>
+                <div class="h-10 rounded-lg skeleton"></div>
+              </div>
+
+              <div data-person-details hidden class="grid gap-4 sm:grid-cols-2">
+                <div data-solo-option class="sm:col-span-2" hidden>
+                  <label class="inline-flex items-center gap-2 text-sm text-white/80">
+                    <input id="soloRoom" name="soloRoom" type="checkbox" class="h-4 w-4 rounded border-white/30 bg-white/10 text-white focus:ring-2 focus:ring-white/60" />
+                    <span>Jeg reiser alene (ingen person 2)</span>
+                  </label>
+                </div>
+                <div class="sm:col-span-2">
+                  <label for="roomManagerName" class="text-sm text-white/80">Fullt navn</label>
+                  <input id="roomManagerName" name="roomManagerName" autocomplete="name" required class="mt-1 w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
+                </div>
+                <div>
+                  <label for="roomManagerEmail" class="text-sm text-white/80">E-post</label>
+                  <input id="roomManagerEmail" name="roomManagerEmail" type="email" autocomplete="email" required class="mt-1 w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
+                </div>
+                <div>
+                  <label for="roomManagerPhone" class="text-sm text-white/80">Telefon</label>
+                  <div class="mt-1 flex flex-col gap-2 sm:flex-row sm:items-center">
+                    <div class="relative w-full sm:w-32" data-select data-default="+47" data-placeholder="+47">
+                      <input id="roomManagerCountryCode" name="roomManagerCountryCode" type="hidden" value="+47" data-select-value required />
+                      <button type="button" data-select-trigger aria-label="Landkode" aria-haspopup="listbox" aria-expanded="false" class="flex w-full items-center justify-between gap-2 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-left text-white/90 outline-none focus:ring-2 focus:ring-white/60">
+                        <span data-select-label class="whitespace-nowrap">+47</span>
+                        <svg data-select-chevron viewBox="0 0 20 20" aria-hidden="true" class="h-4 w-4 text-white/70 transition-transform">
+                          <path d="M5 7.5l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                        </svg>
+                      </button>
+                      <ul data-select-menu role="listbox" aria-label="Landkode" hidden class="absolute left-0 right-0 z-50 mt-2 max-h-64 overflow-auto rounded-xl border border-white/20 bg-slate-900/80 backdrop-blur-md shadow-lg">
+                        {
+                          countryCodes.map((code) => (
+                            <li>
+                              <button type="button" role="option" data-select-option data-value={code.value} data-label={code.label} class="w-full whitespace-nowrap text-left px-3 py-2 text-sm text-white/90 hover:bg-white/10 focus:bg-white/10">
+                                {code.label}
+                              </button>
+                            </li>
+                          ))
+                        }
+                      </ul>
+                    </div>
+                    <input id="roomManagerPhone" name="roomManagerPhone" type="tel" inputmode="numeric" autocomplete="tel" minlength="8" maxlength="8" pattern="\\d{8}" required class="w-full min-w-0 flex-1 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
                   </div>
-                  <input id="roomManagerPhone" name="roomManagerPhone" type="tel" inputmode="numeric" autocomplete="tel" minlength="8" maxlength="8" pattern="\\d{8}" required class="w-full min-w-0 flex-1 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
                 </div>
               </div>
             </div>
@@ -147,39 +163,61 @@ const countryCodes = [
 
           <fieldset data-person="2" hidden disabled class="rounded-2xl border border-white/15 bg-white/5 p-4 sm:p-5">
             <legend class="px-2 text-sm font-semibold text-white/80">Person 2</legend>
-            <div class="grid gap-4 sm:grid-cols-2">
-              <div class="sm:col-span-2">
-                <label for="guest2Name" class="text-sm text-white/80">Fullt navn</label>
-                <input id="guest2Name" name="guest2Name" autocomplete="name" required class="mt-1 w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
-              </div>
+            <div class="grid gap-4">
               <div>
-                <label for="guest2Email" class="text-sm text-white/80">E-post</label>
-                <input id="guest2Email" name="guest2Email" type="email" autocomplete="email" required class="mt-1 w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
+                <label for="ticketId2" class="text-sm text-white/80">
+                  <span class="inline-flex items-center justify-center gap-2">
+                    <span>Billett-ID</span>
+                    <span title={ticketIdHelp} aria-label={ticketIdHelp} tabindex="0" class="inline-flex h-5 w-5 items-center justify-center rounded-full border border-white/30 text-[11px] text-white/80"> ? </span>
+                  </span>
+                </label>
+                <div class="mt-1 grid gap-3 sm:grid-cols-[1fr_auto]">
+                  <input id="ticketId2" name="ticketId2" data-ticket-input="2" inputmode="text" autocomplete="off" placeholder="F.eks. ABC123" required class="w-full rounded-lg border border-white/20 bg-white/10 px-4 py-3 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
+                  <button type="button" data-ticket-check="2" class="inline-flex items-center justify-center rounded-lg bg-white/90 text-sky-900 px-6 py-3 font-semibold shadow-sm transition hover:bg-white"> Hent detaljer </button>
+                </div>
+                <p data-ticket-status="2" class="mt-2 text-sm text-white/75"></p>
               </div>
-              <div>
-                <label for="guest2Phone" class="text-sm text-white/80">Telefon</label>
-                <div class="mt-1 flex flex-col gap-2 sm:flex-row sm:items-center">
-                  <div class="relative w-full sm:w-32" data-select data-default="+47" data-placeholder="+47">
-                    <input id="guest2CountryCode" name="guest2CountryCode" type="hidden" value="+47" data-select-value required />
-                    <button type="button" data-select-trigger aria-label="Landkode" aria-haspopup="listbox" aria-expanded="false" class="flex w-full items-center justify-between gap-2 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-left text-white/90 outline-none focus:ring-2 focus:ring-white/60">
-                      <span data-select-label class="whitespace-nowrap">+47</span>
-                      <svg data-select-chevron viewBox="0 0 20 20" aria-hidden="true" class="h-4 w-4 text-white/70 transition-transform">
-                        <path d="M5 7.5l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                      </svg>
-                    </button>
-                    <ul data-select-menu role="listbox" aria-label="Landkode" hidden class="absolute left-0 right-0 z-50 mt-2 max-h-64 overflow-auto rounded-xl border border-white/20 bg-slate-900/80 backdrop-blur-md shadow-lg">
-                      {
-                        countryCodes.map((code) => (
-                          <li>
-                            <button type="button" role="option" data-select-option data-value={code.value} data-label={code.label} class="w-full whitespace-nowrap text-left px-3 py-2 text-sm text-white/90 hover:bg-white/10 focus:bg-white/10">
-                              {code.label}
-                            </button>
-                          </li>
-                        ))
-                      }
-                    </ul>
+
+              <div data-ticket-skeleton hidden class="grid gap-3 sm:grid-cols-2">
+                <div class="h-10 rounded-lg skeleton sm:col-span-2"></div>
+                <div class="h-10 rounded-lg skeleton"></div>
+                <div class="h-10 rounded-lg skeleton"></div>
+              </div>
+
+              <div data-person-details hidden class="grid gap-4 sm:grid-cols-2">
+                <div class="sm:col-span-2">
+                  <label for="guest2Name" class="text-sm text-white/80">Fullt navn</label>
+                  <input id="guest2Name" name="guest2Name" autocomplete="name" required class="mt-1 w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
+                </div>
+                <div>
+                  <label for="guest2Email" class="text-sm text-white/80">E-post</label>
+                  <input id="guest2Email" name="guest2Email" type="email" autocomplete="email" required class="mt-1 w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
+                </div>
+                <div>
+                  <label for="guest2Phone" class="text-sm text-white/80">Telefon</label>
+                  <div class="mt-1 flex flex-col gap-2 sm:flex-row sm:items-center">
+                    <div class="relative w-full sm:w-32" data-select data-default="+47" data-placeholder="+47">
+                      <input id="guest2CountryCode" name="guest2CountryCode" type="hidden" value="+47" data-select-value required />
+                      <button type="button" data-select-trigger aria-label="Landkode" aria-haspopup="listbox" aria-expanded="false" class="flex w-full items-center justify-between gap-2 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-left text-white/90 outline-none focus:ring-2 focus:ring-white/60">
+                        <span data-select-label class="whitespace-nowrap">+47</span>
+                        <svg data-select-chevron viewBox="0 0 20 20" aria-hidden="true" class="h-4 w-4 text-white/70 transition-transform">
+                          <path d="M5 7.5l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                        </svg>
+                      </button>
+                      <ul data-select-menu role="listbox" aria-label="Landkode" hidden class="absolute left-0 right-0 z-50 mt-2 max-h-64 overflow-auto rounded-xl border border-white/20 bg-slate-900/80 backdrop-blur-md shadow-lg">
+                        {
+                          countryCodes.map((code) => (
+                            <li>
+                              <button type="button" role="option" data-select-option data-value={code.value} data-label={code.label} class="w-full whitespace-nowrap text-left px-3 py-2 text-sm text-white/90 hover:bg-white/10 focus:bg-white/10">
+                                {code.label}
+                              </button>
+                            </li>
+                          ))
+                        }
+                      </ul>
+                    </div>
+                    <input id="guest2Phone" name="guest2Phone" type="tel" inputmode="numeric" autocomplete="tel" minlength="8" maxlength="8" pattern="\\d{8}" required class="w-full min-w-0 flex-1 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
                   </div>
-                  <input id="guest2Phone" name="guest2Phone" type="tel" inputmode="numeric" autocomplete="tel" minlength="8" maxlength="8" pattern="\\d{8}" required class="w-full min-w-0 flex-1 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
                 </div>
               </div>
             </div>
@@ -187,39 +225,61 @@ const countryCodes = [
 
           <fieldset data-person="3" hidden disabled class="rounded-2xl border border-white/15 bg-white/5 p-4 sm:p-5">
             <legend class="px-2 text-sm font-semibold text-white/80">Person 3</legend>
-            <div class="grid gap-4 sm:grid-cols-2">
-              <div class="sm:col-span-2">
-                <label for="guest3Name" class="text-sm text-white/80">Fullt navn</label>
-                <input id="guest3Name" name="guest3Name" autocomplete="name" required class="mt-1 w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
-              </div>
+            <div class="grid gap-4">
               <div>
-                <label for="guest3Email" class="text-sm text-white/80">E-post</label>
-                <input id="guest3Email" name="guest3Email" type="email" autocomplete="email" required class="mt-1 w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
+                <label for="ticketId3" class="text-sm text-white/80">
+                  <span class="inline-flex items-center justify-center gap-2">
+                    <span>Billett-ID</span>
+                    <span title={ticketIdHelp} aria-label={ticketIdHelp} tabindex="0" class="inline-flex h-5 w-5 items-center justify-center rounded-full border border-white/30 text-[11px] text-white/80"> ? </span>
+                  </span>
+                </label>
+                <div class="mt-1 grid gap-3 sm:grid-cols-[1fr_auto]">
+                  <input id="ticketId3" name="ticketId3" data-ticket-input="3" inputmode="text" autocomplete="off" placeholder="F.eks. ABC123" required class="w-full rounded-lg border border-white/20 bg-white/10 px-4 py-3 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
+                  <button type="button" data-ticket-check="3" class="inline-flex items-center justify-center rounded-lg bg-white/90 text-sky-900 px-6 py-3 font-semibold shadow-sm transition hover:bg-white"> Hent detaljer </button>
+                </div>
+                <p data-ticket-status="3" class="mt-2 text-sm text-white/75"></p>
               </div>
-              <div>
-                <label for="guest3Phone" class="text-sm text-white/80">Telefon</label>
-                <div class="mt-1 flex flex-col gap-2 sm:flex-row sm:items-center">
-                  <div class="relative w-full sm:w-32" data-select data-default="+47" data-placeholder="+47">
-                    <input id="guest3CountryCode" name="guest3CountryCode" type="hidden" value="+47" data-select-value required />
-                    <button type="button" data-select-trigger aria-label="Landkode" aria-haspopup="listbox" aria-expanded="false" class="flex w-full items-center justify-between gap-2 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-left text-white/90 outline-none focus:ring-2 focus:ring-white/60">
-                      <span data-select-label class="whitespace-nowrap">+47</span>
-                      <svg data-select-chevron viewBox="0 0 20 20" aria-hidden="true" class="h-4 w-4 text-white/70 transition-transform">
-                        <path d="M5 7.5l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                      </svg>
-                    </button>
-                    <ul data-select-menu role="listbox" aria-label="Landkode" hidden class="absolute left-0 right-0 z-50 mt-2 max-h-64 overflow-auto rounded-xl border border-white/20 bg-slate-900/80 backdrop-blur-md shadow-lg">
-                      {
-                        countryCodes.map((code) => (
-                          <li>
-                            <button type="button" role="option" data-select-option data-value={code.value} data-label={code.label} class="w-full whitespace-nowrap text-left px-3 py-2 text-sm text-white/90 hover:bg-white/10 focus:bg-white/10">
-                              {code.label}
-                            </button>
-                          </li>
-                        ))
-                      }
-                    </ul>
+
+              <div data-ticket-skeleton hidden class="grid gap-3 sm:grid-cols-2">
+                <div class="h-10 rounded-lg skeleton sm:col-span-2"></div>
+                <div class="h-10 rounded-lg skeleton"></div>
+                <div class="h-10 rounded-lg skeleton"></div>
+              </div>
+
+              <div data-person-details hidden class="grid gap-4 sm:grid-cols-2">
+                <div class="sm:col-span-2">
+                  <label for="guest3Name" class="text-sm text-white/80">Fullt navn</label>
+                  <input id="guest3Name" name="guest3Name" autocomplete="name" required class="mt-1 w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
+                </div>
+                <div>
+                  <label for="guest3Email" class="text-sm text-white/80">E-post</label>
+                  <input id="guest3Email" name="guest3Email" type="email" autocomplete="email" required class="mt-1 w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
+                </div>
+                <div>
+                  <label for="guest3Phone" class="text-sm text-white/80">Telefon</label>
+                  <div class="mt-1 flex flex-col gap-2 sm:flex-row sm:items-center">
+                    <div class="relative w-full sm:w-32" data-select data-default="+47" data-placeholder="+47">
+                      <input id="guest3CountryCode" name="guest3CountryCode" type="hidden" value="+47" data-select-value required />
+                      <button type="button" data-select-trigger aria-label="Landkode" aria-haspopup="listbox" aria-expanded="false" class="flex w-full items-center justify-between gap-2 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-left text-white/90 outline-none focus:ring-2 focus:ring-white/60">
+                        <span data-select-label class="whitespace-nowrap">+47</span>
+                        <svg data-select-chevron viewBox="0 0 20 20" aria-hidden="true" class="h-4 w-4 text-white/70 transition-transform">
+                          <path d="M5 7.5l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                        </svg>
+                      </button>
+                      <ul data-select-menu role="listbox" aria-label="Landkode" hidden class="absolute left-0 right-0 z-50 mt-2 max-h-64 overflow-auto rounded-xl border border-white/20 bg-slate-900/80 backdrop-blur-md shadow-lg">
+                        {
+                          countryCodes.map((code) => (
+                            <li>
+                              <button type="button" role="option" data-select-option data-value={code.value} data-label={code.label} class="w-full whitespace-nowrap text-left px-3 py-2 text-sm text-white/90 hover:bg-white/10 focus:bg-white/10">
+                                {code.label}
+                              </button>
+                            </li>
+                          ))
+                        }
+                      </ul>
+                    </div>
+                    <input id="guest3Phone" name="guest3Phone" type="tel" inputmode="numeric" autocomplete="tel" minlength="8" maxlength="8" pattern="\\d{8}" required class="w-full min-w-0 flex-1 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
                   </div>
-                  <input id="guest3Phone" name="guest3Phone" type="tel" inputmode="numeric" autocomplete="tel" minlength="8" maxlength="8" pattern="\\d{8}" required class="w-full min-w-0 flex-1 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
                 </div>
               </div>
             </div>
@@ -227,39 +287,61 @@ const countryCodes = [
 
           <fieldset data-person="4" hidden disabled class="rounded-2xl border border-white/15 bg-white/5 p-4 sm:p-5">
             <legend class="px-2 text-sm font-semibold text-white/80">Person 4</legend>
-            <div class="grid gap-4 sm:grid-cols-2">
-              <div class="sm:col-span-2">
-                <label for="guest4Name" class="text-sm text-white/80">Fullt navn</label>
-                <input id="guest4Name" name="guest4Name" autocomplete="name" required class="mt-1 w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
-              </div>
+            <div class="grid gap-4">
               <div>
-                <label for="guest4Email" class="text-sm text-white/80">E-post</label>
-                <input id="guest4Email" name="guest4Email" type="email" autocomplete="email" required class="mt-1 w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
+                <label for="ticketId4" class="text-sm text-white/80">
+                  <span class="inline-flex items-center justify-center gap-2">
+                    <span>Billett-ID</span>
+                    <span title={ticketIdHelp} aria-label={ticketIdHelp} tabindex="0" class="inline-flex h-5 w-5 items-center justify-center rounded-full border border-white/30 text-[11px] text-white/80"> ? </span>
+                  </span>
+                </label>
+                <div class="mt-1 grid gap-3 sm:grid-cols-[1fr_auto]">
+                  <input id="ticketId4" name="ticketId4" data-ticket-input="4" inputmode="text" autocomplete="off" placeholder="F.eks. ABC123" required class="w-full rounded-lg border border-white/20 bg-white/10 px-4 py-3 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
+                  <button type="button" data-ticket-check="4" class="inline-flex items-center justify-center rounded-lg bg-white/90 text-sky-900 px-6 py-3 font-semibold shadow-sm transition hover:bg-white"> Hent detaljer </button>
+                </div>
+                <p data-ticket-status="4" class="mt-2 text-sm text-white/75"></p>
               </div>
-              <div>
-                <label for="guest4Phone" class="text-sm text-white/80">Telefon</label>
-                <div class="mt-1 flex flex-col gap-2 sm:flex-row sm:items-center">
-                  <div class="relative w-full sm:w-32" data-select data-default="+47" data-placeholder="+47">
-                    <input id="guest4CountryCode" name="guest4CountryCode" type="hidden" value="+47" data-select-value required />
-                    <button type="button" data-select-trigger aria-label="Landkode" aria-haspopup="listbox" aria-expanded="false" class="flex w-full items-center justify-between gap-2 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-left text-white/90 outline-none focus:ring-2 focus:ring-white/60">
-                      <span data-select-label class="whitespace-nowrap">+47</span>
-                      <svg data-select-chevron viewBox="0 0 20 20" aria-hidden="true" class="h-4 w-4 text-white/70 transition-transform">
-                        <path d="M5 7.5l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                      </svg>
-                    </button>
-                    <ul data-select-menu role="listbox" aria-label="Landkode" hidden class="absolute left-0 right-0 z-50 mt-2 max-h-64 overflow-auto rounded-xl border border-white/20 bg-slate-900/80 backdrop-blur-md shadow-lg">
-                      {
-                        countryCodes.map((code) => (
-                          <li>
-                            <button type="button" role="option" data-select-option data-value={code.value} data-label={code.label} class="w-full whitespace-nowrap text-left px-3 py-2 text-sm text-white/90 hover:bg-white/10 focus:bg-white/10">
-                              {code.label}
-                            </button>
-                          </li>
-                        ))
-                      }
-                    </ul>
+
+              <div data-ticket-skeleton hidden class="grid gap-3 sm:grid-cols-2">
+                <div class="h-10 rounded-lg skeleton sm:col-span-2"></div>
+                <div class="h-10 rounded-lg skeleton"></div>
+                <div class="h-10 rounded-lg skeleton"></div>
+              </div>
+
+              <div data-person-details hidden class="grid gap-4 sm:grid-cols-2">
+                <div class="sm:col-span-2">
+                  <label for="guest4Name" class="text-sm text-white/80">Fullt navn</label>
+                  <input id="guest4Name" name="guest4Name" autocomplete="name" required class="mt-1 w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
+                </div>
+                <div>
+                  <label for="guest4Email" class="text-sm text-white/80">E-post</label>
+                  <input id="guest4Email" name="guest4Email" type="email" autocomplete="email" required class="mt-1 w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
+                </div>
+                <div>
+                  <label for="guest4Phone" class="text-sm text-white/80">Telefon</label>
+                  <div class="mt-1 flex flex-col gap-2 sm:flex-row sm:items-center">
+                    <div class="relative w-full sm:w-32" data-select data-default="+47" data-placeholder="+47">
+                      <input id="guest4CountryCode" name="guest4CountryCode" type="hidden" value="+47" data-select-value required />
+                      <button type="button" data-select-trigger aria-label="Landkode" aria-haspopup="listbox" aria-expanded="false" class="flex w-full items-center justify-between gap-2 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-left text-white/90 outline-none focus:ring-2 focus:ring-white/60">
+                        <span data-select-label class="whitespace-nowrap">+47</span>
+                        <svg data-select-chevron viewBox="0 0 20 20" aria-hidden="true" class="h-4 w-4 text-white/70 transition-transform">
+                          <path d="M5 7.5l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                        </svg>
+                      </button>
+                      <ul data-select-menu role="listbox" aria-label="Landkode" hidden class="absolute left-0 right-0 z-50 mt-2 max-h-64 overflow-auto rounded-xl border border-white/20 bg-slate-900/80 backdrop-blur-md shadow-lg">
+                        {
+                          countryCodes.map((code) => (
+                            <li>
+                              <button type="button" role="option" data-select-option data-value={code.value} data-label={code.label} class="w-full whitespace-nowrap text-left px-3 py-2 text-sm text-white/90 hover:bg-white/10 focus:bg-white/10">
+                                {code.label}
+                              </button>
+                            </li>
+                          ))
+                        }
+                      </ul>
+                    </div>
+                    <input id="guest4Phone" name="guest4Phone" type="tel" inputmode="numeric" autocomplete="tel" minlength="8" maxlength="8" pattern="\\d{8}" required class="w-full min-w-0 flex-1 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
                   </div>
-                  <input id="guest4Phone" name="guest4Phone" type="tel" inputmode="numeric" autocomplete="tel" minlength="8" maxlength="8" pattern="\\d{8}" required class="w-full min-w-0 flex-1 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
                 </div>
               </div>
             </div>
@@ -329,12 +411,27 @@ const countryCodes = [
   const roomType = document.getElementById("roomType");
   const roomTypeError = document.getElementById("roomTypeError");
   const roomTypeTrigger = document.querySelector("[data-roomtype-trigger]");
-  const bookingDetails = document.querySelector("[data-booking-details]");
-  const ticketInput = document.getElementById("bookingTicketId");
-  const ticketCheckBtn = document.getElementById("bookingTicketCheck");
-  const ticketStatus = document.getElementById("bookingTicketStatus");
-  const ticketHiddenInput = document.getElementById("bookingTicketIdHidden");
   const personSections = Array.from(document.querySelectorAll("[data-person]"));
+  const ticketSlots = personSections.map((section) => {
+    const idx = Number(section.dataset.person || 0);
+    const input = section.querySelector("[data-ticket-input]");
+    const button = section.querySelector("[data-ticket-check]");
+    const status = section.querySelector("[data-ticket-status]");
+    const skeleton = section.querySelector("[data-ticket-skeleton]");
+    const details = section.querySelector("[data-person-details]");
+    return {
+      idx,
+      input,
+      button,
+      status,
+      skeleton,
+      details,
+      label: button?.textContent?.trim() || "Hent detaljer",
+      validated: false,
+      ticket: null,
+      loading: false,
+    };
+  });
   const form = document.getElementById("booking-form");
   const submitBtn = document.getElementById("booking-submit");
   const successPanel = document.getElementById("booking-success");
@@ -346,11 +443,10 @@ const countryCodes = [
   const termsDialog = document.getElementById("terms-dialog");
   const termsOpeners = Array.from(document.querySelectorAll("[data-terms-open]"));
   const termsClosers = termsDialog ? Array.from(termsDialog.querySelectorAll("[data-terms-close]")) : [];
+  const soloCheckbox = document.getElementById("soloRoom");
+  const soloOption = document.querySelector("[data-solo-option]");
   const availabilityUrl = "/.netlify/functions/room-availability";
   let latestCounts = null;
-  let ticketValidated = false;
-  let ticketData = null;
-  const ticketCheckLabel = ticketCheckBtn?.textContent || "Sjekk billett";
   const submitLabel = submitBtn?.querySelector("[data-label]");
   const termsCheckbox = document.getElementById("terms");
 
@@ -383,24 +479,49 @@ const countryCodes = [
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const setTicketStatus = (message, tone = "info") => {
-    if (!ticketStatus) return;
-    ticketStatus.textContent = message || "";
-    ticketStatus.className = `mt-2 text-sm ${tone === "error" ? "text-rose-100" : tone === "success" ? "text-emerald-200" : "text-white/75"}`;
+  const setTicketStatus = (slot, message, tone = "info") => {
+    if (!slot?.status) return;
+    slot.status.textContent = message || "";
+    slot.status.className = `mt-2 text-sm ${tone === "error" ? "text-rose-100" : tone === "success" ? "text-emerald-200" : "text-white/75"}`;
   };
 
-  const setBookingEnabled = (enabled) => {
-    if (!bookingDetails) return;
-    bookingDetails.hidden = !enabled;
-    bookingDetails.setAttribute("aria-hidden", enabled ? "false" : "true");
-    bookingDetails.querySelectorAll("input, button, select, textarea").forEach((el) => {
-      if (enabled) {
-        el.removeAttribute("disabled");
-      } else {
+  const resetTicketSlot = (slot, clearInput = false, keepStatus = false) => {
+    if (!slot) return;
+    slot.validated = false;
+    slot.ticket = null;
+    slot.loading = false;
+    if (!keepStatus) setTicketStatus(slot, "", "info");
+    if (slot.skeleton) slot.skeleton.hidden = true;
+    if (slot.details) {
+      slot.details.hidden = true;
+      slot.details.querySelectorAll("input, select, textarea, button").forEach((el) => {
         el.setAttribute("disabled", "");
-      }
-    });
-    if (enabled) updateGuests();
+        if (el.matches("input, textarea")) el.value = "";
+      });
+    }
+    if (clearInput && slot.input) slot.input.value = "";
+  };
+
+  const updateSlotVisual = (slot) => {
+    if (!slot) return;
+    if (slot.skeleton) slot.skeleton.hidden = !slot.loading;
+    if (slot.details) {
+      const showDetails = slot.validated && !slot.loading;
+      slot.details.hidden = !showDetails;
+      slot.details.querySelectorAll("input, select, textarea, button").forEach((el) => {
+        if (showDetails) {
+          el.removeAttribute("disabled");
+        } else {
+          el.setAttribute("disabled", "");
+        }
+      });
+    }
+  };
+
+  const getEffectiveCount = () => {
+    const count = Number(roomType?.value || 0);
+    if (count === 2 && soloCheckbox?.checked) return 1;
+    return count;
   };
 
   const parseTicketPhone = (raw, selectEl) => {
@@ -420,12 +541,32 @@ const countryCodes = [
     return { code: "", local: cleaned.replace(/\D/g, "") };
   };
 
-  const prefillPerson1 = (ticket) => {
+  const allowedTicketType = "grunnpakke";
+
+  const normalizeTicketType = (value) =>
+    String(value || "")
+      .trim()
+      .toLowerCase();
+
+  const isAllowedTicketType = (value) => normalizeTicketType(value).includes(allowedTicketType);
+
+  const getTicketType = (ticket) => ticket?.product || ticket?.name || ticket?.ticket?.name || ticket?.ticket?.title || "";
+
+  const personFieldIds = {
+    1: { name: "roomManagerName", email: "roomManagerEmail", phone: "roomManagerPhone", country: "roomManagerCountryCode" },
+    2: { name: "guest2Name", email: "guest2Email", phone: "guest2Phone", country: "guest2CountryCode" },
+    3: { name: "guest3Name", email: "guest3Email", phone: "guest3Phone", country: "guest3CountryCode" },
+    4: { name: "guest4Name", email: "guest4Email", phone: "guest4Phone", country: "guest4CountryCode" },
+  };
+
+  const prefillPerson = (index, ticket) => {
     if (!ticket) return;
-    const nameEl = document.getElementById("roomManagerName");
-    const emailEl = document.getElementById("roomManagerEmail");
-    const phoneEl = document.getElementById("roomManagerPhone");
-    const countryInput = document.getElementById("roomManagerCountryCode");
+    const fields = personFieldIds[index];
+    if (!fields) return;
+    const nameEl = document.getElementById(fields.name);
+    const emailEl = document.getElementById(fields.email);
+    const phoneEl = document.getElementById(fields.phone);
+    const countryInput = document.getElementById(fields.country);
     const countrySelect = countryInput?.closest("[data-select]");
 
     if (nameEl && ticket.ownerName) nameEl.value = ticket.ownerName;
@@ -441,6 +582,66 @@ const countryCodes = [
       if (parsed?.local && parsed.local.length === 8) {
         phoneEl.value = parsed.local;
       }
+    }
+  };
+
+  const handleTicketCheck = async (slot) => {
+    const id = String(slot?.input?.value || "").trim();
+    if (!id) {
+      setTicketStatus(slot, "Skriv inn en billett-ID.", "error");
+      resetTicketSlot(slot);
+      updateSubmitState();
+      return;
+    }
+
+    resetTicketSlot(slot);
+    slot.loading = true;
+    updateSlotVisual(slot);
+    setTicketStatus(slot, "Henter detaljer...", "info");
+    if (slot?.button) {
+      slot.button.disabled = true;
+      slot.button.textContent = "Henter...";
+    }
+
+    try {
+      const ticket = await fetchTicketByRefId(id);
+      const ticketType = getTicketType(ticket);
+      if (!isAllowedTicketType(ticketType)) {
+        const displayType = ticketType || "Ukjent";
+        setTicketStatus(slot, `Billetten '${displayType}' er ikke gyldig for rombooking. Kun Grunnpakke er tillatt.`, "error");
+        slot.loading = false;
+        resetTicketSlot(slot, false, true);
+        updateSlotVisual(slot);
+        return;
+      }
+      slot.ticket = ticket;
+      slot.validated = true;
+      slot.loading = false;
+      if (slot.input) slot.input.value = ticket.id || id.toUpperCase();
+      setTicketStatus(slot, ticket.ownerName ? `Billett funnet: ${ticket.ownerName}` : "Billett funnet.", "success");
+      prefillPerson(slot.idx, ticket);
+      updateSlotVisual(slot);
+      if (slot.details) {
+        slot.details.querySelectorAll("[data-select]").forEach((select) => syncSelectToValue(select, false));
+      }
+    } catch (err) {
+      const code = err && err.code ? err.code : 0;
+      if (code === 404 || err?.message === "NOT_FOUND") {
+        setTicketStatus(slot, "Fant ikke billett med denne ID-en.", "error");
+      } else if (code === 400 || err?.message === "EMPTY_ID") {
+        setTicketStatus(slot, "Ugyldig billett-ID.", "error");
+      } else {
+        setTicketStatus(slot, "Kunne ikke hente billetten akkurat nå.", "error");
+      }
+      slot.loading = false;
+      resetTicketSlot(slot, false, true);
+      updateSlotVisual(slot);
+    } finally {
+      if (slot?.button) {
+        slot.button.disabled = false;
+        slot.button.textContent = slot.label;
+      }
+      updateSubmitState();
     }
   };
 
@@ -473,9 +674,15 @@ const countryCodes = [
     applyDotStatus(triggerDot, match?.dataset.status || "unknown");
   };
 
+  const allTicketsValidated = () => {
+    const count = getEffectiveCount();
+    if (!count) return false;
+    return ticketSlots.filter((slot) => slot.idx <= count).every((slot) => slot.validated);
+  };
+
   const updateSubmitState = () => {
     if (!submitBtn) return;
-    const ready = Boolean(ticketValidated && roomType?.value && form?.checkValidity());
+    const ready = Boolean(roomType?.value && allTicketsValidated() && form?.checkValidity());
     submitBtn.disabled = !ready;
     if (!submitLabel) return;
     if (!ready) {
@@ -705,90 +912,27 @@ const countryCodes = [
     });
   }
 
-  const resetTicketState = () => {
-    ticketValidated = false;
-    ticketData = null;
-    if (ticketHiddenInput) ticketHiddenInput.value = "";
-    setBookingEnabled(false);
-  };
-
-  const handleTicketCheck = async () => {
-    const id = String(ticketInput?.value || "").trim();
-    if (!id) {
-      setTicketStatus("Skriv inn en billett-ID.", "error");
-      resetTicketState();
-      return;
-    }
-
-    setTicketStatus("Sjekker billetten...", "info");
-    if (ticketCheckBtn) {
-      ticketCheckBtn.disabled = true;
-      ticketCheckBtn.textContent = "Sjekker...";
-    }
-
-    try {
-      const ticket = await fetchTicketByRefId(id);
-      ticketData = ticket;
-      ticketValidated = true;
-      if (ticketHiddenInput) ticketHiddenInput.value = ticket.id || id.toUpperCase();
-      setTicketStatus(ticket.ownerName ? `Billett funnet: ${ticket.ownerName}` : "Billett funnet.", "success");
-      setBookingEnabled(true);
-      prefillPerson1(ticket);
-      updateSubmitState();
-    } catch (err) {
-      const code = err && err.code ? err.code : 0;
-      if (code === 404 || err?.message === "NOT_FOUND") {
-        setTicketStatus("Fant ikke billett med denne ID-en.", "error");
-      } else if (code === 400 || err?.message === "EMPTY_ID") {
-        setTicketStatus("Ugyldig billett-ID.", "error");
-      } else {
-        setTicketStatus("Kunne ikke hente billetten akkurat nå.", "error");
-      }
-      resetTicketState();
-    } finally {
-      if (ticketCheckBtn) {
-        ticketCheckBtn.disabled = false;
-        ticketCheckBtn.textContent = ticketCheckLabel;
-      }
-      updateSubmitState();
-    }
-  };
-
-  if (ticketCheckBtn) {
-    ticketCheckBtn.addEventListener("click", (event) => {
-      event.preventDefault();
-      void handleTicketCheck();
-    });
-  }
-
-  if (ticketInput) {
-    ticketInput.addEventListener("keydown", (event) => {
-      if (event.key === "Enter") {
+  ticketSlots.forEach((slot) => {
+    if (slot.button) {
+      slot.button.addEventListener("click", (event) => {
         event.preventDefault();
-        void handleTicketCheck();
-      }
-    });
-    ticketInput.addEventListener("input", () => {
-      setTicketStatus("");
-      resetTicketState();
-      updateSubmitState();
-    });
-  }
-
-  try {
-    const params = new URLSearchParams(window.location.search);
-    const fromQuery = (params.get("ticketId") || params.get("ref") || "").trim();
-    if (fromQuery && ticketInput) {
-      ticketInput.value = fromQuery;
-      void handleTicketCheck();
-      const url = new URL(window.location.href);
-      url.searchParams.delete("ticketId");
-      url.searchParams.delete("ref");
-      window.history.replaceState({}, "", url.toString());
+        void handleTicketCheck(slot);
+      });
     }
-  } catch {
-    // ignore URLSearchParams issues
-  }
+
+    if (slot.input) {
+      slot.input.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          void handleTicketCheck(slot);
+        }
+      });
+      slot.input.addEventListener("input", () => {
+        resetTicketSlot(slot);
+        updateSubmitState();
+      });
+    }
+  });
 
   const clearRoomTypeError = () => {
     if (roomTypeError) roomTypeError.hidden = true;
@@ -802,38 +946,61 @@ const countryCodes = [
     if (roomType?.value) clearRoomTypeError();
     if (termsBlock) termsBlock.hidden = count <= 0;
     if (termsCheckbox) termsCheckbox.disabled = count <= 0;
+
+    if (soloOption && soloCheckbox) {
+      if (count === 2) {
+        soloOption.hidden = false;
+        soloCheckbox.removeAttribute("disabled");
+      } else {
+        soloOption.hidden = true;
+        soloCheckbox.checked = false;
+        soloCheckbox.setAttribute("disabled", "");
+      }
+    }
+
+    const effectiveCount = getEffectiveCount();
     personSections.forEach((section) => {
       const idx = Number(section.dataset.person || 0);
-      const show = count >= idx;
+      const show = effectiveCount >= idx;
+      const slot = ticketSlots.find((item) => item.idx === idx);
       section.hidden = !show;
       section.disabled = !show;
       section.setAttribute("aria-hidden", show ? "false" : "true");
-      section.querySelectorAll("input").forEach((input) => {
-        const isSelectValue = input.matches("[data-select-value]");
-        if (show) {
-          input.removeAttribute("disabled");
-          input.setAttribute("required", "");
-          if (isSelectValue && !input.value) {
-            const select = input.closest("[data-select]");
-            if (select) syncSelectToValue(select, false);
-          }
-        } else {
-          input.setAttribute("disabled", "");
-          input.removeAttribute("required");
-          if (!isSelectValue) input.value = "";
+      if (!slot) return;
+      if (!show) {
+        if (slot.input) {
+          slot.input.setAttribute("disabled", "");
+          slot.input.removeAttribute("required");
+          slot.input.value = "";
         }
-      });
+        if (slot.button) slot.button.setAttribute("disabled", "");
+        resetTicketSlot(slot, true);
+        return;
+      }
+
+      if (slot.input) {
+        slot.input.removeAttribute("disabled");
+        slot.input.setAttribute("required", "");
+      }
+      if (slot.button && !slot.loading) slot.button.removeAttribute("disabled");
+      updateSlotVisual(slot);
+      if (slot.validated && slot.details) {
+        slot.details.querySelectorAll("[data-select]").forEach((select) => syncSelectToValue(select, false));
+      }
     });
     updateRoomTypeTriggerDot();
     updateSubmitState();
   };
 
-  setBookingEnabled(false);
   updateSubmitState();
 
   if (roomType) {
     roomType.addEventListener("change", updateGuests);
     updateGuests();
+  }
+
+  if (soloCheckbox) {
+    soloCheckbox.addEventListener("change", updateGuests);
   }
 
   const setSubmitting = (isSubmitting) => {
@@ -851,8 +1018,8 @@ const countryCodes = [
       if (errorPanel) errorPanel.hidden = true;
       setSubmitting(true);
 
-      if (!ticketValidated) {
-        setError("Bekreft billett", "Sjekk billett-ID før du sender inn rombooking.");
+      if (!allTicketsValidated()) {
+        setError("Bekreft billetter", "Hent detaljer for alle på rommet før du sender inn rombooking.");
         setSubmitting(false);
         return;
       }
