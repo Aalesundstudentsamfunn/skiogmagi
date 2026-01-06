@@ -3,6 +3,121 @@
 // Helper to get elements by id
 const getEl = (id) => document.getElementById(id);
 
+let selectsInitialized = false;
+
+function setSelectValue(select, value, labelText, fireChange = true) {
+  const input = select.querySelector("[data-select-value]");
+  const label = select.querySelector("[data-select-label]");
+  const options = Array.from(select.querySelectorAll("[data-select-option]"));
+  if (input) input.value = value || "";
+  if (label) label.textContent = labelText || select.dataset.placeholder || "";
+  options.forEach((opt) => {
+    opt.setAttribute("aria-selected", opt.dataset.value === value ? "true" : "false");
+  });
+  if (fireChange && input) input.dispatchEvent(new Event("change", { bubbles: true }));
+}
+
+function syncSelectToValue(select, fireChange = false) {
+  const input = select.querySelector("[data-select-value]");
+  const options = Array.from(select.querySelectorAll("[data-select-option]"));
+  const value = input?.value || select.dataset.default || "";
+  const match = options.find((opt) => opt.dataset.value === value);
+  if (match) {
+    const labelText = match.dataset.label || match.textContent?.trim() || value;
+    setSelectValue(select, value, labelText, fireChange);
+  } else {
+    const label = select.querySelector("[data-select-label]");
+    if (label) label.textContent = select.dataset.placeholder || "Velg";
+  }
+}
+
+function closeSelect(select) {
+  const trigger = select.querySelector("[data-select-trigger]");
+  const menu = select.querySelector("[data-select-menu]");
+  const chevron = select.querySelector("[data-select-chevron]");
+  if (menu) menu.hidden = true;
+  select.dataset.open = "false";
+  if (trigger) trigger.setAttribute("aria-expanded", "false");
+  if (chevron) chevron.style.transform = "";
+}
+
+function closeAllSelects(selects, except) {
+  selects.forEach((select) => {
+    if (select !== except) closeSelect(select);
+  });
+}
+
+function openSelect(select, selects) {
+  const trigger = select.querySelector("[data-select-trigger]");
+  const menu = select.querySelector("[data-select-menu]");
+  const chevron = select.querySelector("[data-select-chevron]");
+  if (!menu) return;
+  closeAllSelects(selects, select);
+  menu.hidden = false;
+  select.dataset.open = "true";
+  if (trigger) trigger.setAttribute("aria-expanded", "true");
+  if (chevron) chevron.style.transform = "rotate(180deg)";
+}
+
+function initCustomSelects() {
+  if (selectsInitialized) return;
+  const selects = Array.from(document.querySelectorAll("[data-select]"));
+  if (!selects.length) return;
+  selectsInitialized = true;
+
+  selects.forEach((select) => {
+    const trigger = select.querySelector("[data-select-trigger]");
+    const menu = select.querySelector("[data-select-menu]");
+    const options = Array.from(select.querySelectorAll("[data-select-option]"));
+    syncSelectToValue(select, false);
+
+    if (trigger) {
+      trigger.addEventListener("click", (event) => {
+        event.preventDefault();
+        const isOpen = select.dataset.open === "true";
+        if (isOpen) {
+          closeSelect(select);
+        } else {
+          openSelect(select, selects);
+        }
+      });
+    }
+
+    options.forEach((opt) => {
+      opt.addEventListener("click", (event) => {
+        event.preventDefault();
+        const value = opt.dataset.value || "";
+        const labelText = opt.dataset.label || opt.textContent?.trim() || value;
+        setSelectValue(select, value, labelText, true);
+        closeSelect(select);
+        trigger?.focus();
+      });
+    });
+
+    menu?.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closeSelect(select);
+        trigger?.focus();
+      }
+    });
+  });
+
+  document.addEventListener("click", (event) => {
+    selects.forEach((select) => {
+      if (!select.contains(event.target)) closeSelect(select);
+    });
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") closeAllSelects(selects);
+  });
+}
+
+function syncAllSelects() {
+  document.querySelectorAll("[data-select]").forEach((select) => syncSelectToValue(select, false));
+}
+
 // Show status text above the ticket box
 export function setStatus(msg, tone = "info") {
   const el = getEl("status");
@@ -133,6 +248,8 @@ export function initTicketDialogs(setStatusFn) {
   const transferDlg = document.getElementById("transfer-dialog");
   const transferForm = document.getElementById("transfer-form");
 
+  initCustomSelects();
+
   // QR enlarge dialog
   if (qrSmall) {
     qrSmall.addEventListener("click", () => {
@@ -183,7 +300,12 @@ export function initTicketDialogs(setStatusFn) {
 
   if (transferDlg) {
     transferDlg.addEventListener("click", (event) => {
-      if (event.target === transferDlg) animateClose(transferDlg);
+      const panel = transferDlg.querySelector(".modal-panel");
+      if (!panel) return;
+      const target = event.target;
+      if (target instanceof Node && !panel.contains(target)) {
+        animateClose(transferDlg);
+      }
     });
 
     transferDlg.querySelectorAll("[data-close]").forEach((btn) => btn.addEventListener("click", () => animateClose(transferDlg)));
@@ -198,6 +320,13 @@ export function initTicketDialogs(setStatusFn) {
   if (transferForm) {
     transferForm.addEventListener("submit", async (event) => {
       event.preventDefault();
+      if (!transferForm.checkValidity()) {
+        transferForm.reportValidity();
+        if (typeof setStatusFn === "function") {
+          setStatusFn("Fyll ut alle felter korrekt.", "error");
+        }
+        return;
+      }
       const nameEl = document.getElementById("newName");
       const emailEl = document.getElementById("newEmail");
       const phoneElInput = document.getElementById("newPhone");
@@ -251,11 +380,12 @@ export function initTicketDialogs(setStatusFn) {
           if (phoneRow2) phoneRow2.classList.remove("hidden");
         }
 
-        animateClose(transferDlg);
-        transferForm.reset();
-        if (typeof setStatusFn === "function") {
-          setStatusFn("Takk! Vi har mottatt informasjon om ny eier.", "success");
-        }
+      animateClose(transferDlg);
+      transferForm.reset();
+      syncAllSelects();
+      if (typeof setStatusFn === "function") {
+        setStatusFn("Takk! Vi har mottatt informasjon om ny eier.", "success");
+      }
 
         const resultEl = document.getElementById("result");
         if (resultEl) resultEl.classList.add("hidden");

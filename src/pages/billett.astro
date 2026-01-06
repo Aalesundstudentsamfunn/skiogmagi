@@ -5,6 +5,27 @@ import GlassPanel from "../components/ui/GlassPanel.astro";
 
 const title = "Billett";
 const desc = "Se detaljer om billetten din til vintermagien Sogndal, i en senere utgave vil du også ha mulighet til å overføre billetten din til noen andre.";
+const countryCodes = [
+  { value: "+47", label: "🇳🇴 +47" },
+  { value: "+46", label: "🇸🇪 +46" },
+  { value: "+45", label: "🇩🇰 +45" },
+  { value: "+358", label: "🇫🇮 +358" },
+  { value: "+44", label: "🇬🇧 +44" },
+  { value: "+49", label: "🇩🇪 +49" },
+  { value: "+31", label: "🇳🇱 +31" },
+  { value: "+33", label: "🇫🇷 +33" },
+  { value: "+34", label: "🇪🇸 +34" },
+  { value: "+39", label: "🇮🇹 +39" },
+  { value: "+48", label: "🇵🇱 +48" },
+  { value: "+370", label: "🇱🇹 +370" },
+  { value: "+371", label: "🇱🇻 +371" },
+  { value: "+372", label: "🇪🇪 +372" },
+  { value: "+40", label: "🇷🇴 +40" },
+  { value: "+359", label: "🇧🇬 +359" },
+  { value: "+91", label: "🇮🇳 +91" },
+  { value: "+63", label: "🇵🇭 +63" },
+  { value: "+1", label: "🇺🇸 🇨🇦 +1" },
+];
 ---
 
 <PageLayout title={title} description={desc}>
@@ -126,7 +147,7 @@ const desc = "Se detaljer om billetten din til vintermagien Sogndal, i en senere
   <!-- Transfer dialog -->
   <dialog id="transfer-dialog" class="modal" aria-label="Meld inn ny eier">
     <div class="modal-container fixed inset-0 grid place-items-center p-4">
-      <form id="transfer-form" name="ticket-transfer" method="POST" data-netlify="true" netlify-honeypot="bot-field" class="modal-panel relative w-full max-w-lg overflow-hidden rounded-2xl border border-black/10 bg-white text-neutral-900 shadow-2xl ring-1 ring-black/5 p-5">
+      <form id="transfer-form" name="ticket-transfer" method="POST" data-netlify="true" netlify-honeypot="bot-field" class="modal-panel allow-overflow relative w-full max-w-lg rounded-2xl border border-black/10 bg-white text-neutral-900 shadow-2xl ring-1 ring-black/5 p-5">
         <input type="hidden" name="form-name" value="ticket-transfer" />
         <input type="hidden" name="ticketId" id="transferTicketId" />
         <p class="hidden">
@@ -148,7 +169,29 @@ const desc = "Se detaljer om billetten din til vintermagien Sogndal, i en senere
           </div>
           <div class="sm:col-span-2">
             <label for="newPhone" class="text-sm text-neutral-700">Telefon</label>
-            <input id="newPhone" name="newPhone" required class="mt-1 w-full rounded-lg border border-black/15 bg-white px-3 py-2 text-neutral-900 outline-none focus:ring-2 focus:ring-indigo-500/60" />
+            <div class="mt-1 flex flex-col gap-2 sm:flex-row sm:items-center">
+              <div class="relative w-full sm:w-32" data-select data-default="+47" data-placeholder="+47">
+                <input id="newCountryCode" name="newCountryCode" type="hidden" value="+47" data-select-value required />
+                <button type="button" data-select-trigger aria-label="Landkode" aria-haspopup="listbox" aria-expanded="false" class="flex w-full items-center justify-between gap-2 rounded-lg border border-black/15 bg-white px-3 py-2 text-left text-neutral-900 outline-none focus:ring-2 focus:ring-indigo-500/60">
+                  <span data-select-label class="whitespace-nowrap">+47</span>
+                  <svg data-select-chevron viewBox="0 0 20 20" aria-hidden="true" class="h-4 w-4 text-neutral-500 transition-transform">
+                    <path d="M5 7.5l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                  </svg>
+                </button>
+                <ul data-select-menu role="listbox" aria-label="Landkode" hidden class="absolute left-0 right-0 z-50 mt-2 max-h-64 overflow-auto rounded-xl border border-black/10 bg-white shadow-lg">
+                  {
+                    countryCodes.map((code) => (
+                      <li>
+                        <button type="button" role="option" data-select-option data-value={code.value} data-label={code.label} class="w-full whitespace-nowrap text-left px-3 py-2 text-sm text-neutral-900 hover:bg-neutral-100 focus:bg-neutral-100">
+                          {code.label}
+                        </button>
+                      </li>
+                    ))
+                  }
+                </ul>
+              </div>
+              <input id="newPhone" name="newPhone" type="tel" inputmode="numeric" minlength="8" maxlength="8" pattern="\\d{8}" required class="w-full min-w-0 flex-1 rounded-lg border border-black/15 bg-white px-3 py-2 text-neutral-900 outline-none focus:ring-2 focus:ring-indigo-500/60" />
+            </div>
           </div>
         </div>
         <div class="mt-5 flex justify-end gap-2">
@@ -206,5 +249,14 @@ const desc = "Se detaljer om billetten din til vintermagien Sogndal, i en senere
     background: linear-gradient(90deg, rgba(0, 0, 0, 0.06) 25%, rgba(0, 0, 0, 0.1) 37%, rgba(0, 0, 0, 0.06) 63%);
     background-size: 400% 100%;
     animation: skeleton-shimmer 1.2s ease-in-out infinite;
+  }
+
+  .modal-panel.allow-overflow {
+    overflow: visible;
+  }
+
+  .modal-panel.allow-overflow > .modal-body,
+  .modal-panel.allow-overflow > .p-5 {
+    overflow: visible;
   }
 </style>
