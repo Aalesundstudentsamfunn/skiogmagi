@@ -37,7 +37,8 @@ export function renderTicket(ticket) {
   if (ownerEl) ownerEl.textContent = ticket.ownerName || "";
   if (emailEl) emailEl.textContent = ticket.email || "";
   if (transferIdInput && "value" in transferIdInput) {
-    transferIdInput.value = ticket.id || "";
+    const ticketDbId = ticket?.ticket_id || ticket?.ticket?.ticket_id || ticket?.ticketId || ticket?.ticket?.id || "";
+    transferIdInput.value = String(ticketDbId || ticket.id || ticket.ref_id || "");
   }
 
   // Phone row
@@ -221,7 +222,8 @@ export function initTicketDialogs(setStatusFn) {
       const origRow = document.getElementById("row-original");
       const origEl = document.getElementById("ticket-original");
       const currentOwner = document.getElementById("ticket-owner")?.textContent || "";
-      const ticketId = document.getElementById("ticket-id")?.textContent || "";
+      const ticketIdInput = document.getElementById("transferTicketId");
+      const ticketId = (ticketIdInput && "value" in ticketIdInput ? ticketIdInput.value : "") || document.getElementById("ticket-id")?.textContent || "";
 
       try {
         const formData = new FormData(transferForm);
