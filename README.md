@@ -200,4 +200,4 @@ PUBLIC_CLOUDINARY_CLOUD_NAME
 
 This project is proprietary and maintained for the Ski & Magi crew.
 
-PS: Takk til GPT for rask readme
+PS: GPT for rask readme
