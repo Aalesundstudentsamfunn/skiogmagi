@@ -21,7 +21,15 @@ const currentPath = Astro.url?.pathname || "/";
     <div class="promo-bar__inner">
       <span class="promo-bar__dot" aria-hidden="true"></span>
       <span>
-        Bestill heiskort nå! Bruk koden <strong>sogn2d</strong> ved bestilling for å få Ski &amp; Magi pris.
+        <a
+          class="promo-bar__link"
+          href="https://sogndal.skiperformance.com/no/shopp#/no/buy?is_promo=1&is_promo_offer=0&promo_connector_id=8"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Bestill heiskort nå!
+        </a>{" "}
+        Bruk koden <strong>sogn2d</strong> ved bestilling for å få Ski &amp; Magi pris.
       </span>
       <button type="button" class="promo-bar__close" data-promo-close aria-label="Lukk varsel">×</button>
     </div>
@@ -222,6 +230,18 @@ const currentPath = Astro.url?.pathname || "/";
     box-shadow: 0 0 8px rgba(52, 211, 153, 0.7);
     flex: 0 0 auto;
     animation: promo-pulse 1.8s ease-in-out infinite;
+  }
+
+  .promo-bar__link {
+    color: #fff;
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-thickness: 2px;
+  }
+
+  .promo-bar__link:hover {
+    opacity: 0.9;
   }
 
   .promo-bar__close {
