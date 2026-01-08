@@ -9,6 +9,7 @@ const links = [
   { name: "Se billett", href: "/billett" },
   { name: "Booking", href: "/booking" },
   { name: "Program", href: "/program" },
+  { name: "Heiskort", href: "https://sogndal.skiperformance.com/no/shopp#/no/buy?is_promo=1&is_promo_offer=0&promo_connector_id=8" },
 ];
 
 const ticketLink = { name: "Kjøp billett", href: "https://tikkio.com/events/60480" };
@@ -16,6 +17,15 @@ const currentPath = Astro.url?.pathname || "/";
 ---
 
 <header id="site-header" class="fixed top-0 left-0 w-full z-50">
+  <div class="promo-bar" data-promo-bar>
+    <div class="promo-bar__inner">
+      <span class="promo-bar__dot" aria-hidden="true"></span>
+      <span>
+        Bestill heiskort nå! Bruk koden <strong>sogn2d</strong> ved bestilling for å få Ski &amp; Magi pris.
+      </span>
+      <button type="button" class="promo-bar__close" data-promo-close aria-label="Lukk varsel">×</button>
+    </div>
+  </div>
   <nav id="site-nav" class="px-8 lg:px-16 py-4 text-white transition-colors">
     <div class="flex items-center justify-between w-full mx-auto">
       <!-- Logo -->
@@ -33,7 +43,12 @@ const currentPath = Astro.url?.pathname || "/";
                 {l.name}
               </span>
             ) : (
-              <a href={l.href} class={`relative transition-colors duration-300 hover:opacity-90 ${currentPath === l.href ? "font-semibold after:absolute after:-bottom-1.5 after:left-0 after:w-full after:h-0.5 after:bg-linear-to-r after:from-sky-400 after:to-fuchsia-400 after:rounded-full" : ""}`}>
+              <a
+                href={l.href}
+                target={l.href.startsWith("http") ? "_blank" : undefined}
+                rel={l.href.startsWith("http") ? "noreferrer" : undefined}
+                class={`relative transition-colors duration-300 hover:opacity-90 ${currentPath === l.href ? "font-semibold after:absolute after:-bottom-1.5 after:left-0 after:w-full after:h-0.5 after:bg-linear-to-r after:from-sky-400 after:to-fuchsia-400 after:rounded-full" : ""}`}
+              >
                 {l.name}
               </a>
             )
@@ -62,7 +77,12 @@ const currentPath = Astro.url?.pathname || "/";
               {l.name}
             </span>
           ) : (
-            <a href={l.href} class={`block font-medium transition-colors ${currentPath === l.href ? "font-semibold" : "opacity-80 hover:opacity-100"}`}>
+            <a
+              href={l.href}
+              target={l.href.startsWith("http") ? "_blank" : undefined}
+              rel={l.href.startsWith("http") ? "noreferrer" : undefined}
+              class={`block font-medium transition-colors ${currentPath === l.href ? "font-semibold" : "opacity-80 hover:opacity-100"}`}
+            >
               {l.name}
             </a>
           )
@@ -77,6 +97,17 @@ const currentPath = Astro.url?.pathname || "/";
   document.addEventListener("DOMContentLoaded", () => {
     const nav = document.getElementById("site-nav");
     if (!nav) return;
+
+    const promoBar = document.querySelector("[data-promo-bar]");
+    const promoClose = document.querySelector("[data-promo-close]");
+    if (promoClose && promoBar) {
+      promoClose.addEventListener("click", () => {
+        promoBar.classList.add("promo-bar--dismissed");
+        window.setTimeout(() => {
+          promoBar.setAttribute("hidden", "");
+        }, 300);
+      });
+    }
 
     const btn = nav.querySelector("[data-menu-btn]");
     const menu = nav.querySelector("[data-mobile_menu],[data-mobile-menu]") || nav.querySelector("[data-mobile-menu]");
@@ -133,6 +164,126 @@ const currentPath = Astro.url?.pathname || "/";
 </script>
 
 <style is:global>
+  .promo-bar {
+    width: 100%;
+    padding: 0.5rem 1rem;
+    background: linear-gradient(90deg, rgba(16, 185, 129, 0.25), rgba(14, 116, 144, 0.25), rgba(59, 130, 246, 0.25));
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    position: relative;
+    overflow: hidden;
+    animation: promo-slide-in 320ms ease-out;
+    transition:
+      transform 260ms ease,
+      opacity 260ms ease;
+  }
+
+  .promo-bar::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0));
+    transform: translateX(-100%);
+    animation: promo-shimmer 3.5s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  .promo-bar--dismissed {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+
+  .promo-bar__inner {
+    max-width: 64rem;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    position: relative;
+    padding-right: 2.5rem;
+    padding-left: 2.5rem;
+    color: #fff;
+    font-size: 0.8rem;
+    text-align: center;
+  }
+
+  .promo-bar__inner strong {
+    font-weight: 700;
+    letter-spacing: 0.04em;
+  }
+
+  .promo-bar__dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 9999px;
+    background: #34d399;
+    box-shadow: 0 0 8px rgba(52, 211, 153, 0.7);
+    flex: 0 0 auto;
+    animation: promo-pulse 1.8s ease-in-out infinite;
+  }
+
+  .promo-bar__close {
+    position: absolute;
+    right: 0.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    border: 0;
+    background: transparent;
+    color: #fff;
+    font-size: 1.1rem;
+    line-height: 1;
+    opacity: 0.8;
+    cursor: pointer;
+  }
+
+  .promo-bar__close:hover {
+    opacity: 1;
+  }
+
+  @keyframes promo-pulse {
+    0%,
+    100% {
+      transform: scale(1);
+      box-shadow: 0 0 8px rgba(52, 211, 153, 0.7);
+    }
+    50% {
+      transform: scale(1.15);
+      box-shadow: 0 0 14px rgba(52, 211, 153, 0.9);
+    }
+  }
+
+  @keyframes promo-shimmer {
+    0% {
+      transform: translateX(-100%);
+    }
+    50% {
+      transform: translateX(100%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
+  }
+
+  @keyframes promo-slide-in {
+    from {
+      transform: translateY(-100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .promo-bar__inner {
+      font-size: 0.75rem;
+      line-height: 1.2;
+    }
+  }
+
   /* Mobile menu animation */
   #site-nav [data-mobile-menu] {
     position: absolute;
