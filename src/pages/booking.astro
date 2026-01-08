@@ -1,0 +1,1248 @@
+---
+import PageLayout from "../layouts/PageLayout.astro";
+import Footer from "../components/Footer.astro";
+import GlassPanel from "../components/ui/GlassPanel.astro";
+
+const title = "Booking";
+const desc = "Send inn romønsker til Ski & Magi i Sogndal. Fyll inn romtype, romansvarlig og kontaktinfo for alle på rommet.";
+const ticketIdHelp = "Finnes på Tikkio under billetter eller i e-posten din fra Tikkio. Referanse-ID er det samme.";
+const roomTypes = [
+  { value: "2", label: "2 personer" },
+  { value: "3", label: "3 personer" },
+  { value: "4", label: "4 personer" },
+];
+const countryCodes = [
+  { value: "+47", label: "🇳🇴 +47" },
+  { value: "+46", label: "🇸🇪 +46" },
+  { value: "+45", label: "🇩🇰 +45" },
+  { value: "+358", label: "🇫🇮 +358" },
+  { value: "+44", label: "🇬🇧 +44" },
+  { value: "+49", label: "🇩🇪 +49" },
+  { value: "+31", label: "🇳🇱 +31" },
+  { value: "+33", label: "🇫🇷 +33" },
+  { value: "+34", label: "🇪🇸 +34" },
+  { value: "+39", label: "🇮🇹 +39" },
+  { value: "+48", label: "🇵🇱 +48" },
+  { value: "+370", label: "🇱🇹 +370" },
+  { value: "+371", label: "🇱🇻 +371" },
+  { value: "+372", label: "🇪🇪 +372" },
+  { value: "+40", label: "🇷🇴 +40" },
+  { value: "+359", label: "🇧🇬 +359" },
+  { value: "+91", label: "🇮🇳 +91" },
+  { value: "+63", label: "🇵🇭 +63" },
+  { value: "+1", label: "🇺🇸 🇨🇦 +1" },
+];
+---
+
+<PageLayout title={title} description={desc}>
+  <section id="hero" class="hero relative isolate overflow-hidden mt-20 sm:mt-24">
+    <div class="mx-auto max-w-6xl px-6 pt-16 sm:pt-20 text-white">
+      <h1 class="text-4xl font-extrabold drop-shadow sm:text-5xl">{title}</h1>
+      <p class="mt-3 text-white/85 max-w-2xl">{desc}</p>
+    </div>
+  </section>
+
+  <section class="mx-auto w-full max-w-6xl px-6 pb-16 pt-8 text-white relative z-10">
+    <GlassPanel class="text-white !overflow-visible" style="overflow: visible;">
+      <div id="booking-success" hidden class="rounded-2xl border border-white/15 bg-white/10 p-6 text-white">
+        <h2 class="text-2xl font-bold">Takk for innsendingen!</h2>
+        <p class="mt-2 text-white/85">Vi har mottatt rombookingen din og tar kontakt med romansvarlig snart.</p>
+      </div>
+
+      <div id="booking-error" hidden class="rounded-2xl border border-rose-300/40 bg-rose-500/10 p-4 text-rose-50">
+        <p id="booking-error-title" class="font-semibold">Noe gikk galt.</p>
+        <p id="booking-error-message" class="mt-1 text-sm text-rose-100/90">Prøv igjen om litt, eller ta kontakt hvis problemet fortsetter.</p>
+      </div>
+
+      <form id="booking-form" name="room-booking" method="POST" data-netlify="true" netlify-honeypot="bot-field" class="grid gap-6">
+        <input type="hidden" name="form-name" value="room-booking" />
+        <p class="hidden">
+          <label>
+            Ikke fyll ut dette feltet:
+            <input name="bot-field" />
+          </label>
+        </p>
+        <div data-booking-details class="grid gap-4">
+          <div>
+            <span id="roomTypeLabel" class="text-sm font-semibold text-white/80">Antall personer per rom</span>
+            <div class="relative mt-1" data-select data-placeholder="Velg romtype" data-select-id="roomType" data-roomtype-select>
+              <input id="roomType" name="roomType" type="hidden" data-select-value required />
+              <button type="button" data-select-trigger data-roomtype-trigger aria-labelledby="roomTypeLabel roomTypeValue" aria-haspopup="listbox" aria-expanded="false" class="flex w-full items-center justify-between gap-2 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-left text-white/90 outline-none focus:ring-2 focus:ring-white/60">
+                <span id="roomTypeValue" data-select-label class="flex items-center gap-2">
+                  <span data-roomtype-dot class="h-2 w-2 rounded-full bg-white/30"></span>
+                  <span data-select-text class="truncate">Velg romtype</span>
+                </span>
+                <svg data-select-chevron viewBox="0 0 20 20" aria-hidden="true" class="h-4 w-4 text-white/70 transition-transform">
+                  <path d="M5 7.5l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                </svg>
+              </button>
+              <ul data-select-menu role="listbox" aria-label="Romtype" hidden class="absolute left-0 right-0 z-50 mt-2 max-h-64 overflow-auto rounded-xl border border-white/20 bg-slate-900/80 backdrop-blur-md shadow-lg">
+                {
+                  roomTypes.map((type) => (
+                    <li>
+                      <button type="button" role="option" data-select-option data-roomtype-option data-value={type.value} data-label={type.label} data-base-label={type.label} class="flex w-full items-center gap-2 whitespace-nowrap px-3 py-2 text-left text-sm text-white/90 hover:bg-white/10 focus:bg-white/10">
+                        <span data-roomtype-dot class="h-2 w-2 rounded-full bg-white/30" />
+                        <span data-roomtype-label>{type.label}</span>
+                      </button>
+                    </li>
+                  ))
+                }
+              </ul>
+            </div>
+            <p id="roomTypeError" hidden class="mt-2 text-sm text-rose-100">Velg romtype før du sender inn.</p>
+            <p class="mt-2 text-sm text-white/70">Velg antall personer, så åpnes feltene for alle i rommet.</p>
+          </div>
+
+          <fieldset data-person="1" hidden disabled class="rounded-2xl border border-white/15 bg-white/5 p-4 sm:p-5">
+            <legend class="px-2 text-sm font-semibold text-white/80">Romansvarlig (person 1)</legend>
+            <div class="grid gap-4">
+              <div>
+                <div class="flex items-center gap-2 text-sm text-white/80">
+                  <label for="ticketId1">Billett-ID</label>
+                  <button type="button" data-help-toggle aria-controls="ticketIdHelp1" aria-expanded="false" aria-label={ticketIdHelp} class="inline-flex h-5 w-5 items-center justify-center rounded-full border border-white/30 text-[11px] text-white/80">
+                    ?
+                  </button>
+                </div>
+                <p id="ticketIdHelp1" data-help-panel hidden class="mt-2 text-xs text-white/70">{ticketIdHelp}</p>
+                <div class="mt-1 grid gap-3 sm:grid-cols-[1fr_auto]">
+                  <input id="ticketId1" name="ticketId1" data-ticket-input="1" inputmode="text" autocomplete="off" placeholder="F.eks. ABC123" required class="w-full rounded-lg border border-white/20 bg-white/10 px-4 py-3 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
+                  <button type="button" data-ticket-check="1" class="inline-flex items-center justify-center rounded-lg bg-white/90 text-sky-900 px-6 py-3 font-semibold shadow-sm transition hover:bg-white"> Hent detaljer </button>
+                </div>
+                <p data-ticket-status="1" class="mt-2 text-sm text-white/75"></p>
+              </div>
+
+              <div data-ticket-skeleton hidden class="grid gap-3 sm:grid-cols-2">
+                <div class="h-10 rounded-lg skeleton sm:col-span-2"></div>
+                <div class="h-10 rounded-lg skeleton"></div>
+                <div class="h-10 rounded-lg skeleton"></div>
+              </div>
+
+              <div data-person-details hidden class="grid gap-4 sm:grid-cols-2">
+                <div data-solo-option class="sm:col-span-2" hidden>
+                  <input id="soloBooking" name="soloBooking" type="hidden" value="no" />
+                  <label class="inline-flex items-center gap-2 text-sm text-white/80">
+                    <input id="soloBookingToggle" type="checkbox" class="h-4 w-4 rounded border-white/30 bg-white/10 text-white focus:ring-2 focus:ring-white/60" />
+                    <span>Jeg reiser alene (ingen person 2)</span>
+                  </label>
+                </div>
+                <div class="sm:col-span-2">
+                  <label for="romansvarligName" class="text-sm text-white/80">Fullt navn</label>
+                  <input id="romansvarligName" name="romansvarligName" autocomplete="name" required class="mt-1 w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
+                </div>
+                <div>
+                  <label for="romansvarligEmail" class="text-sm text-white/80">E-post</label>
+                  <input id="romansvarligEmail" name="romansvarligEmail" type="email" autocomplete="email" required class="mt-1 w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
+                </div>
+                <div>
+                  <label for="romansvarligPhone" class="text-sm text-white/80">Telefon</label>
+                  <div class="mt-1 flex flex-col gap-2 sm:flex-row sm:items-center">
+                    <div class="relative w-full sm:w-32" data-select data-default="+47" data-placeholder="+47">
+                      <input id="romansvarligCountryCode" name="romansvarligCountryCode" type="hidden" value="+47" data-select-value required />
+                      <button type="button" data-select-trigger aria-label="Landkode" aria-haspopup="listbox" aria-expanded="false" class="flex w-full items-center justify-between gap-2 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-left text-white/90 outline-none focus:ring-2 focus:ring-white/60">
+                        <span data-select-label class="whitespace-nowrap">+47</span>
+                        <svg data-select-chevron viewBox="0 0 20 20" aria-hidden="true" class="h-4 w-4 text-white/70 transition-transform">
+                          <path d="M5 7.5l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                        </svg>
+                      </button>
+                      <ul data-select-menu role="listbox" aria-label="Landkode" hidden class="absolute left-0 right-0 z-50 mt-2 max-h-64 overflow-auto rounded-xl border border-white/20 bg-slate-900/80 backdrop-blur-md shadow-lg">
+                        {
+                          countryCodes.map((code) => (
+                            <li>
+                              <button type="button" role="option" data-select-option data-value={code.value} data-label={code.label} class="w-full whitespace-nowrap text-left px-3 py-2 text-sm text-white/90 hover:bg-white/10 focus:bg-white/10">
+                                {code.label}
+                              </button>
+                            </li>
+                          ))
+                        }
+                      </ul>
+                    </div>
+                    <input id="romansvarligPhone" name="romansvarligPhone" type="tel" inputmode="numeric" autocomplete="tel" minlength="8" maxlength="8" pattern="\\d{8}" required class="w-full min-w-0 flex-1 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset data-person="2" hidden disabled class="rounded-2xl border border-white/15 bg-white/5 p-4 sm:p-5">
+            <legend class="px-2 text-sm font-semibold text-white/80">Person 2</legend>
+            <div class="grid gap-4">
+              <div>
+                <div class="flex items-center gap-2 text-sm text-white/80">
+                  <label for="ticketId2">Billett-ID</label>
+                  <button type="button" data-help-toggle aria-controls="ticketIdHelp2" aria-expanded="false" aria-label={ticketIdHelp} class="inline-flex h-5 w-5 items-center justify-center rounded-full border border-white/30 text-[11px] text-white/80">
+                    ?
+                  </button>
+                </div>
+                <p id="ticketIdHelp2" data-help-panel hidden class="mt-2 text-xs text-white/70">{ticketIdHelp}</p>
+                <div class="mt-1 grid gap-3 sm:grid-cols-[1fr_auto]">
+                  <input id="ticketId2" name="ticketId2" data-ticket-input="2" inputmode="text" autocomplete="off" placeholder="F.eks. ABC123" required class="w-full rounded-lg border border-white/20 bg-white/10 px-4 py-3 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
+                  <button type="button" data-ticket-check="2" class="inline-flex items-center justify-center rounded-lg bg-white/90 text-sky-900 px-6 py-3 font-semibold shadow-sm transition hover:bg-white"> Hent detaljer </button>
+                </div>
+                <p data-ticket-status="2" class="mt-2 text-sm text-white/75"></p>
+              </div>
+
+              <div data-ticket-skeleton hidden class="grid gap-3 sm:grid-cols-2">
+                <div class="h-10 rounded-lg skeleton sm:col-span-2"></div>
+                <div class="h-10 rounded-lg skeleton"></div>
+                <div class="h-10 rounded-lg skeleton"></div>
+              </div>
+
+              <div data-person-details hidden class="grid gap-4 sm:grid-cols-2">
+                <div class="sm:col-span-2">
+                  <label for="person2Name" class="text-sm text-white/80">Fullt navn</label>
+                  <input id="person2Name" name="person2Name" autocomplete="name" required class="mt-1 w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
+                </div>
+                <div>
+                  <label for="person2Email" class="text-sm text-white/80">E-post</label>
+                  <input id="person2Email" name="person2Email" type="email" autocomplete="email" required class="mt-1 w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
+                </div>
+                <div>
+                  <label for="person2Phone" class="text-sm text-white/80">Telefon</label>
+                  <div class="mt-1 flex flex-col gap-2 sm:flex-row sm:items-center">
+                    <div class="relative w-full sm:w-32" data-select data-default="+47" data-placeholder="+47">
+                      <input id="person2CountryCode" name="person2CountryCode" type="hidden" value="+47" data-select-value required />
+                      <button type="button" data-select-trigger aria-label="Landkode" aria-haspopup="listbox" aria-expanded="false" class="flex w-full items-center justify-between gap-2 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-left text-white/90 outline-none focus:ring-2 focus:ring-white/60">
+                        <span data-select-label class="whitespace-nowrap">+47</span>
+                        <svg data-select-chevron viewBox="0 0 20 20" aria-hidden="true" class="h-4 w-4 text-white/70 transition-transform">
+                          <path d="M5 7.5l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                        </svg>
+                      </button>
+                      <ul data-select-menu role="listbox" aria-label="Landkode" hidden class="absolute left-0 right-0 z-50 mt-2 max-h-64 overflow-auto rounded-xl border border-white/20 bg-slate-900/80 backdrop-blur-md shadow-lg">
+                        {
+                          countryCodes.map((code) => (
+                            <li>
+                              <button type="button" role="option" data-select-option data-value={code.value} data-label={code.label} class="w-full whitespace-nowrap text-left px-3 py-2 text-sm text-white/90 hover:bg-white/10 focus:bg-white/10">
+                                {code.label}
+                              </button>
+                            </li>
+                          ))
+                        }
+                      </ul>
+                    </div>
+                    <input id="person2Phone" name="person2Phone" type="tel" inputmode="numeric" autocomplete="tel" minlength="8" maxlength="8" pattern="\\d{8}" required class="w-full min-w-0 flex-1 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset data-person="3" hidden disabled class="rounded-2xl border border-white/15 bg-white/5 p-4 sm:p-5">
+            <legend class="px-2 text-sm font-semibold text-white/80">Person 3</legend>
+            <div class="grid gap-4">
+              <div>
+                <div class="flex items-center gap-2 text-sm text-white/80">
+                  <label for="ticketId3">Billett-ID</label>
+                  <button type="button" data-help-toggle aria-controls="ticketIdHelp3" aria-expanded="false" aria-label={ticketIdHelp} class="inline-flex h-5 w-5 items-center justify-center rounded-full border border-white/30 text-[11px] text-white/80">
+                    ?
+                  </button>
+                </div>
+                <p id="ticketIdHelp3" data-help-panel hidden class="mt-2 text-xs text-white/70">{ticketIdHelp}</p>
+                <div class="mt-1 grid gap-3 sm:grid-cols-[1fr_auto]">
+                  <input id="ticketId3" name="ticketId3" data-ticket-input="3" inputmode="text" autocomplete="off" placeholder="F.eks. ABC123" required class="w-full rounded-lg border border-white/20 bg-white/10 px-4 py-3 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
+                  <button type="button" data-ticket-check="3" class="inline-flex items-center justify-center rounded-lg bg-white/90 text-sky-900 px-6 py-3 font-semibold shadow-sm transition hover:bg-white"> Hent detaljer </button>
+                </div>
+                <p data-ticket-status="3" class="mt-2 text-sm text-white/75"></p>
+              </div>
+
+              <div data-ticket-skeleton hidden class="grid gap-3 sm:grid-cols-2">
+                <div class="h-10 rounded-lg skeleton sm:col-span-2"></div>
+                <div class="h-10 rounded-lg skeleton"></div>
+                <div class="h-10 rounded-lg skeleton"></div>
+              </div>
+
+              <div data-person-details hidden class="grid gap-4 sm:grid-cols-2">
+                <div class="sm:col-span-2">
+                  <label for="person3Name" class="text-sm text-white/80">Fullt navn</label>
+                  <input id="person3Name" name="person3Name" autocomplete="name" required class="mt-1 w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
+                </div>
+                <div>
+                  <label for="person3Email" class="text-sm text-white/80">E-post</label>
+                  <input id="person3Email" name="person3Email" type="email" autocomplete="email" required class="mt-1 w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
+                </div>
+                <div>
+                  <label for="person3Phone" class="text-sm text-white/80">Telefon</label>
+                  <div class="mt-1 flex flex-col gap-2 sm:flex-row sm:items-center">
+                    <div class="relative w-full sm:w-32" data-select data-default="+47" data-placeholder="+47">
+                      <input id="person3CountryCode" name="person3CountryCode" type="hidden" value="+47" data-select-value required />
+                      <button type="button" data-select-trigger aria-label="Landkode" aria-haspopup="listbox" aria-expanded="false" class="flex w-full items-center justify-between gap-2 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-left text-white/90 outline-none focus:ring-2 focus:ring-white/60">
+                        <span data-select-label class="whitespace-nowrap">+47</span>
+                        <svg data-select-chevron viewBox="0 0 20 20" aria-hidden="true" class="h-4 w-4 text-white/70 transition-transform">
+                          <path d="M5 7.5l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                        </svg>
+                      </button>
+                      <ul data-select-menu role="listbox" aria-label="Landkode" hidden class="absolute left-0 right-0 z-50 mt-2 max-h-64 overflow-auto rounded-xl border border-white/20 bg-slate-900/80 backdrop-blur-md shadow-lg">
+                        {
+                          countryCodes.map((code) => (
+                            <li>
+                              <button type="button" role="option" data-select-option data-value={code.value} data-label={code.label} class="w-full whitespace-nowrap text-left px-3 py-2 text-sm text-white/90 hover:bg-white/10 focus:bg-white/10">
+                                {code.label}
+                              </button>
+                            </li>
+                          ))
+                        }
+                      </ul>
+                    </div>
+                    <input id="person3Phone" name="person3Phone" type="tel" inputmode="numeric" autocomplete="tel" minlength="8" maxlength="8" pattern="\\d{8}" required class="w-full min-w-0 flex-1 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset data-person="4" hidden disabled class="rounded-2xl border border-white/15 bg-white/5 p-4 sm:p-5">
+            <legend class="px-2 text-sm font-semibold text-white/80">Person 4</legend>
+            <div class="grid gap-4">
+              <div>
+                <div class="flex items-center gap-2 text-sm text-white/80">
+                  <label for="ticketId4">Billett-ID</label>
+                  <button type="button" data-help-toggle aria-controls="ticketIdHelp4" aria-expanded="false" aria-label={ticketIdHelp} class="inline-flex h-5 w-5 items-center justify-center rounded-full border border-white/30 text-[11px] text-white/80">
+                    ?
+                  </button>
+                </div>
+                <p id="ticketIdHelp4" data-help-panel hidden class="mt-2 text-xs text-white/70">{ticketIdHelp}</p>
+                <div class="mt-1 grid gap-3 sm:grid-cols-[1fr_auto]">
+                  <input id="ticketId4" name="ticketId4" data-ticket-input="4" inputmode="text" autocomplete="off" placeholder="F.eks. ABC123" required class="w-full rounded-lg border border-white/20 bg-white/10 px-4 py-3 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
+                  <button type="button" data-ticket-check="4" class="inline-flex items-center justify-center rounded-lg bg-white/90 text-sky-900 px-6 py-3 font-semibold shadow-sm transition hover:bg-white"> Hent detaljer </button>
+                </div>
+                <p data-ticket-status="4" class="mt-2 text-sm text-white/75"></p>
+              </div>
+
+              <div data-ticket-skeleton hidden class="grid gap-3 sm:grid-cols-2">
+                <div class="h-10 rounded-lg skeleton sm:col-span-2"></div>
+                <div class="h-10 rounded-lg skeleton"></div>
+                <div class="h-10 rounded-lg skeleton"></div>
+              </div>
+
+              <div data-person-details hidden class="grid gap-4 sm:grid-cols-2">
+                <div class="sm:col-span-2">
+                  <label for="person4Name" class="text-sm text-white/80">Fullt navn</label>
+                  <input id="person4Name" name="person4Name" autocomplete="name" required class="mt-1 w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
+                </div>
+                <div>
+                  <label for="person4Email" class="text-sm text-white/80">E-post</label>
+                  <input id="person4Email" name="person4Email" type="email" autocomplete="email" required class="mt-1 w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
+                </div>
+                <div>
+                  <label for="person4Phone" class="text-sm text-white/80">Telefon</label>
+                  <div class="mt-1 flex flex-col gap-2 sm:flex-row sm:items-center">
+                    <div class="relative w-full sm:w-32" data-select data-default="+47" data-placeholder="+47">
+                      <input id="person4CountryCode" name="person4CountryCode" type="hidden" value="+47" data-select-value required />
+                      <button type="button" data-select-trigger aria-label="Landkode" aria-haspopup="listbox" aria-expanded="false" class="flex w-full items-center justify-between gap-2 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-left text-white/90 outline-none focus:ring-2 focus:ring-white/60">
+                        <span data-select-label class="whitespace-nowrap">+47</span>
+                        <svg data-select-chevron viewBox="0 0 20 20" aria-hidden="true" class="h-4 w-4 text-white/70 transition-transform">
+                          <path d="M5 7.5l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                        </svg>
+                      </button>
+                      <ul data-select-menu role="listbox" aria-label="Landkode" hidden class="absolute left-0 right-0 z-50 mt-2 max-h-64 overflow-auto rounded-xl border border-white/20 bg-slate-900/80 backdrop-blur-md shadow-lg">
+                        {
+                          countryCodes.map((code) => (
+                            <li>
+                              <button type="button" role="option" data-select-option data-value={code.value} data-label={code.label} class="w-full whitespace-nowrap text-left px-3 py-2 text-sm text-white/90 hover:bg-white/10 focus:bg-white/10">
+                                {code.label}
+                              </button>
+                            </li>
+                          ))
+                        }
+                      </ul>
+                    </div>
+                    <input id="person4Phone" name="person4Phone" type="tel" inputmode="numeric" autocomplete="tel" minlength="8" maxlength="8" pattern="\\d{8}" required class="w-full min-w-0 flex-1 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/60" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </fieldset>
+
+          <div data-terms hidden class="flex items-start gap-3 text-sm text-white/90">
+            <input id="termsValue" name="termsAgreed" type="hidden" value="no" />
+            <input id="termsToggle" type="checkbox" required class="mt-1 h-4 w-4 rounded border-white/30 bg-white/10 text-white focus:ring-2 focus:ring-white/60" />
+            <p class="mt-0.5">
+              <label for="termsToggle">Jeg forstår og godtar</label><button type="button" data-terms-open class="ml-1 inline-flex items-center underline decoration-white/50 underline-offset-2 transition hover:decoration-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60"> vilkårene for booking </button>.
+            </p>
+          </div>
+          <button id="booking-submit" type="submit" class="inline-flex items-center justify-center rounded-full bg-white/95 px-6 py-3 text-sm font-semibold text-sky-900 shadow-lg shadow-sky-500/20 transition hover:bg-white">
+            <span data-label>Send inn rombooking</span>
+          </button>
+        </div>
+      </form>
+    </GlassPanel>
+  </section>
+
+  <div class="mt-auto">
+    <Footer />
+  </div>
+</PageLayout>
+
+<dialog id="terms-dialog" class="modal" aria-labelledby="terms-title">
+  <div class="modal-container fixed inset-0 grid place-items-center p-4">
+    <div class="modal-panel relative w-full max-w-2xl overflow-hidden rounded-2xl border border-black/10 bg-white text-neutral-900 shadow-2xl ring-1 ring-black/5">
+      <header class="flex items-start justify-between gap-4 border-b border-neutral-200 px-5 py-4">
+        <div>
+          <h2 id="terms-title" class="text-xl font-bold text-neutral-900">Vilkår for booking</h2>
+          <p class="mt-1 text-sm text-neutral-600">Standard hotellregler gjelder.</p>
+        </div>
+        <button type="button" class="rounded-full p-2 text-neutral-600 transition hover:bg-neutral-100 hover:text-neutral-900" aria-label="Lukk" data-terms-close>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5">
+            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 0 1 1.414 0L10 8.586l4.293-4.293a1 1 0 1 1 1.414 1.414L11.414 10l4.293 4.293a1 1 0 0 1-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 0 1-1.414-1.414L8.586 10 4.293 5.707a1 1 0 0 1 0-1.414Z" clip-rule="evenodd"></path>
+          </svg>
+        </button>
+      </header>
+      <div class="p-5 text-sm text-neutral-700">
+        <p class="font-semibold text-neutral-900">Ansvar og eierskap</p>
+        <ul class="mt-2 list-disc pl-5 space-y-2">
+          <li>Romansvarlig (person 1) er kontaktpunktet for rommet og holdes ansvarlig ved brudd på regler eller skader.</li>
+          <li>Alle på rommet skal følge hotellregler, husordensregler og lokale retningslinjer.</li>
+          <li>Skader eller mangler på rommet meldes fra så snart som mulig.</li>
+          <li>Ved skade/ødeleggelse kan kostnader bli fakturert romansvarlig.</li>
+        </ul>
+
+        <p class="mt-5 font-semibold text-neutral-900">Ro og sikkerhet</p>
+        <ul class="mt-2 list-disc pl-5 space-y-2">
+          <li>Respekter ro-tider og vis hensyn til andre gjester.</li>
+          <li>Ikke røyk, bruk åpen ild eller gjør endringer på rommet som kan skade inventar.</li>
+          <li>Brudd på regler kan medføre bortvisning uten refusjon.</li>
+        </ul>
+
+        <p class="mt-5 text-xs text-neutral-500">Ved å sende inn booking bekrefter du at alle i rommet er informert og samtykker.</p>
+      </div>
+      <footer class="flex justify-end gap-3 border-t border-neutral-200 px-5 py-4">
+        <button type="button" class="inline-flex items-center rounded-lg bg-neutral-900 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-neutral-800" data-terms-close> Lukk </button>
+      </footer>
+    </div>
+  </div>
+</dialog>
+
+<script is:inline type="module">
+  import { fetchTicketByRefId } from "/scripts/ticket/api.js";
+
+  const roomType = document.getElementById("roomType");
+  const roomTypeError = document.getElementById("roomTypeError");
+  const roomTypeTrigger = document.querySelector("[data-roomtype-trigger]");
+  const personSections = Array.from(document.querySelectorAll("[data-person]"));
+  // Map per-person UI controls (ticket lookup + details) for easier updates.
+  const ticketSlots = personSections.map((section) => {
+    const idx = Number(section.dataset.person || 0);
+    const input = section.querySelector("[data-ticket-input]");
+    const button = section.querySelector("[data-ticket-check]");
+    const status = section.querySelector("[data-ticket-status]");
+    const skeleton = section.querySelector("[data-ticket-skeleton]");
+    const details = section.querySelector("[data-person-details]");
+    return {
+      idx,
+      input,
+      button,
+      status,
+      skeleton,
+      details,
+      label: button?.textContent?.trim() || "Hent detaljer",
+      validated: false,
+      ticket: null,
+      loading: false,
+    };
+  });
+  const form = document.getElementById("booking-form");
+  const submitBtn = document.getElementById("booking-submit");
+  const successPanel = document.getElementById("booking-success");
+  const errorPanel = document.getElementById("booking-error");
+  const errorTitle = document.getElementById("booking-error-title");
+  const errorMessage = document.getElementById("booking-error-message");
+  const roomTypeOptions = Array.from(document.querySelectorAll("[data-roomtype-option]"));
+  const selectEls = Array.from(document.querySelectorAll("[data-select]"));
+  const termsDialog = document.getElementById("terms-dialog");
+  const termsOpeners = Array.from(document.querySelectorAll("[data-terms-open]"));
+  const termsClosers = termsDialog ? Array.from(termsDialog.querySelectorAll("[data-terms-close]")) : [];
+  const helpToggles = Array.from(document.querySelectorAll("[data-help-toggle]"));
+  const helpPanels = Array.from(document.querySelectorAll("[data-help-panel]"));
+  const soloCheckbox = document.getElementById("soloBookingToggle");
+  const soloOption = document.querySelector("[data-solo-option]");
+  const soloValueInput = document.getElementById("soloBooking");
+  const availabilityUrl = "/.netlify/functions/room-availability";
+  let latestCounts = null;
+  const submitLabel = submitBtn?.querySelector("[data-label]");
+  const termsCheckbox = document.getElementById("termsToggle");
+  const termsValueInput = document.getElementById("termsValue");
+
+  // Close the terms modal with a short fade-out animation.
+  const closeTerms = () => {
+    if (!termsDialog?.hasAttribute("open")) return;
+    termsDialog.classList.add("closing");
+    setTimeout(() => {
+      try {
+        termsDialog.close();
+      } catch {
+        termsDialog.removeAttribute("open");
+      }
+      termsDialog.classList.remove("closing");
+    }, 150);
+  };
+
+  // Open the terms modal with dialog fallback for older browsers.
+  const openTerms = () => {
+    if (!termsDialog) return;
+    try {
+      termsDialog.showModal();
+    } catch {
+      termsDialog.setAttribute("open", "true");
+    }
+  };
+
+  // Collapse ticket help hints except the currently toggled one.
+  const closeAllHelp = (exceptId = "") => {
+    helpPanels.forEach((panel) => {
+      if (panel.id !== exceptId) panel.hidden = true;
+    });
+    helpToggles.forEach((btn) => {
+      const targetId = btn.getAttribute("aria-controls") || "";
+      if (targetId !== exceptId) btn.setAttribute("aria-expanded", "false");
+    });
+  };
+
+  // Show the top-level error panel and move focus to it.
+  const setError = (title, message) => {
+    if (errorTitle && title) errorTitle.textContent = title;
+    if (errorMessage && message) errorMessage.textContent = message;
+    if (errorPanel) errorPanel.hidden = false;
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  // Update the inline status text for a ticket lookup slot.
+  const setTicketStatus = (slot, message, tone = "info") => {
+    if (!slot?.status) return;
+    slot.status.textContent = message || "";
+    slot.status.className = `mt-2 text-sm ${tone === "error" ? "text-rose-100" : tone === "success" ? "text-emerald-200" : "text-white/75"}`;
+  };
+
+  // Lock or unlock the ticket ref input after a successful lookup.
+  const setSlotLocked = (slot, locked) => {
+    if (!slot?.input) return;
+    slot.input.readOnly = locked;
+    slot.input.setAttribute("aria-readonly", locked ? "true" : "false");
+    slot.input.classList.toggle("opacity-70", locked);
+    slot.input.classList.toggle("cursor-not-allowed", locked);
+    slot.input.classList.toggle("bg-white/5", locked);
+  };
+
+  // Reset ticket slot state, optionally clearing the ref input.
+  const resetTicketSlot = (slot, clearInput = false, keepStatus = false) => {
+    if (!slot) return;
+    slot.validated = false;
+    slot.ticket = null;
+    slot.loading = false;
+    if (!keepStatus) setTicketStatus(slot, "", "info");
+    setSlotLocked(slot, false);
+    if (slot.skeleton) slot.skeleton.hidden = true;
+    if (slot.details) {
+      slot.details.hidden = true;
+      slot.details.querySelectorAll("input, select, textarea, button").forEach((el) => {
+        el.setAttribute("disabled", "");
+        if (el.matches("input, textarea")) el.value = "";
+      });
+    }
+    if (clearInput && slot.input) slot.input.value = "";
+  };
+
+  // Sync skeleton/details visibility with slot state.
+  const updateSlotVisual = (slot) => {
+    if (!slot) return;
+    if (slot.skeleton) slot.skeleton.hidden = !slot.loading;
+    if (slot.details) {
+      const showDetails = slot.validated && !slot.loading;
+      slot.details.hidden = !showDetails;
+      slot.details.querySelectorAll("input, select, textarea, button").forEach((el) => {
+        if (showDetails) {
+          el.removeAttribute("disabled");
+        } else {
+          el.setAttribute("disabled", "");
+        }
+      });
+    }
+  };
+
+  // Solo booking in a 2-person room only needs one ticket.
+  const getEffectiveCount = () => {
+    const count = Number(roomType?.value || 0);
+    if (count === 2 && soloCheckbox?.checked) return 1;
+    return count;
+  };
+
+  // Split a phone string into country code + local digits for prefilling.
+  const parseTicketPhone = (raw, selectEl) => {
+    const cleaned = String(raw || "").replace(/\s+/g, "");
+    if (!cleaned) return null;
+    if (!cleaned.startsWith("+")) {
+      return { code: "", local: cleaned.replace(/\D/g, "") };
+    }
+    const options = Array.from(selectEl?.querySelectorAll("[data-select-option]") || [])
+      .map((opt) => opt.dataset.value)
+      .filter(Boolean)
+      .sort((a, b) => b.length - a.length);
+    const match = options.find((code) => cleaned.startsWith(code));
+    if (match) {
+      return { code: match, local: cleaned.slice(match.length).replace(/\D/g, "") };
+    }
+    return { code: "", local: cleaned.replace(/\D/g, "") };
+  };
+
+  // Gate room booking to only "Grunnpakke" tickets.
+  const allowedTicketType = "grunnpakke";
+
+  // Normalize ticket type labels for comparison.
+  const normalizeTicketType = (value) =>
+    String(value || "")
+      .trim()
+      .toLowerCase();
+
+  const isAllowedTicketType = (value) => normalizeTicketType(value).includes(allowedTicketType);
+
+  // Ticket API returns slightly different shapes depending on endpoint/version.
+  const getTicketType = (ticket) => ticket?.product || ticket?.name || ticket?.ticket?.name || ticket?.ticket?.title || "";
+
+  // Extract the database ticket id so we can store it on form submit.
+  const getTicketDbId = (ticket) =>
+    ticket?.ticket_id || ticket?.ticket?.ticket_id || ticket?.ticketId || ticket?.ticket?.id || "";
+
+  // Normalize ticket ids so we can compare ref ids and numeric ids consistently.
+  const normalizeTicketId = (value) => String(value || "").trim().toUpperCase();
+  const getTicketRefId = (ticket) => ticket?.ref_id || ticket?.refId || ticket?.reference || "";
+
+  const hasDuplicateTicketInput = (id, slot) => {
+    const normalized = normalizeTicketId(id);
+    if (!normalized) return false;
+    return ticketSlots.some((other) => {
+      if (other === slot) return false;
+      return normalizeTicketId(other.input?.value) === normalized;
+    });
+  };
+
+  const isDuplicateTicket = (ticket, slot) => {
+    const ticketDbId = getTicketDbId(ticket);
+    const ticketRefId = getTicketRefId(ticket);
+    const targetIds = [ticketDbId, ticketRefId].map(normalizeTicketId).filter(Boolean);
+    if (!targetIds.length) return false;
+    return ticketSlots.some((other) => {
+      if (other === slot) return false;
+      const otherIds = [
+        getTicketDbId(other.ticket),
+        getTicketRefId(other.ticket),
+        other.input?.value,
+      ]
+        .map(normalizeTicketId)
+        .filter(Boolean);
+      if (!otherIds.length) return false;
+      return targetIds.some((target) => otherIds.includes(target));
+    });
+  };
+
+  const personFieldIds = {
+    1: { name: "romansvarligName", email: "romansvarligEmail", phone: "romansvarligPhone", country: "romansvarligCountryCode" },
+    2: { name: "person2Name", email: "person2Email", phone: "person2Phone", country: "person2CountryCode" },
+    3: { name: "person3Name", email: "person3Email", phone: "person3Phone", country: "person3CountryCode" },
+    4: { name: "person4Name", email: "person4Email", phone: "person4Phone", country: "person4CountryCode" },
+  };
+
+  // Pre-fill the matching person fields with data from the ticket lookup.
+  const prefillPerson = (index, ticket) => {
+    if (!ticket) return;
+    const fields = personFieldIds[index];
+    if (!fields) return;
+    const nameEl = document.getElementById(fields.name);
+    const emailEl = document.getElementById(fields.email);
+    const phoneEl = document.getElementById(fields.phone);
+    const countryInput = document.getElementById(fields.country);
+    const countrySelect = countryInput?.closest("[data-select]");
+
+    if (nameEl && ticket.ownerName) nameEl.value = ticket.ownerName;
+    if (emailEl && ticket.email) emailEl.value = ticket.email;
+
+    if (phoneEl && ticket.phone) {
+      const parsed = parseTicketPhone(ticket.phone, countrySelect);
+      if (parsed?.code && countrySelect) {
+        const match = countrySelect.querySelector(`[data-select-option][data-value="${parsed.code}"]`);
+        const labelText = match?.dataset.label || match?.textContent?.trim() || parsed.code;
+        setSelectValue(countrySelect, parsed.code, labelText, false);
+      }
+      if (parsed?.local && parsed.local.length === 8) {
+        phoneEl.value = parsed.local;
+      }
+    }
+  };
+
+  // Fetch ticket, validate type, prefill person data, and lock the ref field.
+  const handleTicketCheck = async (slot) => {
+    const id = String(slot?.input?.value || "").trim();
+    if (!id) {
+      setTicketStatus(slot, "Skriv inn en billett-ID.", "error");
+      resetTicketSlot(slot);
+      updateSubmitState();
+      return;
+    }
+    if (hasDuplicateTicketInput(id, slot)) {
+      setTicketStatus(slot, "Denne billetten er allerede lagt til i skjemaet.", "error");
+      resetTicketSlot(slot, false, true);
+      updateSubmitState();
+      return;
+    }
+    if (slot?.input?.readOnly) {
+      setTicketStatus(slot, "Billett er allerede hentet.", "info");
+      return;
+    }
+
+    resetTicketSlot(slot);
+    slot.loading = true;
+    updateSlotVisual(slot);
+    setTicketStatus(slot, "Henter detaljer...", "info");
+    if (slot?.button) {
+      slot.button.disabled = true;
+      slot.button.textContent = "Henter...";
+    }
+
+    try {
+      const ticket = await fetchTicketByRefId(id);
+      const ticketType = getTicketType(ticket);
+      if (!isAllowedTicketType(ticketType)) {
+        const displayType = ticketType || "Ukjent";
+        setTicketStatus(slot, `Billetten '${displayType}' er ikke gyldig for rombooking. Kun Grunnpakke er tillatt.`, "error");
+        slot.loading = false;
+        resetTicketSlot(slot, false, true);
+        updateSlotVisual(slot);
+        return;
+      }
+      if (isDuplicateTicket(ticket, slot)) {
+        setTicketStatus(slot, "Denne billetten er allerede lagt til i skjemaet.", "error");
+        slot.loading = false;
+        resetTicketSlot(slot, false, true);
+        updateSlotVisual(slot);
+        return;
+      }
+      slot.ticket = ticket;
+      slot.validated = true;
+      slot.loading = false;
+      if (slot.input) {
+        const refId = ticket.ref_id || ticket.id || id.toUpperCase();
+        const ticketDbId = getTicketDbId(ticket);
+        slot.input.value = ticketDbId ? String(ticketDbId) : refId;
+        setSlotLocked(slot, true);
+      }
+      setTicketStatus(slot, ticket.ownerName ? `Billett funnet: ${ticket.ownerName}` : "Billett funnet.", "success");
+      prefillPerson(slot.idx, ticket);
+      updateSlotVisual(slot);
+      if (slot.details) {
+        slot.details.querySelectorAll("[data-select]").forEach((select) => syncSelectToValue(select, false));
+      }
+    } catch (err) {
+      const code = err && err.code ? err.code : 0;
+      if (code === 404 || err?.message === "NOT_FOUND") {
+        setTicketStatus(slot, "Fant ikke billett med denne ID-en.", "error");
+      } else if (code === 400 || err?.message === "EMPTY_ID") {
+        setTicketStatus(slot, "Ugyldig billett-ID.", "error");
+      } else {
+        setTicketStatus(slot, "Kunne ikke hente billetten akkurat nå.", "error");
+      }
+      slot.loading = false;
+      resetTicketSlot(slot, false, true);
+      updateSlotVisual(slot);
+    } finally {
+      if (slot?.button) {
+        slot.button.disabled = false;
+        slot.button.textContent = slot.validated ? "Endre" : slot.label;
+      }
+      updateSubmitState();
+    }
+  };
+
+  // Human-readable room availability labels for the dropdown.
+  const formatAvailabilityLabel = (baseLabel, count) => {
+    if (count <= 0) return `${baseLabel} · Utilgjengelig`;
+    const suffix = count === 1 ? "ledig" : "ledige";
+    return `${baseLabel} · ${count} rom ${suffix}`;
+  };
+
+  // Map available counts to UI status colors.
+  const statusForCount = (count, soloAvailable = false) => {
+    if (count <= 0 && soloAvailable) return "low";
+    if (count <= 0) return "none";
+    if (count <= 5) return "low";
+    return "ok";
+  };
+
+  // Update status dot color based on availability.
+  const applyDotStatus = (dot, status) => {
+    if (!dot) return;
+    dot.classList.remove("bg-emerald-400", "bg-amber-400", "bg-rose-400", "bg-white/30");
+    if (status === "ok") dot.classList.add("bg-emerald-400");
+    else if (status === "low") dot.classList.add("bg-amber-400");
+    else if (status === "none") dot.classList.add("bg-rose-400");
+    else dot.classList.add("bg-white/30");
+  };
+
+  // Keep the trigger dot synced with the currently selected option.
+  const updateRoomTypeTriggerDot = () => {
+    const roomSelect = document.querySelector("[data-roomtype-select]");
+    const triggerDot = roomSelect?.querySelector("[data-roomtype-dot]");
+    const selected = roomType?.value || "";
+    const match = roomTypeOptions.find((opt) => opt.dataset.value === selected);
+    applyDotStatus(triggerDot, match?.dataset.status || "unknown");
+  };
+
+  // Verify all required ticket slots have passed validation.
+  const allTicketsValidated = () => {
+    const count = getEffectiveCount();
+    if (!count) return false;
+    return ticketSlots.filter((slot) => slot.idx <= count).every((slot) => slot.validated);
+  };
+
+  // Enable the submit button only when all requirements are satisfied.
+  const updateSubmitState = () => {
+    if (!submitBtn) return;
+    const ready = Boolean(roomType?.value && allTicketsValidated() && form?.checkValidity());
+    submitBtn.disabled = !ready;
+    if (!submitLabel) return;
+    if (!ready) {
+      submitLabel.textContent = "Fyll ut alle felter";
+    } else {
+      submitLabel.textContent = "Send inn rombooking";
+    }
+  };
+
+  // Apply availability counts to room type options and triggers.
+  const applyAvailability = (counts, pendingSolo = 0) => {
+    if (!counts) return;
+    latestCounts = counts;
+    roomTypeOptions.forEach((opt) => {
+      const value = opt.dataset.value || "";
+      const baseLabel = opt.dataset.baseLabel || opt.textContent?.trim() || value;
+      const available = Number(counts[value] ?? 0);
+      const soloAvailable = value === "2" && Number(pendingSolo) === 1;
+      const label =
+        value === "2" && soloAvailable && available <= 0
+          ? `${baseLabel} · 1 plass i delt rom`
+          : formatAvailabilityLabel(baseLabel, available);
+      const status = statusForCount(available, soloAvailable);
+      opt.dataset.label = label;
+      opt.dataset.status = status;
+      const labelEl = opt.querySelector("[data-roomtype-label]");
+      if (labelEl) labelEl.textContent = label;
+      const canSelect = available > 0 || soloAvailable;
+      opt.disabled = !canSelect;
+      opt.setAttribute("aria-disabled", !canSelect ? "true" : "false");
+      opt.classList.toggle("opacity-50", !canSelect);
+      opt.classList.toggle("cursor-not-allowed", !canSelect);
+      applyDotStatus(opt.querySelector("[data-roomtype-dot]"), status);
+    });
+
+    const roomTypeSelect = roomType?.closest("[data-select]");
+    if (roomTypeSelect) syncSelectToValue(roomTypeSelect, false);
+    updateRoomTypeTriggerDot();
+    updateSubmitState();
+  };
+
+  // Load current availability from the Netlify function.
+  const fetchAvailability = async () => {
+    try {
+      const response = await fetch(availabilityUrl, { headers: { Accept: "application/json" } });
+      if (!response.ok) throw new Error("Failed to load availability");
+      const data = await response.json();
+      applyAvailability(data.counts || data, data.pendingSolo ?? 0);
+    } catch (err) {
+      setError("Kunne ikke hente tilgjengelighet", "Prøv igjen om litt, eller ta kontakt hvis problemet fortsetter.");
+    }
+  };
+
+  // Reserve a room before submitting the booking to avoid oversell.
+  const reserveRoom = async (roomTypeValue, isSolo = false) => {
+    if (!roomTypeValue) return { ok: false, error: "invalid" };
+    try {
+      const payload = { action: "reserve", roomType: roomTypeValue, solo: isSolo };
+      const response = await fetch(availabilityUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        applyAvailability(data.counts || latestCounts || {}, data.pendingSolo ?? 0);
+        return { ok: false, error: data.error || "unknown" };
+      }
+      applyAvailability(data.counts || latestCounts || {}, data.pendingSolo ?? 0);
+      return { ok: true };
+    } catch (err) {
+      return { ok: false, error: "unavailable" };
+    }
+  };
+
+  // Release a reservation when the form submission fails.
+  const releaseRoom = async (roomTypeValue, isSolo = false) => {
+    if (!roomTypeValue) return;
+    try {
+      const response = await fetch(availabilityUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({ action: "release", roomType: roomTypeValue, solo: isSolo }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (response.ok) applyAvailability(data.counts || latestCounts || {}, data.pendingSolo ?? 0);
+    } catch (err) {
+      // ignore release errors
+    }
+  };
+
+  // Custom select: close dropdown and reset chevron state.
+  const closeSelect = (select) => {
+    const trigger = select.querySelector("[data-select-trigger]");
+    const menu = select.querySelector("[data-select-menu]");
+    const chevron = select.querySelector("[data-select-chevron]");
+    if (menu) menu.hidden = true;
+    select.dataset.open = "false";
+    if (trigger) trigger.setAttribute("aria-expanded", "false");
+    if (chevron) chevron.style.transform = "";
+  };
+
+  // Close all selects except the one interacting.
+  const closeAllSelects = (except) => {
+    selectEls.forEach((select) => {
+      if (select !== except) closeSelect(select);
+    });
+  };
+
+  // Custom select: open dropdown and rotate chevron.
+  const openSelect = (select) => {
+    const trigger = select.querySelector("[data-select-trigger]");
+    const menu = select.querySelector("[data-select-menu]");
+    const chevron = select.querySelector("[data-select-chevron]");
+    if (!menu) return;
+    closeAllSelects(select);
+    menu.hidden = false;
+    select.dataset.open = "true";
+    if (trigger) trigger.setAttribute("aria-expanded", "true");
+    if (chevron) chevron.style.transform = "rotate(180deg)";
+  };
+
+  // Update the hidden input + visible label for the custom select.
+  const setSelectValue = (select, value, labelText, fireChange = true) => {
+    const input = select.querySelector("[data-select-value]");
+    const label = select.querySelector("[data-select-label]");
+    const labelTextEl = label?.querySelector?.("[data-select-text]");
+    const options = Array.from(select.querySelectorAll("[data-select-option]"));
+    if (input) input.value = value || "";
+    if (labelTextEl) {
+      labelTextEl.textContent = labelText || select.dataset.placeholder || "";
+    } else if (label) {
+      label.textContent = labelText || select.dataset.placeholder || "";
+    }
+    options.forEach((opt) => {
+      opt.setAttribute("aria-selected", opt.dataset.value === value ? "true" : "false");
+    });
+    if (fireChange && input) input.dispatchEvent(new Event("change", { bubbles: true }));
+  };
+
+  // Sync the custom select UI to its current value.
+  const syncSelectToValue = (select, fireChange = false) => {
+    const input = select.querySelector("[data-select-value]");
+    const options = Array.from(select.querySelectorAll("[data-select-option]"));
+    const value = input?.value || select.dataset.default || "";
+    const match = options.find((opt) => opt.dataset.value === value);
+    if (match) {
+      const labelText = match.dataset.label || match.textContent?.trim() || value;
+      setSelectValue(select, value, labelText, fireChange);
+    } else {
+      const label = select.querySelector("[data-select-label]");
+      const labelTextEl = label?.querySelector?.("[data-select-text]");
+      if (labelTextEl) {
+        labelTextEl.textContent = select.dataset.placeholder || "Velg";
+      } else if (label) {
+        label.textContent = select.dataset.placeholder || "Velg";
+      }
+    }
+  };
+
+  selectEls.forEach((select) => {
+    const trigger = select.querySelector("[data-select-trigger]");
+    const menu = select.querySelector("[data-select-menu]");
+    const options = Array.from(select.querySelectorAll("[data-select-option]"));
+    syncSelectToValue(select, false);
+
+    if (trigger) {
+      trigger.addEventListener("click", (event) => {
+        event.preventDefault();
+        const isOpen = select.dataset.open === "true";
+        if (isOpen) {
+          closeSelect(select);
+        } else {
+          openSelect(select);
+        }
+      });
+
+      trigger.addEventListener("keydown", (event) => {
+        if (event.key === "ArrowDown" || event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          openSelect(select);
+          options[0]?.focus();
+        }
+      });
+    }
+
+    options.forEach((opt) => {
+      opt.addEventListener("click", (event) => {
+        event.preventDefault();
+        if (opt.disabled || opt.getAttribute("aria-disabled") === "true") return;
+        const value = opt.dataset.value || "";
+        const labelText = opt.dataset.label || opt.textContent?.trim() || value;
+        setSelectValue(select, value, labelText, true);
+        closeSelect(select);
+        trigger?.focus();
+      });
+    });
+
+    menu?.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closeSelect(select);
+        trigger?.focus();
+      }
+    });
+  });
+
+  document.addEventListener("click", (event) => {
+    selectEls.forEach((select) => {
+      if (!select.contains(event.target)) closeSelect(select);
+    });
+    const target = event.target;
+    if (!(target instanceof Node)) return;
+    if (target.closest("[data-help-toggle]") || target.closest("[data-help-panel]")) return;
+    closeAllHelp();
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") closeAllSelects();
+  });
+
+  helpToggles.forEach((btn) => {
+    btn.addEventListener("click", (event) => {
+      event.preventDefault();
+      const targetId = btn.getAttribute("aria-controls") || "";
+      const panel = targetId ? document.getElementById(targetId) : null;
+      if (!panel) return;
+      const willOpen = panel.hidden;
+      closeAllHelp();
+      panel.hidden = !willOpen;
+      btn.setAttribute("aria-expanded", String(willOpen));
+    });
+  });
+
+  termsOpeners.forEach((btn) => {
+    btn.addEventListener("click", (event) => {
+      event.preventDefault();
+      openTerms();
+    });
+  });
+
+  termsClosers.forEach((btn) => {
+    btn.addEventListener("click", (event) => {
+      event.preventDefault();
+      closeTerms();
+    });
+  });
+
+  if (termsDialog) {
+    termsDialog.addEventListener("cancel", (event) => {
+      event.preventDefault();
+      closeTerms();
+    });
+
+    termsDialog.addEventListener("click", (event) => {
+      const panel = termsDialog.querySelector(".modal-panel");
+      if (panel && !panel.contains(event.target)) closeTerms();
+    });
+  }
+
+  ticketSlots.forEach((slot) => {
+    if (slot.button) {
+      slot.button.addEventListener("click", (event) => {
+        event.preventDefault();
+        if (slot.validated) {
+          resetTicketSlot(slot, true);
+          slot.button.textContent = slot.label;
+          slot.input?.focus();
+          updateSubmitState();
+          return;
+        }
+        void handleTicketCheck(slot);
+      });
+    }
+
+    if (slot.input) {
+      slot.input.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          if (slot.validated) return;
+          void handleTicketCheck(slot);
+        }
+      });
+      slot.input.addEventListener("input", () => {
+        resetTicketSlot(slot);
+        updateSubmitState();
+      });
+    }
+  });
+
+  // Clear the "select a room type" error state.
+  const clearRoomTypeError = () => {
+    if (roomTypeError) roomTypeError.hidden = true;
+    if (roomTypeTrigger) roomTypeTrigger.removeAttribute("aria-invalid");
+  };
+
+  const termsBlock = document.querySelector("[data-terms]");
+
+  // Toggle person sections based on room size and solo flag, keep hidden values in sync.
+  const updateGuests = () => {
+    const count = Number(roomType?.value || 0);
+    if (roomType?.value) clearRoomTypeError();
+    if (termsBlock) termsBlock.hidden = count <= 0;
+    if (termsCheckbox) termsCheckbox.disabled = count <= 0;
+    if (termsValueInput) {
+      termsValueInput.value = termsCheckbox && termsCheckbox.checked ? "yes" : "no";
+      if (count <= 0) termsValueInput.value = "no";
+    }
+
+    if (soloOption && soloCheckbox) {
+      if (count === 2) {
+        soloOption.hidden = false;
+        soloCheckbox.removeAttribute("disabled");
+      } else {
+        soloOption.hidden = true;
+        soloCheckbox.checked = false;
+        soloCheckbox.setAttribute("disabled", "");
+      }
+    }
+    if (soloValueInput) {
+      soloValueInput.value = count === 2 && soloCheckbox?.checked ? "yes" : "no";
+    }
+
+    const effectiveCount = getEffectiveCount();
+    personSections.forEach((section) => {
+      const idx = Number(section.dataset.person || 0);
+      const show = effectiveCount >= idx;
+      const slot = ticketSlots.find((item) => item.idx === idx);
+      section.hidden = !show;
+      section.disabled = !show;
+      section.setAttribute("aria-hidden", show ? "false" : "true");
+      if (!slot) return;
+      if (!show) {
+        if (slot.input) {
+          slot.input.setAttribute("disabled", "");
+          slot.input.removeAttribute("required");
+          slot.input.value = "";
+        }
+        if (slot.button) slot.button.setAttribute("disabled", "");
+        resetTicketSlot(slot, true);
+        return;
+      }
+
+      if (slot.input) {
+        slot.input.removeAttribute("disabled");
+        slot.input.setAttribute("required", "");
+      }
+      if (slot.button && !slot.loading) slot.button.removeAttribute("disabled");
+      updateSlotVisual(slot);
+      if (slot.validated && slot.details) {
+        slot.details.querySelectorAll("[data-select]").forEach((select) => syncSelectToValue(select, false));
+      }
+    });
+    updateRoomTypeTriggerDot();
+    updateSubmitState();
+  };
+
+  updateSubmitState();
+
+  if (roomType) {
+    roomType.addEventListener("change", updateGuests);
+    updateGuests();
+  }
+
+  if (soloCheckbox) {
+    soloCheckbox.addEventListener("change", updateGuests);
+  }
+
+  if (termsCheckbox) {
+    termsCheckbox.addEventListener("change", () => {
+      if (termsValueInput) {
+        termsValueInput.value = termsCheckbox.checked ? "yes" : "no";
+      }
+      updateSubmitState();
+    });
+  }
+
+  // Toggle submit button state and label during submission.
+  const setSubmitting = (isSubmitting) => {
+    if (!submitBtn) return;
+    submitBtn.disabled = isSubmitting;
+    const label = submitBtn.querySelector("[data-label]");
+    if (label) label.textContent = isSubmitting ? "Sender..." : "Send inn rombooking";
+  };
+
+  if (form) {
+    form.addEventListener("input", updateSubmitState);
+    form.addEventListener("change", updateSubmitState);
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      if (errorPanel) errorPanel.hidden = true;
+      setSubmitting(true);
+
+      if (!allTicketsValidated()) {
+        setError("Bekreft billetter", "Hent detaljer for alle på rommet før du sender inn rombooking.");
+        setSubmitting(false);
+        return;
+      }
+
+      if (!roomType?.value) {
+        if (roomTypeError) roomTypeError.hidden = false;
+        if (roomTypeTrigger) {
+          roomTypeTrigger.setAttribute("aria-invalid", "true");
+          roomTypeTrigger.focus();
+        }
+        setSubmitting(false);
+        return;
+      }
+
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        setSubmitting(false);
+        return;
+      }
+
+      const roomTypeValue = roomType?.value || "";
+      const isSolo = roomTypeValue === "2" && soloCheckbox?.checked;
+      const reservation = await reserveRoom(roomTypeValue, isSolo);
+      if (!reservation.ok) {
+        const message = reservation.error === "sold_out" ? "Denne romtypen er utsolgt akkurat nå." : "Kunne ikke reservere rom. Prøv igjen om litt.";
+        setError("Ingen ledige rom", message);
+        setSubmitting(false);
+        return;
+      }
+
+      try {
+        const formData = new FormData(form);
+        const payload = new URLSearchParams(formData).toString();
+        const response = await fetch(form.getAttribute("action") || window.location.pathname, {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: payload,
+        });
+
+        if (!response.ok) throw new Error("Form submit failed");
+
+        form.reset();
+        selectEls.forEach((select) => syncSelectToValue(select, false));
+        if (successPanel) successPanel.hidden = false;
+        form.hidden = true;
+      } catch (err) {
+        await releaseRoom(roomTypeValue, isSolo);
+        setError("Noe gikk galt.", "Innsendingen feilet. Prøv igjen om litt, eller ta kontakt hvis problemet fortsetter.");
+      } finally {
+        setSubmitting(false);
+        updateSubmitState();
+      }
+    });
+  }
+
+  fetchAvailability();
+</script>
