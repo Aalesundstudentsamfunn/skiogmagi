@@ -9,31 +9,14 @@ const links = [
   { name: "Se billett", href: "/billett" },
   { name: "Booking", href: "/booking" },
   { name: "Program", href: "/program" },
-  { name: "Heiskort", href: "https://sogndal.skiperformance.com/no/shopp#/no/buy?is_promo=1&is_promo_offer=0&promo_connector_id=8" },
 ];
 
 const ticketLink = { name: "Kjøp billett", href: "https://tikkio.com/events/60480" };
+const heiskortLink = "https://sogndal.skiperformance.com/no/shopp#/no/buy?is_promo=1&is_promo_offer=0&promo_connector_id=8";
 const currentPath = Astro.url?.pathname || "/";
 ---
 
 <header id="site-header" class="fixed top-0 left-0 w-full z-50">
-  <div class="promo-bar" data-promo-bar>
-    <div class="promo-bar__inner">
-      <span class="promo-bar__dot" aria-hidden="true"></span>
-      <span>
-        <a
-          class="promo-bar__link"
-          href="https://sogndal.skiperformance.com/no/shopp#/no/buy?is_promo=1&is_promo_offer=0&promo_connector_id=8"
-          target="_blank"
-          rel="noreferrer"
-        >
-          Bestill heiskort nå!
-        </a>{" "}
-        Bruk koden <strong>sogn2d</strong> ved bestilling for å få Ski &amp; Magi pris.
-      </span>
-      <button type="button" class="promo-bar__close" data-promo-close aria-label="Lukk varsel">×</button>
-    </div>
-  </div>
   <nav id="site-nav" class="px-8 lg:px-16 py-4 text-white transition-colors">
     <div class="flex items-center justify-between w-full mx-auto">
       <!-- Logo -->
@@ -51,17 +34,22 @@ const currentPath = Astro.url?.pathname || "/";
                 {l.name}
               </span>
             ) : (
-              <a
-                href={l.href}
-                target={l.href.startsWith("http") ? "_blank" : undefined}
-                rel={l.href.startsWith("http") ? "noreferrer" : undefined}
-                class={`relative transition-colors duration-300 hover:opacity-90 ${currentPath === l.href ? "font-semibold after:absolute after:-bottom-1.5 after:left-0 after:w-full after:h-0.5 after:bg-linear-to-r after:from-sky-400 after:to-fuchsia-400 after:rounded-full" : ""}`}
-              >
+              <a href={l.href} target={l.href.startsWith("http") ? "_blank" : undefined} rel={l.href.startsWith("http") ? "noreferrer" : undefined} class={`relative transition-colors duration-300 hover:opacity-90 ${currentPath === l.href ? "font-semibold after:absolute after:-bottom-1.5 after:left-0 after:w-full after:h-0.5 after:bg-linear-to-r after:from-sky-400 after:to-fuchsia-400 after:rounded-full" : ""}`}>
                 {l.name}
               </a>
             )
           )
         }
+
+        <div class="nav-dropdown">
+          <button type="button" class="nav-dropdown__trigger" aria-haspopup="true"> Heiskort </button>
+          <div class="nav-dropdown__menu" role="menu">
+            <a class="nav-dropdown__item" href={heiskortLink} target="_blank" rel="noreferrer"> Link </a>
+            <span class="nav-dropdown__meta">
+              Promokode: <strong>Sogn2d</strong>
+            </span>
+          </div>
+        </div>
 
         <!-- CTA Button (enabled, matches CtaSection style) -->
         <CtaButton label={ticketLink.name} href={ticketLink.href} newTab class="px-5 py-2 ml-4 rounded-full text-sm hover:translate-y-0" />
@@ -85,17 +73,21 @@ const currentPath = Astro.url?.pathname || "/";
               {l.name}
             </span>
           ) : (
-            <a
-              href={l.href}
-              target={l.href.startsWith("http") ? "_blank" : undefined}
-              rel={l.href.startsWith("http") ? "noreferrer" : undefined}
-              class={`block font-medium transition-colors ${currentPath === l.href ? "font-semibold" : "opacity-80 hover:opacity-100"}`}
-            >
+            <a href={l.href} target={l.href.startsWith("http") ? "_blank" : undefined} rel={l.href.startsWith("http") ? "noreferrer" : undefined} class={`block font-medium transition-colors ${currentPath === l.href ? "font-semibold" : "opacity-80 hover:opacity-100"}`}>
               {l.name}
             </a>
           )
         )
       }
+      <details class="mobile-dropdown">
+        <summary class="mobile-dropdown__summary block font-medium transition-colors opacity-80 hover:opacity-100">Heiskort</summary>
+        <div class="mobile-dropdown__content">
+          <a class="block pl-4 text-sm opacity-80 hover:opacity-100" href={heiskortLink} target="_blank" rel="noreferrer"> Kjøp </a>
+          <span class="block pl-4 text-xs text-white/70">
+            Promokode: <strong>Sogn2d</strong>
+          </span>
+        </div>
+      </details>
       <!-- CTA moved into the top bar on mobile -->
     </div>
   </nav>
@@ -105,17 +97,6 @@ const currentPath = Astro.url?.pathname || "/";
   document.addEventListener("DOMContentLoaded", () => {
     const nav = document.getElementById("site-nav");
     if (!nav) return;
-
-    const promoBar = document.querySelector("[data-promo-bar]");
-    const promoClose = document.querySelector("[data-promo-close]");
-    if (promoClose && promoBar) {
-      promoClose.addEventListener("click", () => {
-        promoBar.classList.add("promo-bar--dismissed");
-        window.setTimeout(() => {
-          promoBar.setAttribute("hidden", "");
-        }, 300);
-      });
-    }
 
     const btn = nav.querySelector("[data-menu-btn]");
     const menu = nav.querySelector("[data-mobile_menu],[data-mobile-menu]") || nav.querySelector("[data-mobile-menu]");
@@ -172,136 +153,128 @@ const currentPath = Astro.url?.pathname || "/";
 </script>
 
 <style is:global>
-  .promo-bar {
-    width: 100%;
-    padding: 0.5rem 1rem;
-    background: linear-gradient(90deg, rgba(16, 185, 129, 0.25), rgba(14, 116, 144, 0.25), rgba(59, 130, 246, 0.25));
-    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+  .nav-dropdown {
     position: relative;
-    overflow: hidden;
-    animation: promo-slide-in 320ms ease-out;
-    transition:
-      transform 260ms ease,
-      opacity 260ms ease;
+    display: inline-flex;
+    align-items: center;
   }
 
-  .promo-bar::before {
+  .nav-dropdown::after {
     content: "";
     position: absolute;
-    inset: 0;
-    background: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0));
-    transform: translateX(-100%);
-    animation: promo-shimmer 3.5s ease-in-out infinite;
-    pointer-events: none;
+    left: -0.5rem;
+    right: -0.5rem;
+    top: 100%;
+    height: 0.6rem;
   }
 
-  .promo-bar--dismissed {
-    transform: translateY(-100%);
+  .nav-dropdown__trigger {
+    background: none;
+    border: 0;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0;
+  }
+
+  .nav-dropdown__trigger::after {
+    content: "";
+    display: inline-block;
+    width: 0.4rem;
+    height: 0.4rem;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    transform: rotate(45deg);
+    margin-top: -2px;
+  }
+
+  .nav-dropdown__menu {
+    position: absolute;
+    top: 100%;
+    left: -0.5rem;
+    min-width: 170px;
+    background: rgba(15, 23, 42, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    padding: 0.5rem;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.4);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     opacity: 0;
+    transform: translateY(-6px);
+    pointer-events: none;
+    transition:
+      opacity 160ms ease,
+      transform 160ms ease;
+    z-index: 40;
   }
 
-  .promo-bar__inner {
-    max-width: 64rem;
-    margin: 0 auto;
+  .nav-dropdown__item {
+    display: block;
+    padding: 0.4rem 0.6rem;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 0.85rem;
+    transition:
+      background 150ms ease,
+      color 150ms ease;
+  }
+
+  .nav-dropdown__item:hover {
+    background: rgba(255, 255, 255, 0.12);
+  }
+
+  .nav-dropdown__meta {
+    display: block;
+    padding: 0.4rem 0.6rem 0.2rem;
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.7);
+  }
+
+  .nav-dropdown:hover .nav-dropdown__menu,
+  .nav-dropdown:focus-within .nav-dropdown__menu {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  .mobile-dropdown {
+    border: 0;
+  }
+
+  .mobile-dropdown__summary {
+    list-style: none;
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    position: relative;
-    padding-right: 2.5rem;
-    padding-left: 2.5rem;
-    color: #fff;
-    font-size: 0.8rem;
-    text-align: center;
-  }
-
-  .promo-bar__inner strong {
-    font-weight: 700;
-    letter-spacing: 0.04em;
-  }
-
-  .promo-bar__dot {
-    width: 0.5rem;
-    height: 0.5rem;
-    border-radius: 9999px;
-    background: #34d399;
-    box-shadow: 0 0 8px rgba(52, 211, 153, 0.7);
-    flex: 0 0 auto;
-    animation: promo-pulse 1.8s ease-in-out infinite;
-  }
-
-  .promo-bar__link {
-    color: #fff;
-    font-weight: 600;
-    text-decoration: underline;
-    text-underline-offset: 3px;
-    text-decoration-thickness: 2px;
-  }
-
-  .promo-bar__link:hover {
-    opacity: 0.9;
-  }
-
-  .promo-bar__close {
-    position: absolute;
-    right: 0.5rem;
-    top: 50%;
-    transform: translateY(-50%);
-    border: 0;
-    background: transparent;
-    color: #fff;
-    font-size: 1.1rem;
-    line-height: 1;
-    opacity: 0.8;
+    gap: 0.35rem;
+    font-weight: 500;
     cursor: pointer;
   }
 
-  .promo-bar__close:hover {
-    opacity: 1;
+  .mobile-dropdown__summary::-webkit-details-marker {
+    display: none;
   }
 
-  @keyframes promo-pulse {
-    0%,
-    100% {
-      transform: scale(1);
-      box-shadow: 0 0 8px rgba(52, 211, 153, 0.7);
-    }
-    50% {
-      transform: scale(1.15);
-      box-shadow: 0 0 14px rgba(52, 211, 153, 0.9);
-    }
+  .mobile-dropdown__summary::after {
+    content: "";
+    display: inline-block;
+    width: 0.4rem;
+    height: 0.4rem;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    transform: rotate(45deg);
+    margin-top: -2px;
   }
 
-  @keyframes promo-shimmer {
-    0% {
-      transform: translateX(-100%);
-    }
-    50% {
-      transform: translateX(100%);
-    }
-    100% {
-      transform: translateX(100%);
-    }
+  .mobile-dropdown[open] .mobile-dropdown__summary::after {
+    transform: rotate(-135deg);
   }
 
-  @keyframes promo-slide-in {
-    from {
-      transform: translateY(-100%);
-      opacity: 0;
-    }
-    to {
-      transform: translateY(0);
-      opacity: 1;
-    }
-  }
-
-  @media (max-width: 640px) {
-    .promo-bar__inner {
-      font-size: 0.75rem;
-      line-height: 1.2;
-    }
+  .mobile-dropdown__content {
+    padding-top: 0.4rem;
   }
 
   /* Mobile menu animation */
