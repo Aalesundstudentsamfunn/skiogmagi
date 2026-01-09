@@ -12,6 +12,7 @@ const links = [
 ];
 
 const ticketLink = { name: "Kjøp billett", href: "https://tikkio.com/events/60480" };
+const heiskortLink = "https://sogndal.skiperformance.com/no/shopp#/no/buy?is_promo=1&is_promo_offer=0&promo_connector_id=8";
 const currentPath = Astro.url?.pathname || "/";
 ---
 
@@ -33,12 +34,22 @@ const currentPath = Astro.url?.pathname || "/";
                 {l.name}
               </span>
             ) : (
-              <a href={l.href} class={`relative transition-colors duration-300 hover:opacity-90 ${currentPath === l.href ? "font-semibold after:absolute after:-bottom-1.5 after:left-0 after:w-full after:h-0.5 after:bg-linear-to-r after:from-sky-400 after:to-fuchsia-400 after:rounded-full" : ""}`}>
+              <a href={l.href} target={l.href.startsWith("http") ? "_blank" : undefined} rel={l.href.startsWith("http") ? "noreferrer" : undefined} class={`relative transition-colors duration-300 hover:opacity-90 ${currentPath === l.href ? "font-semibold after:absolute after:-bottom-1.5 after:left-0 after:w-full after:h-0.5 after:bg-linear-to-r after:from-sky-400 after:to-fuchsia-400 after:rounded-full" : ""}`}>
                 {l.name}
               </a>
             )
           )
         }
+
+        <div class="nav-dropdown">
+          <button type="button" class="nav-dropdown__trigger" aria-haspopup="true"> Heiskort </button>
+          <div class="nav-dropdown__menu" role="menu">
+            <a class="nav-dropdown__item" href={heiskortLink} target="_blank" rel="noreferrer"> Link </a>
+            <span class="nav-dropdown__meta">
+              Promokode: <strong>Sogn2d</strong>
+            </span>
+          </div>
+        </div>
 
         <!-- CTA Button (enabled, matches CtaSection style) -->
         <CtaButton label={ticketLink.name} href={ticketLink.href} newTab class="px-5 py-2 ml-4 rounded-full text-sm hover:translate-y-0" />
@@ -62,12 +73,21 @@ const currentPath = Astro.url?.pathname || "/";
               {l.name}
             </span>
           ) : (
-            <a href={l.href} class={`block font-medium transition-colors ${currentPath === l.href ? "font-semibold" : "opacity-80 hover:opacity-100"}`}>
+            <a href={l.href} target={l.href.startsWith("http") ? "_blank" : undefined} rel={l.href.startsWith("http") ? "noreferrer" : undefined} class={`block font-medium transition-colors ${currentPath === l.href ? "font-semibold" : "opacity-80 hover:opacity-100"}`}>
               {l.name}
             </a>
           )
         )
       }
+      <details class="mobile-dropdown">
+        <summary class="mobile-dropdown__summary block font-medium transition-colors opacity-80 hover:opacity-100">Heiskort</summary>
+        <div class="mobile-dropdown__content">
+          <a class="block pl-4 text-sm opacity-80 hover:opacity-100" href={heiskortLink} target="_blank" rel="noreferrer"> Kjøp </a>
+          <span class="block pl-4 text-xs text-white/70">
+            Promokode: <strong>Sogn2d</strong>
+          </span>
+        </div>
+      </details>
       <!-- CTA moved into the top bar on mobile -->
     </div>
   </nav>
@@ -133,6 +153,130 @@ const currentPath = Astro.url?.pathname || "/";
 </script>
 
 <style is:global>
+  .nav-dropdown {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .nav-dropdown::after {
+    content: "";
+    position: absolute;
+    left: -0.5rem;
+    right: -0.5rem;
+    top: 100%;
+    height: 0.6rem;
+  }
+
+  .nav-dropdown__trigger {
+    background: none;
+    border: 0;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0;
+  }
+
+  .nav-dropdown__trigger::after {
+    content: "";
+    display: inline-block;
+    width: 0.4rem;
+    height: 0.4rem;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    transform: rotate(45deg);
+    margin-top: -2px;
+  }
+
+  .nav-dropdown__menu {
+    position: absolute;
+    top: 100%;
+    left: -0.5rem;
+    min-width: 170px;
+    background: rgba(15, 23, 42, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    padding: 0.5rem;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.4);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    opacity: 0;
+    transform: translateY(-6px);
+    pointer-events: none;
+    transition:
+      opacity 160ms ease,
+      transform 160ms ease;
+    z-index: 40;
+  }
+
+  .nav-dropdown__item {
+    display: block;
+    padding: 0.4rem 0.6rem;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 0.85rem;
+    transition:
+      background 150ms ease,
+      color 150ms ease;
+  }
+
+  .nav-dropdown__item:hover {
+    background: rgba(255, 255, 255, 0.12);
+  }
+
+  .nav-dropdown__meta {
+    display: block;
+    padding: 0.4rem 0.6rem 0.2rem;
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.7);
+  }
+
+  .nav-dropdown:hover .nav-dropdown__menu,
+  .nav-dropdown:focus-within .nav-dropdown__menu {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  .mobile-dropdown {
+    border: 0;
+  }
+
+  .mobile-dropdown__summary {
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  .mobile-dropdown__summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .mobile-dropdown__summary::after {
+    content: "";
+    display: inline-block;
+    width: 0.4rem;
+    height: 0.4rem;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    transform: rotate(45deg);
+    margin-top: -2px;
+  }
+
+  .mobile-dropdown[open] .mobile-dropdown__summary::after {
+    transform: rotate(-135deg);
+  }
+
+  .mobile-dropdown__content {
+    padding-top: 0.4rem;
+  }
+
   /* Mobile menu animation */
   #site-nav [data-mobile-menu] {
     position: absolute;
