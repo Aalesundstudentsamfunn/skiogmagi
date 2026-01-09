@@ -1,0 +1,207 @@
+---
+import PageLayout from "../../layouts/PageLayout.astro";
+import GlassPanel from "../../components/ui/GlassPanel.astro";
+import Footer from "../../components/Footer.astro";
+
+const title = "Admin tilgjengelighet";
+const desc = "Juster romtilgjengelighet direkte (increment/decrement) og oppdater Netlify Blob.";
+---
+
+<PageLayout title={title} description={desc}>
+  <section id="hero" class="hero relative isolate overflow-hidden mt-20 sm:mt-24">
+    <div class="mx-auto max-w-4xl px-6 pt-16 sm:pt-20 text-white">
+      <h1 class="text-4xl font-extrabold drop-shadow sm:text-5xl">{title}</h1>
+      <p class="mt-3 text-white/85 max-w-2xl">{desc}</p>
+    </div>
+  </section>
+
+  <section class="mx-auto w-full max-w-4xl px-6 pb-16 pt-8 text-white relative z-10">
+    <GlassPanel class="text-white">
+      <div class="grid gap-6">
+        <div class="grid gap-2">
+          <label for="adminToken" class="text-sm font-semibold text-white/80">Admin nøkkel</label>
+          <input
+            id="adminToken"
+            type="password"
+            required
+            class="w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white/90 outline-none focus:ring-2 focus:ring-white/60"
+            placeholder="ROOM_ADMIN_TOKEN"
+          />
+          <p class="text-xs text-white/60">Sett miljøvariabelen <span class="font-semibold">ROOM_ADMIN_TOKEN</span> i Netlify.</p>
+        </div>
+
+        <div class="grid gap-2">
+          <label for="delta" class="text-sm font-semibold text-white/80">Steg</label>
+          <input
+            id="delta"
+            type="number"
+            min="1"
+            value="1"
+            class="w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white/90 outline-none focus:ring-2 focus:ring-white/60"
+          />
+          <p class="text-xs text-white/60">Velg hvor mye hvert klikk skal øke eller redusere.</p>
+        </div>
+
+        <div class="grid gap-4">
+          <div class="availability-row" data-room="2">
+            <div>
+              <p class="text-sm text-white/80">2 personer</p>
+              <p class="text-2xl font-semibold" data-count>0</p>
+              <p class="text-xs text-white/60" data-limit>Limit: 0</p>
+            </div>
+            <div class="flex gap-2">
+              <button type="button" data-action="dec" class="rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white/90 hover:bg-white/15">-</button>
+              <button type="button" data-action="inc" class="rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white/90 hover:bg-white/15">+</button>
+            </div>
+          </div>
+
+          <div class="availability-row" data-room="3">
+            <div>
+              <p class="text-sm text-white/80">3 personer</p>
+              <p class="text-2xl font-semibold" data-count>0</p>
+              <p class="text-xs text-white/60" data-limit>Limit: 0</p>
+            </div>
+            <div class="flex gap-2">
+              <button type="button" data-action="dec" class="rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white/90 hover:bg-white/15">-</button>
+              <button type="button" data-action="inc" class="rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white/90 hover:bg-white/15">+</button>
+            </div>
+          </div>
+
+          <div class="availability-row" data-room="4">
+            <div>
+              <p class="text-sm text-white/80">4 personer</p>
+              <p class="text-2xl font-semibold" data-count>0</p>
+              <p class="text-xs text-white/60" data-limit>Limit: 0</p>
+            </div>
+            <div class="flex gap-2">
+              <button type="button" data-action="dec" class="rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white/90 hover:bg-white/15">-</button>
+              <button type="button" data-action="inc" class="rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white/90 hover:bg-white/15">+</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap gap-3">
+          <button type="button" id="loadState" class="rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white/90 hover:bg-white/15">
+            Hent status
+          </button>
+        </div>
+
+        <div id="admin-status" role="status" class="rounded-2xl border border-white/15 bg-white/5 p-4 text-sm text-white/80" hidden></div>
+      </div>
+    </GlassPanel>
+  </section>
+
+  <Footer />
+</PageLayout>
+
+<style is:global>
+  .availability-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem;
+    border-radius: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.05);
+  }
+</style>
+
+<script>
+  const statusEl = document.getElementById("admin-status");
+  const tokenInput = document.getElementById("adminToken");
+  const deltaInput = document.getElementById("delta");
+  const loadBtn = document.getElementById("loadState");
+  const rows = Array.from(document.querySelectorAll("[data-room]"));
+
+  const statusBase = "rounded-2xl border border-white/15 bg-white/5 p-4 text-sm text-white/80";
+
+  const setStatus = (message, tone = "info") => {
+    if (!statusEl) return;
+    statusEl.hidden = false;
+    statusEl.textContent = message;
+    if (tone === "error") {
+      statusEl.className = `${statusBase} border-rose-400/40 bg-rose-500/10 text-rose-50`;
+    } else if (tone === "success") {
+      statusEl.className = `${statusBase} border-emerald-400/40 bg-emerald-500/10 text-emerald-50`;
+    } else {
+      statusEl.className = statusBase;
+    }
+  };
+
+  const applyState = (data) => {
+    const counts = data?.counts || {};
+    const limits = data?.limits || {};
+    rows.forEach((row) => {
+      const room = row.getAttribute("data-room");
+      const countEl = row.querySelector("[data-count]");
+      const limitEl = row.querySelector("[data-limit]");
+      if (countEl) countEl.textContent = counts?.[room] ?? "0";
+      if (limitEl) limitEl.textContent = `Limit: ${limits?.[room] ?? "0"}`;
+    });
+  };
+
+  const loadState = async () => {
+    try {
+      setStatus("Henter status...", "info");
+      const response = await fetch("/.netlify/functions/room-availability", { headers: { Accept: "application/json" } });
+      if (!response.ok) throw new Error("load_failed");
+      const data = await response.json();
+      applyState(data);
+      setStatus("Status oppdatert.", "success");
+    } catch {
+      setStatus("Kunne ikke hente status.", "error");
+    }
+  };
+
+  const updateCount = async (roomType, nextValue) => {
+    const token = tokenInput?.value?.trim();
+    if (!token) {
+      setStatus("Legg inn admin-nøkkel før du oppdaterer.", "error");
+      return;
+    }
+
+    try {
+      setStatus("Oppdaterer...", "info");
+      const response = await fetch("/.netlify/functions/admin-room-counts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({ token, action: "update", counts: { [roomType]: nextValue } }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        if (response.status === 401) {
+          setStatus("Ugyldig admin-nøkkel.", "error");
+        } else {
+          setStatus("Oppdateringen feilet. Prøv igjen.", "error");
+        }
+        return;
+      }
+      applyState(data);
+      setStatus("Oppdatert.", "success");
+    } catch {
+      setStatus("Oppdateringen feilet. Prøv igjen.", "error");
+    }
+  };
+
+  rows.forEach((row) => {
+    row.querySelectorAll("button[data-action]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const roomType = row.getAttribute("data-room");
+        const countEl = row.querySelector("[data-count]");
+        const current = Number(countEl?.textContent || 0);
+        const delta = Math.max(1, Number(deltaInput?.value || 1));
+        const next = btn.getAttribute("data-action") === "dec" ? Math.max(0, current - delta) : current + delta;
+        updateCount(roomType, next);
+      });
+    });
+  });
+
+  if (loadBtn) {
+    loadBtn.addEventListener("click", () => {
+      loadState();
+    });
+  }
+
+  loadState();
+</script>
