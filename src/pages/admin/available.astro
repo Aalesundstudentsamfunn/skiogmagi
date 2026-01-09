@@ -30,7 +30,13 @@ const desc = "Juster romtilgjengelighet direkte (increment/decrement) og oppdate
           <p class="text-xs text-white/60">Sett miljøvariabelen <span class="font-semibold">ROOM_ADMIN_TOKEN</span> i Netlify.</p>
         </div>
 
-        <div class="grid gap-2">
+        <div class="flex flex-wrap gap-3">
+          <button type="button" id="unlockState" class="rounded-lg border border-emerald-300/30 bg-emerald-400/10 px-4 py-2 text-sm font-semibold text-emerald-50 hover:bg-emerald-400/20">
+            Lås opp
+          </button>
+        </div>
+
+        <div class="grid gap-2" data-admin-locked hidden>
           <label for="delta" class="text-sm font-semibold text-white/80">Steg</label>
           <input
             id="delta"
@@ -42,12 +48,11 @@ const desc = "Juster romtilgjengelighet direkte (increment/decrement) og oppdate
           <p class="text-xs text-white/60">Velg hvor mye hvert klikk skal øke eller redusere.</p>
         </div>
 
-        <div class="grid gap-4">
+        <div class="grid gap-4" data-admin-locked hidden>
           <div class="availability-row" data-room="2">
             <div>
               <p class="text-sm text-white/80">2 personer</p>
               <p class="text-2xl font-semibold" data-count>0</p>
-              <p class="text-xs text-white/60" data-limit>Limit: 0</p>
             </div>
             <div class="flex gap-2">
               <button type="button" data-action="dec" class="rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white/90 hover:bg-white/15">-</button>
@@ -59,7 +64,6 @@ const desc = "Juster romtilgjengelighet direkte (increment/decrement) og oppdate
             <div>
               <p class="text-sm text-white/80">3 personer</p>
               <p class="text-2xl font-semibold" data-count>0</p>
-              <p class="text-xs text-white/60" data-limit>Limit: 0</p>
             </div>
             <div class="flex gap-2">
               <button type="button" data-action="dec" class="rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white/90 hover:bg-white/15">-</button>
@@ -71,7 +75,6 @@ const desc = "Juster romtilgjengelighet direkte (increment/decrement) og oppdate
             <div>
               <p class="text-sm text-white/80">4 personer</p>
               <p class="text-2xl font-semibold" data-count>0</p>
-              <p class="text-xs text-white/60" data-limit>Limit: 0</p>
             </div>
             <div class="flex gap-2">
               <button type="button" data-action="dec" class="rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white/90 hover:bg-white/15">-</button>
@@ -80,7 +83,7 @@ const desc = "Juster romtilgjengelighet direkte (increment/decrement) og oppdate
           </div>
         </div>
 
-        <div class="flex flex-wrap gap-3">
+        <div class="flex flex-wrap gap-3" data-admin-locked hidden>
           <button type="button" id="loadState" class="rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white/90 hover:bg-white/15">
             Hent status
           </button>
@@ -111,7 +114,9 @@ const desc = "Juster romtilgjengelighet direkte (increment/decrement) og oppdate
   const statusEl = document.getElementById("admin-status");
   const tokenInput = document.getElementById("adminToken");
   const deltaInput = document.getElementById("delta");
+  const unlockBtn = document.getElementById("unlockState");
   const loadBtn = document.getElementById("loadState");
+  const lockedBlocks = Array.from(document.querySelectorAll("[data-admin-locked]"));
   const rows = Array.from(document.querySelectorAll("[data-room]"));
 
   const statusBase = "rounded-2xl border border-white/15 bg-white/5 p-4 text-sm text-white/80";
@@ -131,20 +136,51 @@ const desc = "Juster romtilgjengelighet direkte (increment/decrement) og oppdate
 
   const applyState = (data) => {
     const counts = data?.counts || {};
-    const limits = data?.limits || {};
     rows.forEach((row) => {
       const room = row.getAttribute("data-room");
       const countEl = row.querySelector("[data-count]");
-      const limitEl = row.querySelector("[data-limit]");
       if (countEl) countEl.textContent = counts?.[room] ?? "0";
-      if (limitEl) limitEl.textContent = `Limit: ${limits?.[room] ?? "0"}`;
     });
+  };
+
+  const setUnlocked = (isUnlocked) => {
+    lockedBlocks.forEach((block) => {
+      block.hidden = !isUnlocked;
+    });
+  };
+
+  const validateToken = async () => {
+    const token = tokenInput?.value?.trim();
+    if (!token) {
+      setStatus("Legg inn admin-nøkkel først.", "error");
+      return false;
+    }
+    try {
+      setStatus("Sjekker nøkkel...", "info");
+      const response = await fetch("/.netlify/functions/admin-room-counts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({ token, action: "validate" }),
+      });
+      if (!response.ok) throw new Error("invalid");
+      setUnlocked(true);
+      setStatus("Nøkkel godkjent.", "success");
+      return true;
+    } catch {
+      setStatus("Ugyldig admin-nøkkel.", "error");
+      return false;
+    }
   };
 
   const loadState = async () => {
     try {
       setStatus("Henter status...", "info");
-      const response = await fetch("/.netlify/functions/room-availability", { headers: { Accept: "application/json" } });
+      const token = tokenInput?.value?.trim();
+      const response = await fetch("/.netlify/functions/admin-room-counts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({ token, action: "get" }),
+      });
       if (!response.ok) throw new Error("load_failed");
       const data = await response.json();
       applyState(data);
@@ -203,5 +239,10 @@ const desc = "Juster romtilgjengelighet direkte (increment/decrement) og oppdate
     });
   }
 
-  loadState();
+  if (unlockBtn) {
+    unlockBtn.addEventListener("click", async () => {
+      const ok = await validateToken();
+      if (ok) loadState();
+    });
+  }
 </script>
