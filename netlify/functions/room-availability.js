@@ -2,7 +2,7 @@ import { getStore } from "@netlify/blobs";
 
 const DEFAULT_LIMITS = {
   2: 88,
-  3: 16,
+  3: 14,
   4: 21,
 };
 
