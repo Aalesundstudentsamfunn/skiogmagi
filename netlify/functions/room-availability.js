@@ -1,9 +1,9 @@
 import { getStore } from "@netlify/blobs";
 
 const DEFAULT_LIMITS = {
-  2: 88,
+  2: 87,
   3: 14,
-  4: 21,
+  4: 20,
 };
 
 const jsonResponse = (body, status = 200) =>
