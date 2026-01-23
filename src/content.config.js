@@ -18,6 +18,7 @@ const program = defineCollection({
     id: z.string(),
     label: z.string(),
     dateLabel: z.string().optional(),
+    date: z.string().optional(),
     summary: z.string().optional(),
     schedule: z
       .array(
@@ -26,6 +27,15 @@ const program = defineCollection({
           title: z.string(),
           location: z.string().optional(),
           description: z.string().optional(),
+        })
+      )
+      .optional(),
+    extras: z
+      .array(
+        z.object({
+          kind: z.enum(["info", "thanks", "transport"]).optional(),
+          title: z.string().optional(),
+          body: z.string(),
         })
       )
       .optional(),
