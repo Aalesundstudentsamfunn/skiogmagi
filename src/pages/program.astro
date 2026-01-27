@@ -271,23 +271,56 @@ const desc = "Her er oversikten for 5-8. februar med tider, steder og høydepunk
 
     const minActiveMinutes = 30;
 
+    function updateConnectorFills(timelineItems, dayDate, nowRounded) {
+      timelineItems.forEach((el, idx) => {
+        const next = timelineItems[idx + 1];
+        const connFill = el.querySelector("[data-conn-fill]");
+        if (!next || !connFill) return;
+
+        const range = parseTimeRange(el.getAttribute("data-time"));
+        const nextRange = parseTimeRange(next.getAttribute("data-time"));
+        if (!range || !nextRange) {
+          connFill.style.height = "0%";
+          return;
+        }
+
+        const start = toDateTime(dayDate, range.start);
+        const nextStart = toDateTime(dayDate, nextRange.start);
+        if (nextStart < start) {
+          nextStart.setDate(nextStart.getDate() + 1);
+        }
+
+        const totalMs = nextStart - start;
+        let progress = 0;
+        if (totalMs > 0) {
+          progress = (nowRounded - start) / totalMs;
+        }
+
+        progress = Math.min(1, Math.max(0, progress));
+        connFill.style.height = `${Math.round(progress * 100)}%`;
+      });
+    }
+
     function updatePastTimes() {
       const now = new Date();
       const nowRounded = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes(), 0, 0);
+      const timelineMeta = [];
       panelEls.forEach((panel) => {
         const dayDate = parseDayDate(panel);
         if (!dayDate) return;
-        panel.querySelectorAll("[data-time]").forEach((el) => {
+        const dayId = panel.getAttribute("data-day-id") || "";
+        const timelineItems = Array.from(panel.querySelectorAll(".timeline-item"));
+        timelineItems.forEach((el) => {
           const raw = el.getAttribute("data-time");
           const range = parseTimeRange(raw);
           if (!range) return;
 
-          const isTransport = el.classList.contains("extra-time-transport");
           const start = toDateTime(dayDate, range.start);
+          const startMs = start.getTime();
           let end = start;
           if (range.end) {
             end = toDateTime(dayDate, range.end);
-          } else if (!isTransport) {
+          } else {
             end = new Date(start.getTime() + minActiveMinutes * 60 * 1000);
           }
           if (end < start) {
@@ -296,10 +329,104 @@ const desc = "Her er oversikten for 5-8. februar med tider, steder og høydepunk
 
           const isPast = nowRounded > end;
           const isCurrent = nowRounded >= start && nowRounded <= end;
+          const isFuture = nowRounded < start;
           el.classList.toggle("is-past", isPast);
-          el.classList.toggle("is-active", isTransport ? !isPast : isCurrent && !isPast);
+          el.classList.toggle("is-current", isCurrent && !isPast);
+          el.classList.toggle("is-future", isFuture);
+
+          timelineMeta.push({ el, start, startMs, end, isCurrent, dayId });
+        });
+
+        updateConnectorFills(timelineItems, dayDate, nowRounded);
+
+        const transportItems = Array.from(panel.querySelectorAll(".extra-time-transport"));
+        transportItems.forEach((el) => {
+          const raw = el.getAttribute("data-time");
+          const range = parseTimeRange(raw);
+          if (!range) return;
+
+          const start = toDateTime(dayDate, range.start);
+          let end = start;
+          if (range.end) {
+            end = toDateTime(dayDate, range.end);
+          }
+          if (end < start) {
+            end.setDate(end.getDate() + 1);
+          }
+
+          const isPast = nowRounded > end;
+          const isFuture = nowRounded < start;
+          el.classList.toggle("is-past", isPast);
+          el.classList.toggle("is-active", !isPast);
+          el.classList.toggle("is-future", isFuture);
         });
       });
+
+      const currentMeta = timelineMeta.filter((item) => item.isCurrent);
+      let activeKey = null;
+      if (currentMeta.length) {
+        currentMeta.sort((a, b) => a.start - b.start);
+        const pick = currentMeta[0];
+        activeKey = { dayId: pick.dayId, startMs: pick.startMs };
+      } else {
+        const futureMeta = timelineMeta.filter((item) => item.start >= nowRounded);
+        if (futureMeta.length) {
+          futureMeta.sort((a, b) => a.start - b.start);
+          const pick = futureMeta[0];
+          activeKey = { dayId: pick.dayId, startMs: pick.startMs };
+        }
+      }
+
+      timelineMeta.forEach((item) => {
+        const isActive = activeKey && item.dayId === activeKey.dayId && item.startMs === activeKey.startMs;
+        item.el.classList.toggle("is-active", isActive);
+      });
+    }
+
+    function findActiveDayId() {
+      const now = new Date();
+      const nowRounded = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes(), 0, 0);
+      const timelineMeta = [];
+
+      panelEls.forEach((panel) => {
+        const dayDate = parseDayDate(panel);
+        if (!dayDate) return;
+        const dayId = panel.getAttribute("data-day-id") || "";
+        const timelineItems = Array.from(panel.querySelectorAll(".timeline-item"));
+        timelineItems.forEach((el) => {
+          const raw = el.getAttribute("data-time");
+          const range = parseTimeRange(raw);
+          if (!range) return;
+
+          const start = toDateTime(dayDate, range.start);
+          let end = start;
+          if (range.end) {
+            end = toDateTime(dayDate, range.end);
+          } else {
+            end = new Date(start.getTime() + minActiveMinutes * 60 * 1000);
+          }
+          if (end < start) {
+            end.setDate(end.getDate() + 1);
+          }
+
+          const isCurrent = nowRounded >= start && nowRounded <= end;
+          timelineMeta.push({ dayId, start, isCurrent });
+        });
+      });
+
+      const currentMeta = timelineMeta.filter((item) => item.isCurrent);
+      if (currentMeta.length) {
+        currentMeta.sort((a, b) => a.start - b.start);
+        return currentMeta[0].dayId || null;
+      }
+
+      const futureMeta = timelineMeta.filter((item) => item.start >= nowRounded);
+      if (futureMeta.length) {
+        futureMeta.sort((a, b) => a.start - b.start);
+        return futureMeta[0].dayId || null;
+      }
+
+      return null;
     }
 
     function setActive(id) {
@@ -332,7 +459,9 @@ const desc = "Her er oversikten for 5-8. februar med tider, steder og høydepunk
 
     // Initial tab based on hash or fallback to first day
     const hash = window.location.hash.slice(1);
-    const initialId = tabButtons.find((btn) => btn.getAttribute("data-tab") === hash)?.getAttribute("data-tab") || tabButtons[0]?.getAttribute("data-tab");
+    const hashId = tabButtons.find((btn) => btn.getAttribute("data-tab") === hash)?.getAttribute("data-tab");
+    const activeDayId = findActiveDayId();
+    const initialId = activeDayId || hashId || tabButtons[0]?.getAttribute("data-tab");
 
     if (initialId) {
       setActive(initialId);
@@ -403,16 +532,23 @@ const desc = "Her er oversikten for 5-8. februar med tider, steder og høydepunk
   /* Add life to timeline bullets */
   @keyframes bulletPulse {
     from {
-      transform: scale(1);
-      opacity: 0.85;
+      box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.6);
     }
     to {
-      transform: scale(1.15);
-      opacity: 1;
+      box-shadow: 0 0 0 12px rgba(56, 189, 248, 0);
     }
   }
-  .timeline-bullet {
-    animation: none;
+  .timeline-item.is-current .timeline-bullet {
+    animation: bulletPulse 2.2s ease-out infinite;
+  }
+  .timeline-item.is-active .timeline-bullet {
+    animation: bulletPulse 2.2s ease-out infinite;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3),
+      0 0 10px rgba(56, 189, 248, 0.55),
+      0 0 20px rgba(56, 189, 248, 0.35);
+  }
+  .timeline-item:not(.is-active) .timeline-bullet {
+    box-shadow: none;
   }
 
   /* Timeline container for positioning only */
@@ -420,20 +556,24 @@ const desc = "Her er oversikten for 5-8. februar med tider, steder og høydepunk
     position: relative;
   }
 
+  .timeline-conn-fill {
+    height: 0%;
+    transition: height 400ms ease;
+  }
+
   /* Connector segments are placed per-item via data-conn and sized by JS
      so each runs from one dot center to the next dot center precisely. */
 
-  .timeline-item.is-current .timeline-bullet {
-    animation: bulletPulse 2.2s ease-out infinite;
-    background: rgba(56, 189, 248, 0.95);
-  }
   .timeline-item.is-past .timeline-bullet {
     animation: none;
-    background: rgba(148, 163, 184, 0.85);
+    background: rgba(56, 189, 248, 0.85);
     box-shadow: none;
   }
   .timeline-item.is-past .timeline-time {
     color: rgba(148, 163, 184, 0.9);
+  }
+  .timeline-item.is-past .timeline-body {
+    opacity: 0.7;
   }
 
   .extra-time.is-past {
