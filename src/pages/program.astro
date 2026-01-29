@@ -1,6 +1,9 @@
 ---
 import PageLayout from "../layouts/PageLayout.astro";
 import Footer from "../components/Footer.astro";
+import ProgramSchedule from "../components/ProgramSchedule.astro";
+import ProgramExtras from "../components/ProgramExtras.astro";
+import { getCollection, type CollectionEntry } from "astro:content";
 
 type ProgramDay = {
   id: string;
@@ -8,17 +11,34 @@ type ProgramDay = {
   dateLabel: string;
   summary?: string;
   order?: number;
+  schedule?: ProgramItem[];
+  extras?: ProgramExtra[];
+  date?: string;
 };
 
-const programModules = import.meta.glob<{ data: ProgramDay }>("../content/program/*.mdx", { eager: true });
+type ProgramItem = {
+  time: string;
+  title: string;
+  location?: string;
+  description?: string;
+};
 
-const days = Object.values(programModules)
-  .map((mod) => mod?.data)
-  .filter((d): d is ProgramDay => Boolean(d))
+type ProgramExtra = {
+  kind?: "info" | "thanks" | "transport";
+  title?: string;
+  body: string;
+};
+
+type ProgramEntry = CollectionEntry<"program">;
+
+const programEntries: ProgramEntry[] = await getCollection("program");
+
+const days = programEntries
+  .map((entry) => entry.data as ProgramDay)
   .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 
 const title = "Program";
-const desc = "Programmet slippes snart - hold av dagene 5-8. februar og bli med på vintermagien.";
+const desc = "Her er oversikten for 5-8. februar med tider, steder og høydepunkter.";
 ---
 
 <PageLayout title={title} description={desc}>
@@ -31,7 +51,7 @@ const desc = "Programmet slippes snart - hold av dagene 5-8. februar og bli med 
   </section>
 
   <!-- Content -->
-  <section class="mx-auto w-full max-w-6xl px-6 py-8 sm:py-10 text-white mb-66 md:mb-4 hidden">
+  <section class="mx-auto w-full max-w-6xl px-6 py-8 sm:py-10 text-white pb-16">
     <!-- Mobile: top tabs + panel -->
     <div class="md:hidden">
       <!-- Tabs row -->
@@ -46,24 +66,33 @@ const desc = "Programmet slippes snart - hold av dagene 5-8. februar og bli med 
       </div>
 
       <!-- Active day content -->
-      <div class="relative mt-4 rounded-2xl border border-white/15 bg-white/10 p-4 sm:p-5 text-white shadow-sm backdrop-blur-md">
+      <div class="mt-4 space-y-4">
         {
           days.map((d) => (
-            <div id={`mpanel-${d.id}`} data-panel data-day-id={d.id} role="tabpanel" aria-labelledby={`mtab-${d.id}`} hidden class="panel">
-              <header class="mb-2">
-                <h2 class="text-xl font-bold text-white">{d.label}</h2>
-                <p class="text-white/70">
-                  {d.dateLabel}
-                  {d.summary ? ` · ${d.summary}` : ""}
-                </p>
-              </header>
+            <div
+              id={`mpanel-${d.id}`}
+              data-panel
+              data-day-id={d.id}
+              data-day-date={d.date}
+              data-day-label={d.dateLabel}
+              role="tabpanel"
+              aria-labelledby={`mtab-${d.id}`}
+              hidden
+              class="panel"
+            >
+              <ProgramExtras items={d.extras} includeKinds={["info"]} class="mb-4" />
+              <div class="relative rounded-2xl border border-white/15 bg-white/10 p-4 sm:p-5 text-white shadow-sm backdrop-blur-md">
+                <header class="mb-2">
+                  <h2 class="text-xl font-bold text-white">{d.label}</h2>
+                  <p class="text-white/70">
+                    {d.dateLabel}
+                    {d.summary ? ` · ${d.summary}` : ""}
+                  </p>
+                </header>
 
-              <div class="rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-sm text-white/90">Vi er like gira som deg! Programmet kommer snart! &lt;3</div>
-
-              {/**
-               * Temporarily hiding detailed schedule until ready to publish
-               * <ul class="timeline relative ml-0.5 pl-3">...</ul>
-               */}
+                <ProgramSchedule items={d.schedule} variant="mobile" />
+              </div>
+              <ProgramExtras items={d.extras} includeKinds={["transport", "thanks"]} class="mt-4" />
             </div>
           ))
         }
@@ -73,41 +102,61 @@ const desc = "Programmet slippes snart - hold av dagene 5-8. februar og bli med 
     <!-- Desktop: tabs + timeline -->
     <div class="hidden md:grid grid-cols-[280px_1fr] gap-6">
       <!-- Tabs (left) -->
-      <div role="tablist" aria-label="Dager" class="h-max rounded-2xl border border-white/15 bg-white/10 p-3 shadow-sm backdrop-blur-md space-y-2 text-white">
-        {
-          days.map((d) => (
-            <button id={`tab-${d.id}`} data-tab={d.id} role="tab" aria-selected="false" aria-controls={`panel-${d.id}`} class="group w-full text-left rounded-xl px-4 py-3 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/60 hover:bg-white/10 data-[active=true]:bg-indigo-600 data-[active=true]:text-white data-[active=true]:shadow-sm">
-              <div class="text-xs text-white/70">{d.dateLabel}</div>
-              <div class="mt-0.5 font-semibold text-white">{d.label}</div>
-              {d.summary && <div class="mt-1 text-sm text-white/85">{d.summary}</div>}
-            </button>
-          ))
-        }
+      <div class="space-y-4">
+        <div role="tablist" aria-label="Dager" class="h-max rounded-2xl border border-white/15 bg-white/10 p-3 shadow-sm backdrop-blur-md space-y-2 text-white">
+          {
+            days.map((d) => (
+              <button id={`tab-${d.id}`} data-tab={d.id} role="tab" aria-selected="false" aria-controls={`panel-${d.id}`} class="group w-full text-left rounded-xl px-4 py-3 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/60 hover:bg-white/10 data-[active=true]:bg-indigo-600 data-[active=true]:text-white data-[active=true]:shadow-sm">
+                <div class="text-xs text-white/70">{d.dateLabel}</div>
+                <div class="mt-0.5 font-semibold text-white">{d.label}</div>
+                {d.summary && <div class="mt-1 text-sm text-white/85">{d.summary}</div>}
+              </button>
+            ))
+          }
+        </div>
+        <div class="space-y-4">
+          {
+            days.map((d) => (
+              <div data-panel data-day-id={d.id} data-day-date={d.date} data-day-label={d.dateLabel} hidden class="panel">
+                <ProgramExtras items={d.extras} includeKinds={["transport"]} />
+              </div>
+            ))
+          }
+        </div>
       </div>
 
       <!-- Panels (right) -->
-      <div class="relative rounded-2xl border border-white/15 bg-white/10 p-4 sm:p-6 shadow-sm backdrop-blur-md text-white">
-        <!-- ambient glows -->
-        <div aria-hidden class="pointer-events-none absolute -top-20 -left-16 h-40 w-40 rounded-full bg-sky-300/25 blur-3xl"></div>
-        <div aria-hidden class="pointer-events-none absolute -bottom-20 -right-16 h-40 w-40 rounded-full bg-fuchsia-300/25 blur-3xl"></div>
-
+      <div class="space-y-4">
         {
           days.map((d) => (
-            <div id={`panel-${d.id}`} data-panel data-day-id={d.id} role="tabpanel" aria-labelledby={`tab-${d.id}`} hidden class="panel">
-              <header class="mb-4">
-                <h2 class="text-2xl font-bold text-white">{d.label}</h2>
-                <p class="text-white/70">
-                  {d.dateLabel}
-                  {d.summary ? ` · ${d.summary}` : ""}
-                </p>
-              </header>
+            <div
+              id={`panel-${d.id}`}
+              data-panel
+              data-day-id={d.id}
+              data-day-date={d.date}
+              data-day-label={d.dateLabel}
+              role="tabpanel"
+              aria-labelledby={`tab-${d.id}`}
+              hidden
+              class="panel"
+            >
+              <ProgramExtras items={d.extras} includeKinds={["info"]} class="mb-4" />
+              <div class="relative rounded-2xl border border-white/15 bg-white/10 p-4 sm:p-6 shadow-sm backdrop-blur-md text-white">
+                <!-- ambient glows -->
+                <div aria-hidden class="pointer-events-none absolute -top-20 -left-16 h-40 w-40 rounded-full bg-sky-300/25 blur-3xl"></div>
+                <div aria-hidden class="pointer-events-none absolute -bottom-20 -right-16 h-40 w-40 rounded-full bg-fuchsia-300/25 blur-3xl"></div>
 
-              <div class="rounded-2xl border border-white/15 bg-white/5 px-4 py-4 text-white/90">Vi er like gira som deg! Programmet kommer snart! &lt;3</div>
+                <header class="mb-4">
+                  <h2 class="text-2xl font-bold text-white">{d.label}</h2>
+                  <p class="text-white/70">
+                    {d.dateLabel}
+                    {d.summary ? ` · ${d.summary}` : ""}
+                  </p>
+                </header>
 
-              {/**
-               * Temporarily hiding detailed schedule until ready to publish
-               * <ul class="timeline relative ml-0.5 pl-3">...</ul>
-               */}
+                <ProgramSchedule items={d.schedule} variant="desktop" />
+              </div>
+              <ProgramExtras items={d.extras} includeKinds={["thanks"]} class="mt-4" />
             </div>
           ))
         }
@@ -144,8 +193,8 @@ const desc = "Programmet slippes snart - hold av dagene 5-8. februar og bli med 
           if (!nextBullet) return;
           const b2 = nextBullet.getBoundingClientRect();
 
-          const startY = b1.top + b1.height / 2;
-          const endY = b2.top + b2.height / 2;
+          const startY = b1.top + b1.height;
+          const endY = b2.top;
 
           // Position within current li coordinate space
           const liRect = li.getBoundingClientRect();
@@ -159,6 +208,225 @@ const desc = "Programmet slippes snart - hold av dagene 5-8. februar og bli med 
           });
         });
       });
+    }
+
+    const monthMap = {
+      jan: 0,
+      feb: 1,
+      mar: 2,
+      apr: 3,
+      mai: 4,
+      jun: 5,
+      jul: 6,
+      aug: 7,
+      sep: 8,
+      okt: 9,
+      nov: 10,
+      des: 11,
+    };
+
+    function parseDayDate(panel) {
+      const explicit = panel.getAttribute("data-day-date");
+      if (explicit) {
+        const parsed = new Date(explicit);
+        if (!Number.isNaN(parsed.getTime())) return parsed;
+      }
+
+      const label = panel.getAttribute("data-day-label");
+      if (!label) return null;
+
+      const match = label.toLowerCase().match(/(\d{1,2})\.\s*([a-z]+)/);
+      if (!match) return null;
+
+      const day = Number.parseInt(match[1], 10);
+      let key = match[2].replace(/[^a-z]/g, "");
+      if (key.startsWith("sept")) key = "sep";
+      key = key.slice(0, 3);
+
+      const month = monthMap[key];
+      if (month === undefined) return null;
+
+      const now = new Date();
+      let year = now.getFullYear();
+      const candidate = new Date(year, month, day);
+      const diffDays = (candidate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24);
+      if (diffDays < -180) {
+        year += 1;
+      }
+
+      return new Date(year, month, day);
+    }
+
+    function parseTimeRange(raw) {
+      if (!raw) return null;
+      const matches = raw.match(/\b([01]?\d|2[0-3]):[0-5]\d\b/g);
+      if (!matches || !matches.length) return null;
+      return { start: matches[0], end: matches[1] };
+    }
+
+    function toDateTime(base, timeStr) {
+      const [hour, minute] = timeStr.split(":").map((part) => Number.parseInt(part, 10));
+      return new Date(base.getFullYear(), base.getMonth(), base.getDate(), hour, minute, 0, 0);
+    }
+
+    const minActiveMinutes = 30;
+
+    function updateConnectorFills(timelineItems, dayDate, nowRounded) {
+      timelineItems.forEach((el, idx) => {
+        const next = timelineItems[idx + 1];
+        const connFill = el.querySelector("[data-conn-fill]");
+        if (!next || !connFill) return;
+
+        const range = parseTimeRange(el.getAttribute("data-time"));
+        const nextRange = parseTimeRange(next.getAttribute("data-time"));
+        if (!range || !nextRange) {
+          connFill.style.height = "0%";
+          return;
+        }
+
+        const start = toDateTime(dayDate, range.start);
+        const nextStart = toDateTime(dayDate, nextRange.start);
+        if (nextStart < start) {
+          nextStart.setDate(nextStart.getDate() + 1);
+        }
+
+        const totalMs = nextStart - start;
+        let progress = 0;
+        if (totalMs > 0) {
+          progress = (nowRounded - start) / totalMs;
+        }
+
+        progress = Math.min(1, Math.max(0, progress));
+        connFill.style.height = `${Math.round(progress * 100)}%`;
+      });
+    }
+
+    function updatePastTimes() {
+      const now = new Date();
+      const nowRounded = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes(), 0, 0);
+      const timelineMeta = [];
+      panelEls.forEach((panel) => {
+        const dayDate = parseDayDate(panel);
+        if (!dayDate) return;
+        const dayId = panel.getAttribute("data-day-id") || "";
+        const timelineItems = Array.from(panel.querySelectorAll(".timeline-item"));
+        timelineItems.forEach((el) => {
+          const raw = el.getAttribute("data-time");
+          const range = parseTimeRange(raw);
+          if (!range) return;
+
+          const start = toDateTime(dayDate, range.start);
+          const startMs = start.getTime();
+          let end = start;
+          if (range.end) {
+            end = toDateTime(dayDate, range.end);
+          } else {
+            end = new Date(start.getTime() + minActiveMinutes * 60 * 1000);
+          }
+          if (end < start) {
+            end.setDate(end.getDate() + 1);
+          }
+
+          const isPast = nowRounded > end;
+          const isCurrent = nowRounded >= start && nowRounded <= end;
+          const isFuture = nowRounded < start;
+          el.classList.toggle("is-past", isPast);
+          el.classList.toggle("is-current", isCurrent && !isPast);
+          el.classList.toggle("is-future", isFuture);
+
+          timelineMeta.push({ el, start, startMs, end, isCurrent, dayId });
+        });
+
+        updateConnectorFills(timelineItems, dayDate, nowRounded);
+
+        const transportItems = Array.from(panel.querySelectorAll(".extra-time-transport"));
+        transportItems.forEach((el) => {
+          const raw = el.getAttribute("data-time");
+          const range = parseTimeRange(raw);
+          if (!range) return;
+
+          const start = toDateTime(dayDate, range.start);
+          let end = start;
+          if (range.end) {
+            end = toDateTime(dayDate, range.end);
+          }
+          if (end < start) {
+            end.setDate(end.getDate() + 1);
+          }
+
+          const isPast = nowRounded > end;
+          const isFuture = nowRounded < start;
+          el.classList.toggle("is-past", isPast);
+          el.classList.toggle("is-active", !isPast);
+          el.classList.toggle("is-future", isFuture);
+        });
+      });
+
+      const currentMeta = timelineMeta.filter((item) => item.isCurrent);
+      let activeKey = null;
+      if (currentMeta.length) {
+        currentMeta.sort((a, b) => a.start - b.start);
+        const pick = currentMeta[0];
+        activeKey = { dayId: pick.dayId, startMs: pick.startMs };
+      } else {
+        const futureMeta = timelineMeta.filter((item) => item.start >= nowRounded);
+        if (futureMeta.length) {
+          futureMeta.sort((a, b) => a.start - b.start);
+          const pick = futureMeta[0];
+          activeKey = { dayId: pick.dayId, startMs: pick.startMs };
+        }
+      }
+
+      timelineMeta.forEach((item) => {
+        const isActive = activeKey && item.dayId === activeKey.dayId && item.startMs === activeKey.startMs;
+        item.el.classList.toggle("is-active", isActive);
+      });
+    }
+
+    function findActiveDayId() {
+      const now = new Date();
+      const nowRounded = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes(), 0, 0);
+      const timelineMeta = [];
+
+      panelEls.forEach((panel) => {
+        const dayDate = parseDayDate(panel);
+        if (!dayDate) return;
+        const dayId = panel.getAttribute("data-day-id") || "";
+        const timelineItems = Array.from(panel.querySelectorAll(".timeline-item"));
+        timelineItems.forEach((el) => {
+          const raw = el.getAttribute("data-time");
+          const range = parseTimeRange(raw);
+          if (!range) return;
+
+          const start = toDateTime(dayDate, range.start);
+          let end = start;
+          if (range.end) {
+            end = toDateTime(dayDate, range.end);
+          } else {
+            end = new Date(start.getTime() + minActiveMinutes * 60 * 1000);
+          }
+          if (end < start) {
+            end.setDate(end.getDate() + 1);
+          }
+
+          const isCurrent = nowRounded >= start && nowRounded <= end;
+          timelineMeta.push({ dayId, start, isCurrent });
+        });
+      });
+
+      const currentMeta = timelineMeta.filter((item) => item.isCurrent);
+      if (currentMeta.length) {
+        currentMeta.sort((a, b) => a.start - b.start);
+        return currentMeta[0].dayId || null;
+      }
+
+      const futureMeta = timelineMeta.filter((item) => item.start >= nowRounded);
+      if (futureMeta.length) {
+        futureMeta.sort((a, b) => a.start - b.start);
+        return futureMeta[0].dayId || null;
+      }
+
+      return null;
     }
 
     function setActive(id) {
@@ -177,6 +445,7 @@ const desc = "Programmet slippes snart - hold av dagene 5-8. februar og bli med 
 
       // After toggling content, recompute connector sizes
       window.requestAnimationFrame(sizeConnectors);
+      window.requestAnimationFrame(updatePastTimes);
 
       try {
         if (window.history.replaceState) {
@@ -190,11 +459,16 @@ const desc = "Programmet slippes snart - hold av dagene 5-8. februar og bli med 
 
     // Initial tab based on hash or fallback to first day
     const hash = window.location.hash.slice(1);
-    const initialId = tabButtons.find((btn) => btn.getAttribute("data-tab") === hash)?.getAttribute("data-tab") || tabButtons[0]?.getAttribute("data-tab");
+    const hashId = tabButtons.find((btn) => btn.getAttribute("data-tab") === hash)?.getAttribute("data-tab");
+    const activeDayId = findActiveDayId();
+    const initialId = activeDayId || hashId || tabButtons[0]?.getAttribute("data-tab");
 
     if (initialId) {
       setActive(initialId);
     }
+
+    updatePastTimes();
+    window.setInterval(updatePastTimes, 60_000);
 
     // Wire click interactions
     tabButtons.forEach((btn) => {
@@ -264,8 +538,17 @@ const desc = "Programmet slippes snart - hold av dagene 5-8. februar og bli med 
       box-shadow: 0 0 0 12px rgba(56, 189, 248, 0);
     }
   }
-  .timeline-bullet {
+  .timeline-item.is-current .timeline-bullet {
     animation: bulletPulse 2.2s ease-out infinite;
+  }
+  .timeline-item.is-active .timeline-bullet {
+    animation: bulletPulse 2.2s ease-out infinite;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3),
+      0 0 10px rgba(56, 189, 248, 0.55),
+      0 0 20px rgba(56, 189, 248, 0.35);
+  }
+  .timeline-item:not(.is-active) .timeline-bullet {
+    box-shadow: none;
   }
 
   /* Timeline container for positioning only */
@@ -273,6 +556,34 @@ const desc = "Programmet slippes snart - hold av dagene 5-8. februar og bli med 
     position: relative;
   }
 
+  .timeline-conn-fill {
+    height: 0%;
+    transition: height 400ms ease;
+  }
+
   /* Connector segments are placed per-item via data-conn and sized by JS
      so each runs from one dot center to the next dot center precisely. */
+
+  .timeline-item.is-past .timeline-bullet {
+    animation: none;
+    background: rgba(56, 189, 248, 0.85);
+    box-shadow: none;
+  }
+  .timeline-item.is-past .timeline-time {
+    color: rgba(148, 163, 184, 0.9);
+  }
+  .timeline-item.is-past .timeline-body {
+    opacity: 0.7;
+  }
+
+  .extra-time.is-past {
+    text-decoration: line-through;
+    text-decoration-thickness: 2px;
+    text-decoration-color: rgba(255, 255, 255, 0.45);
+  }
+  .extra-time-transport.is-active {
+    background: rgba(56, 189, 248, 0.3);
+    border-color: rgba(125, 211, 252, 0.65);
+    color: rgba(239, 246, 255, 0.95);
+  }
 </style>

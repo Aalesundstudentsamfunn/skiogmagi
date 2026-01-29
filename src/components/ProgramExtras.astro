@@ -1,0 +1,176 @@
+---
+type ProgramExtra = {
+  kind?: "info" | "thanks" | "transport";
+  title?: string;
+  body: string;
+};
+
+export interface Props {
+  items?: ProgramExtra[];
+  includeKinds?: Array<ProgramExtra["kind"]>;
+  class?: string;
+}
+
+const { items = [], includeKinds, class: className = "" } = Astro.props as Props;
+
+const kindMeta: Record<string, { label: string; badgeClass: string }> = {
+  info: {
+    label: "Praktisk info",
+    badgeClass: "bg-sky-400/20 text-sky-100 ring-1 ring-sky-300/40",
+  },
+  thanks: {
+    label: "Takk",
+    badgeClass: "bg-emerald-400/20 text-emerald-100 ring-1 ring-emerald-300/40",
+  },
+  transport: {
+    label: "Transport",
+    badgeClass: "bg-amber-400/20 text-amber-100 ring-1 ring-amber-300/40",
+  },
+};
+
+const normalizeLines = (body: string) =>
+  body
+    .split(/\r?\n/)
+    .map((line) => line.replace(/^[-*•]\s+/, "").trim())
+    .filter(Boolean);
+
+const timeRegex = /\b([01]?\d|2[0-3]):[0-5]\d\b/;
+
+type TextPart = {
+  text: string;
+  bold: boolean;
+};
+
+type TimePart = {
+  text: string;
+  isTime: boolean;
+};
+
+const splitBold = (text: string): TextPart[] => {
+  const parts: TextPart[] = [];
+  let cursor = 0;
+
+  while (cursor < text.length) {
+    const open = text.indexOf("**", cursor);
+    if (open === -1) {
+      parts.push({ text: text.slice(cursor), bold: false });
+      break;
+    }
+
+    const close = text.indexOf("**", open + 2);
+    if (close === -1) {
+      parts.push({ text: text.slice(cursor), bold: false });
+      break;
+    }
+
+    if (open > cursor) {
+      parts.push({ text: text.slice(cursor, open), bold: false });
+    }
+
+    parts.push({ text: text.slice(open + 2, close), bold: true });
+    cursor = close + 2;
+  }
+
+  return parts.filter((part) => part.text.length > 0);
+};
+
+const splitTimes = (text: string): TimePart[] => {
+  const parts: TimePart[] = [];
+  const regex = /\b([01]?\d|2[0-3]):[0-5]\d\b/g;
+  let lastIndex = 0;
+  let match = regex.exec(text);
+  while (match) {
+    const index = match.index ?? 0;
+    if (index > lastIndex) {
+      parts.push({ text: text.slice(lastIndex, index), isTime: false });
+    }
+    parts.push({ text: match[0], isTime: true });
+    lastIndex = index + match[0].length;
+    match = regex.exec(text);
+  }
+  if (lastIndex < text.length) {
+    parts.push({ text: text.slice(lastIndex), isTime: false });
+  }
+  return parts;
+};
+
+const tokenizeText = (text: string) =>
+  splitBold(text).flatMap((part) =>
+    splitTimes(part.text).map((timePart) => ({
+      text: timePart.text,
+      bold: part.bold,
+      isTime: timePart.isTime,
+    }))
+  );
+
+const filteredItems =
+  includeKinds && includeKinds.length > 0
+    ? items.filter((item) => includeKinds.includes(item.kind ?? "info"))
+    : items;
+---
+
+{
+  filteredItems.length > 0 && (
+    <div class={["space-y-3", className].filter(Boolean).join(" ")}>
+      {filteredItems.map((item) => {
+        const meta = kindMeta[item.kind ?? "info"] ?? kindMeta.info;
+        const title = item.title ?? meta.label;
+        const lines = normalizeLines(item.body);
+        const renderList = lines.length > 1;
+        return (
+          <div class="rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-white/90">
+            <div class="flex flex-wrap items-center gap-2">
+              <span class={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] uppercase tracking-wide ${meta.badgeClass}`}>
+                {meta.label}
+              </span>
+              <h3 class="text-base font-semibold text-white">{title}</h3>
+            </div>
+            {renderList ? (
+              <ul class="mt-3 flex flex-wrap gap-2 text-sm text-white/90">
+                {lines.map((line) => {
+                  const hasTime = timeRegex.test(line);
+                  const timeClass = [
+                    "extra-time",
+                    item.kind === "transport" ? "extra-time-transport" : "",
+                  ]
+                    .filter(Boolean)
+                    .join(" ");
+                  const tokens = tokenizeText(line);
+                  return (
+                    <li class={`${timeClass} rounded-full border border-white/20 bg-white/10 px-3 py-1.5 shadow-sm`} data-time={hasTime ? line : undefined}>
+                      {tokens.map((token) =>
+                        token.bold ? (
+                          <strong>
+                            {token.isTime ? <span class="extra-time-stamp">{token.text}</span> : token.text}
+                          </strong>
+                        ) : token.isTime ? (
+                          <span class="extra-time-stamp">{token.text}</span>
+                        ) : (
+                          token.text
+                        )
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : (
+              <p class="mt-2 text-sm text-white/80">
+                {tokenizeText(item.body).map((token) =>
+                  token.bold ? (
+                    <strong>
+                      {token.isTime ? <span class="extra-time-stamp">{token.text}</span> : token.text}
+                    </strong>
+                  ) : token.isTime ? (
+                    <span class="extra-time-stamp">{token.text}</span>
+                  ) : (
+                    token.text
+                  )
+                )}
+              </p>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  )
+}
