@@ -4,9 +4,9 @@ import { Icon } from "astro-icon/components";
 const year = new Date().getFullYear();
 ---
 
-<footer class="relative overflow-hidden text-white">
+<footer class="relative overflow-hidden text-white mt-auto">
   <MagicBackground showTopRule />
-  <div class="mx-auto w-full max-w-6xl px-6 py-10">
+  <div class="mx-auto w-full max-w-6xl px-6 pt-10 pb-[calc(2.5rem+env(safe-area-inset-bottom))]">
     <div class="flex flex-col items-center justify-between gap-6 sm:flex-row">
       <div class="text-center sm:text-left">
         <p class="text-sm/6 opacity-90">© {year} Ski & Magi</p>
