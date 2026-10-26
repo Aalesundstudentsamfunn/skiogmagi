@@ -11,7 +11,7 @@ const links = [
   { name: "Program", href: "/program" },
 ];
 
-const ticketLink = { name: "Kjøp billett", href: "https://tikkio.com/events/60480" };
+const ticketLink = { name: "Kjøp billett", href: "https://stello.no/o/astudent" };
 const heiskortLink = "https://sogndal.skiperformance.com/no/shopp#/no/buy?is_promo=1&is_promo_offer=0&promo_connector_id=8";
 const currentPath = Astro.url?.pathname || "/";
 ---
@@ -41,7 +41,7 @@ const currentPath = Astro.url?.pathname || "/";
           )
         }
 
-        <div class="nav-dropdown">
+        <div class="nav-dropdown" hidden>
           <button type="button" class="nav-dropdown__trigger" aria-haspopup="true"> Heiskort </button>
           <div class="nav-dropdown__menu" role="menu">
             <a class="nav-dropdown__item" href={heiskortLink} target="_blank" rel="noreferrer"> Link </a>
@@ -79,7 +79,7 @@ const currentPath = Astro.url?.pathname || "/";
           )
         )
       }
-      <details class="mobile-dropdown">
+      <details class="mobile-dropdown" hidden>
         <summary class="mobile-dropdown__summary block font-medium transition-colors opacity-80 hover:opacity-100">Heiskort</summary>
         <div class="mobile-dropdown__content">
           <a class="block pl-4 text-sm opacity-80 hover:opacity-100" href={heiskortLink} target="_blank" rel="noreferrer"> Kjøp </a>

@@ -38,7 +38,8 @@ const days = programEntries
   .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 
 const title = "Program";
-const desc = "Her er oversikten for 5-8. februar med tider, steder og høydepunkter.";
+const desc = "Programmet blir snart lansert.";
+const showProgram = false;
 ---
 
 <PageLayout title={title} description={desc}>
@@ -50,8 +51,15 @@ const desc = "Her er oversikten for 5-8. februar med tider, steder og høydepunk
     </div>
   </section>
 
-  <!-- Content -->
   <section class="mx-auto w-full max-w-6xl px-6 py-8 sm:py-10 text-white pb-16">
+    <div class="rounded-2xl border border-white/15 bg-white/10 p-8 text-center shadow-sm backdrop-blur-md">
+      <p class="text-2xl font-semibold text-white">Blir snart lansert</p>
+    </div>
+  </section>
+
+  <!-- Existing program content is kept for when the schedule is ready. -->
+  <!-- Content -->
+  <section hidden={!showProgram} class="mx-auto w-full max-w-6xl px-6 py-8 sm:py-10 text-white pb-16">
     <!-- Mobile: top tabs + panel -->
     <div class="md:hidden">
       <!-- Tabs row -->
