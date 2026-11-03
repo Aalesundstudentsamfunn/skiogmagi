@@ -1,4 +1,5 @@
 import { getStore } from "@netlify/blobs";
+import { SECURITY_HEADERS } from "../../src/utils/security-headers.js";
 
 const DEFAULT_LIMITS = {
   2: 87,
@@ -10,6 +11,7 @@ const jsonResponse = (body, status = 200) =>
   new Response(JSON.stringify(body), {
     status,
     headers: {
+      ...SECURITY_HEADERS,
       "Content-Type": "application/json",
       "Cache-Control": "no-store",
     },

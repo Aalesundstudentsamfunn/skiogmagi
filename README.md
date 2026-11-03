@@ -201,3 +201,30 @@ PUBLIC_CLOUDINARY_CLOUD_NAME
 This project is proprietary and maintained for the Ski & Magi crew.
 
 PS: GPT for rask readme
+
+## Security headers
+
+The catch-all rule in `netlify.toml` adds security headers to static responses.
+`src/middleware.ts` adds the same baseline to Astro's dynamic responses, including
+all ticket API statuses with `Cache-Control: no-store`. The room availability
+function also adds the baseline directly, since Netlify functions do not inherit
+the static header configuration. Shared values are in `src/utils/security-headers.js`;
+keep the TOML values in sync. Netlify already supplies HSTS on the production domain.
+
+The CSP restricts base URLs, plugin content, framing, and form submissions, and
+upgrades insecure resource URLs. It does not restrict script or resource sources
+yet and is not a complete XSS defense. Inline scripts and image load handlers,
+Mux, Cloudinary, Google Fonts, and the external QR service need review before
+introducing a strict source policy. External ticket links are ordinary navigation
+and are not restricted by `form-action 'self'`; the existing forms submit locally.
+
+The previous catch-all seven-day cache override has been removed so pages use
+Netlify's default revalidation. Fingerprinted assets retain their long cache rules.
+Previously cached pages may still use their original lifetime until they expire.
+
+Before publishing, test a Netlify deploy preview: home, program, ticket lookup,
+booking, galleries, video, and external ticket links. Verify static response headers
+and ticket API success/error headers. Use test data for ticket and booking actions.
+Local Astro development does not apply Netlify's static TOML header rules.
+After publishing, verify production responses and rescan with SecurityHeaders.
+A scanner grade is not a full review of ticket access or booking authorization.
