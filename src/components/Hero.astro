@@ -13,7 +13,7 @@ const isLocationSecret = !location || location === "???";
 
 <div id="container" class="relative flex max-h-dvh" style="font-family: Inter, Roboto, 'Helvetica Neue', 'Arial Nova', 'Nimbus Sans', Arial, sans-serif;">
   <!-- Video -->
-  <MuxPlayer id="bgPlayer" playbackId="oH900N4ZEOj7xTzGaw6lmBHQ3P9Da9MhaP8nb400R00gWU" primaryColor="#155dfc" thumbnailTime={0} hotkeys="noc nok nom nof noarrowleft noarrowright" preload="none" class="absolute left-0 right-0 h-full w-full pointer-events-auto z-1" />
+  <MuxPlayer id="bgPlayer" playbackId="02XYQCv7kE00G01ZF2wOswwc861r901SY20202eAVrJ015DcDI" primaryColor="#155dfc" thumbnailTime={0} hotkeys="noc nok nom nof noarrowleft noarrowright" preload="none" class="absolute left-0 right-0 h-full w-full pointer-events-auto z-1" />
 
   <div class="absolute inset-0 skeleton z-8"></div>
   <CldImage src="cover-min_oxufkc_azdl5p" version="1763807656" id="hero" alt="bilde av studenter ute i en snøbakke" aria-hidden="true" class="absolute left-0 right-0 h-full object-cover w-full transition-opacity duration-300 poster z-6" sizes="100vw" loading="eager" decoding="async" fetchpriority="high" draggable="false" onload="this.style.opacity=''; this.parentElement?.setAttribute('data-loaded','true');" />
@@ -27,8 +27,11 @@ const isLocationSecret = !location || location === "???";
 
     <h2 class="hero-sub mt-5 uppercase text-white/95 font-medium text-[clamp(1.75rem,4vw,2.25rem)]">{subtitleParts.map((part, index) => <>{index > 0 && (isLocationSecret? <span class="hero-location" role="img" aria-label="Hemmelig sted"><span data-location-scramble aria-hidden="true">???</span></span>: <span class="hero-scramble-character hero-scramble-word" aria-label={location}><span class="hero-character-width" aria-hidden="true">{location}</span><span class="hero-character-glyph" data-location-reveal={location} aria-hidden="true">{location}</span></span>)}<span aria-label={part}>{part.split(/(\s+)/).filter(Boolean).map((word) => /\s/.test(word)? word: <span class="hero-scramble-word">{Array.from(word).map((character) => <span class="hero-scramble-character" aria-hidden="true"><span class="hero-character-width">{character}</span><span class="hero-character-glyph" data-reveal-character={character}>{character}</span></span>)}</span>)}</span></>)}</h2>
 
-    <div class="inline-flex gap-3 sm:gap-2 z-50 pointer-events-auto">
-      <VideoButton icon="mdi:play" label={ctaLabel} action="play" class="btn-play" />
+    <div class="hero-cta inline-flex gap-3 sm:gap-2 z-50 pointer-events-auto">
+      <div class="hero-cta__reveal">
+        <div class="hero-cta__aura" aria-hidden="true"></div>
+        <VideoButton icon="mdi:play" label={ctaLabel} action="play" class="btn-play" />
+      </div>
     </div>
   </section>
 
@@ -42,6 +45,16 @@ const isLocationSecret = !location || location === "???";
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
     const locations = document.querySelectorAll("[data-location-scramble], [data-location-reveal]");
     const revealCharacters = document.querySelectorAll("[data-reveal-character]");
+    const cta = document.querySelector(".hero-cta");
+    cta?.classList.add("is-waiting");
+    const revealCta = () => {
+      cta?.classList.remove("is-waiting");
+      cta?.classList.add("is-ready");
+    };
+    const subtitleIsRevealed = () => Array.from(revealCharacters).every(
+      (glyph) => glyph.dataset.revealed === "true"
+    );
+    const hasNamedLocation = document.querySelector("[data-location-reveal]");
     const timers = new Set();
     const randomCharacter = (previous) => {
       const choices = characters.replace(previous, "");
@@ -65,6 +78,7 @@ const isLocationSecret = !location || location === "???";
           if (Date.now() >= revealAt) {
             glyph.textContent = original;
             glyph.dataset.revealed = "true";
+            if (!hasNamedLocation && subtitleIsRevealed()) revealCta();
             return;
           }
           glyph.textContent = randomCharacter(glyph.textContent);
@@ -77,13 +91,13 @@ const isLocationSecret = !location || location === "???";
         tick();
       });
 
+      if (reducedMotion.matches || (!hasNamedLocation && subtitleIsRevealed())) revealCta();
+
       locations.forEach((location) => {
         const revealedLocation = location.dataset.locationReveal;
-        const subtitleIsRevealed = () => Array.from(revealCharacters).every(
-          (glyph) => glyph.dataset.revealed === "true"
-        );
         if (revealedLocation && (location.dataset.revealed || reducedMotion.matches)) {
           location.dataset.revealed = "true";
+          revealCta();
           location.textContent = revealedLocation;
           return;
         }
@@ -107,6 +121,7 @@ const isLocationSecret = !location || location === "???";
                 if (Date.now() - revealStartedAt >= revealDelays[index]) {
                   slots[index] = originalCharacters[index];
                   settledCount += 1;
+                  if (settledCount >= Math.max(1, slots.length - 2)) revealCta();
                   if (settledCount === slots.length) location.dataset.revealed = "true";
                   render();
                   return;
@@ -215,6 +230,65 @@ const isLocationSecret = !location || location === "???";
     font-family: monospace;
     white-space: nowrap;
     vertical-align: baseline;
+  }
+
+  .hero-cta {
+    transition: opacity 700ms ease;
+  }
+
+  .hero-cta__reveal {
+    position: relative;
+    display: inline-flex;
+    isolation: isolate;
+  }
+
+  .hero-cta.is-waiting .hero-cta__reveal {
+    opacity: 0;
+    visibility: hidden;
+  }
+
+  .hero-cta.is-ready .hero-cta__reveal {
+    animation: hero-cta-arrive 1.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .hero-cta .btn-play {
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero-cta__aura {
+    position: absolute;
+    inset: -22px -36px;
+    border-radius: 50%;
+    pointer-events: none;
+    opacity: 0;
+    filter: blur(16px);
+    background:
+      radial-gradient(ellipse at 35% 55%, rgb(125 211 252 / 65%), transparent 65%),
+      radial-gradient(ellipse at 70% 45%, rgb(196 181 253 / 55%), transparent 60%);
+  }
+
+  .hero-cta.is-ready .hero-cta__aura {
+    animation: hero-cta-aura 5.5s ease-in-out both;
+  }
+
+  @keyframes hero-cta-arrive {
+    from { opacity: 0; transform: translateY(6px); filter: blur(5px); }
+    to { opacity: 1; transform: translateY(0); filter: blur(0); }
+  }
+
+  @keyframes hero-cta-aura {
+    0% { opacity: 0; transform: scale(0.8); }
+    20% { opacity: 0.85; transform: scale(1); }
+    55% { opacity: 0.7; }
+    100% { opacity: 0; transform: scale(1.3); }
+  }
+
+  #container.is-playing .hero-cta { opacity: 0; pointer-events: none; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-cta.is-ready .hero-cta__reveal { animation: none; }
+    .hero-cta.is-ready .hero-cta__aura { animation: none; }
   }
 
   /* smooth transitions */
