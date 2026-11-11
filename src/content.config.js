@@ -1,10 +1,17 @@
-import { defineCollection, z } from "astro:content";
+import { defineCollection } from "astro:content";
+import { glob } from "astro/loaders";
+import { z } from "astro/zod";
 
 const hero = defineCollection({
-  type: "content",
+  loader: glob({
+    pattern: "**/*.{md,mdx}",
+    base: "./src/content/hero",
+    generateId: ({ entry }) => entry.replace(/\.(md|mdx)$/, ""),
+  }),
   schema: z.object({
     titleAriaLabel: z.string(),
     subtitle: z.string(),
+    location: z.string().trim().default("???"),
     ctaLabel: z.string(),
     // optional if you ever want multiple hero variants and sort them
     order: z.number().optional(),
@@ -12,7 +19,11 @@ const hero = defineCollection({
 });
 
 const program = defineCollection({
-  type: "content",
+  loader: glob({
+    pattern: "**/*.{md,mdx}",
+    base: "./src/content/program",
+    generateId: ({ entry }) => entry.replace(/\.(md|mdx)$/, ""),
+  }),
   schema: z.object({
     order: z.number(),
     id: z.string(),
@@ -43,7 +54,11 @@ const program = defineCollection({
 });
 
 const memories = defineCollection({
-  type: "content",
+  loader: glob({
+    pattern: "**/*.{md,mdx}",
+    base: "./src/content/memories",
+    generateId: ({ entry }) => entry.replace(/\.(md|mdx)$/, ""),
+  }),
   schema: z.object({
     id: z.string(),
     title: z.string(),
