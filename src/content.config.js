@@ -5,6 +5,7 @@ const hero = defineCollection({
   schema: z.object({
     titleAriaLabel: z.string(),
     subtitle: z.string(),
+    location: z.string().trim().default("???"),
     ctaLabel: z.string(),
     // optional if you ever want multiple hero variants and sort them
     order: z.number().optional(),

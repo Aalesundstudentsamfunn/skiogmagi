@@ -6,7 +6,12 @@ export const onRequest = defineMiddleware(async ({ url }, next) => {
   // Clone the response headers so redirects and other immutable responses are safe.
   const headers = new Headers(response.headers);
   for (const [name, value] of Object.entries(SECURITY_HEADERS)) {
-    headers.set(name, value);
+    // Safari also upgrades localhost navigation when this directive is present.
+    // The development server uses HTTP; production retains the HTTPS policy.
+    const localValue = import.meta.env.DEV && name === "Content-Security-Policy"
+      ? value.replace(/;\s*upgrade-insecure-requests\b/g, "")
+      : value;
+    headers.set(name, localValue);
   }
   // Ticket details and API errors must never be stored in shared or browser caches.
   if (url.pathname.startsWith("/api/")) {

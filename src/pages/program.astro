@@ -52,8 +52,9 @@ const showProgram = false;
   </section>
 
   <section class="mx-auto w-full max-w-6xl px-6 py-8 sm:py-10 text-white pb-16">
-    <div class="rounded-2xl border border-white/15 bg-white/10 p-8 text-center shadow-sm backdrop-blur-md">
-      <p class="text-2xl font-semibold text-white">Blir snart lansert</p>
+    <div class="magic-message rounded-2xl border border-white/15 bg-white/10 p-8 text-center shadow-sm backdrop-blur-md">
+      <div class="magic-message__aura" aria-hidden="true"></div>
+      <p class="magic-message__text text-2xl font-semibold text-white">Det er noe magisk med å vente på noe bra...</p>
     </div>
   </section>
 
@@ -176,6 +177,59 @@ const showProgram = false;
     <Footer />
   </div>
 </PageLayout>
+
+<style>
+  .magic-message {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+  }
+
+  .magic-message__aura {
+    position: absolute;
+    inset: -60% -10%;
+    pointer-events: none;
+    opacity: 0;
+    background:
+      radial-gradient(ellipse at 40% 55%, rgb(125 211 252 / 55%), transparent 45%),
+      radial-gradient(ellipse at 65% 45%, rgb(165 180 252 / 45%), transparent 40%),
+      radial-gradient(ellipse at 50% 60%, rgb(240 249 255 / 50%), transparent 25%);
+    filter: blur(22px);
+    animation: message-aura 3.6s ease-in-out both;
+  }
+
+  .magic-message__text {
+    position: relative;
+    animation: message-reveal 2s cubic-bezier(0.16, 1, 0.3, 1) 450ms both;
+  }
+
+  @keyframes message-aura {
+    0% { opacity: 0; transform: translateX(-12%) scale(0.65); }
+    25% { opacity: 0.9; }
+    45% { opacity: 0.75; }
+    100% { opacity: 0; transform: translateX(12%) scale(1.3); }
+  }
+
+  @keyframes message-reveal {
+    from {
+      opacity: 0;
+      filter: blur(10px);
+      transform: translateY(8px);
+      text-shadow: 0 0 24px rgb(186 230 253 / 90%);
+    }
+    to {
+      opacity: 1;
+      filter: blur(0);
+      transform: translateY(0);
+      text-shadow: 0 0 0 transparent;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .magic-message__aura { animation: none; }
+    .magic-message__text { animation: none; }
+  }
+</style>
 
 <script is:inline>
   /* eslint-env browser */

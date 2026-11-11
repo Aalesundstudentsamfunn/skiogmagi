@@ -2,11 +2,13 @@
 import { MuxPlayer } from "@mux/mux-player-astro";
 import VideoButton from "./VideoButton.astro";
 import TitleSvg from "../assets/images/skiogmagi_full.svg";
-import { CldImage } from "astro-cloudinary";
+import CldImage from "./CloudinaryImage.astro";
 import { getEntry } from "astro:content";
 
 const heroEntry = await getEntry("hero", "index");
-const { titleAriaLabel, subtitle, ctaLabel } = heroEntry.data;
+const { titleAriaLabel, subtitle, location, ctaLabel } = heroEntry.data;
+const subtitleParts = subtitle.split("{location}");
+const isLocationSecret = !location || location === "???";
 ---
 
 <div id="container" class="relative flex max-h-dvh" style="font-family: Inter, Roboto, 'Helvetica Neue', 'Arial Nova', 'Nimbus Sans', Arial, sans-serif;">
@@ -23,7 +25,7 @@ const { titleAriaLabel, subtitle, ctaLabel } = heroEntry.data;
   <section class="hero-overlay relative z-10 flex flex-col items-center min-w-screen min-h-dvh gap-4 px-8 align-middle justify-center text-center">
     <TitleSvg aria-label={titleAriaLabel} class="hero-tit w-[20%] min-w-[170px] drop-shadow-[0_2px_12px_rgba(0,0,0,0.35)] transition-all duration-300 group-[.is-playing]:opacity-0 group-[.is-playing]:translate-y-2" />
 
-    <h2 class="hero-sub mt-5 uppercase text-white/95 font-medium text-[clamp(1.75rem,4vw,2.25rem)]">{subtitle}</h2>
+    <h2 class="hero-sub mt-5 uppercase text-white/95 font-medium text-[clamp(1.75rem,4vw,2.25rem)]">{subtitleParts.map((part, index) => <>{index > 0 && (isLocationSecret? <span class="hero-location" role="img" aria-label="Hemmelig sted"><span data-location-scramble aria-hidden="true">???</span></span>: <span class="hero-scramble-character hero-scramble-word" aria-label={location}><span class="hero-character-width" aria-hidden="true">{location}</span><span class="hero-character-glyph" data-location-reveal={location} aria-hidden="true">{location}</span></span>)}<span aria-label={part}>{part.split(/(\s+)/).filter(Boolean).map((word) => /\s/.test(word)? word: <span class="hero-scramble-word">{Array.from(word).map((character) => <span class="hero-scramble-character" aria-hidden="true"><span class="hero-character-width">{character}</span><span class="hero-character-glyph" data-reveal-character={character}>{character}</span></span>)}</span>)}</span></>)}</h2>
 
     <div class="inline-flex gap-3 sm:gap-2 z-50 pointer-events-auto">
       <VideoButton icon="mdi:play" label={ctaLabel} action="play" class="btn-play" />
@@ -33,6 +35,102 @@ const { titleAriaLabel, subtitle, ctaLabel } = heroEntry.data;
   <!-- Pause button -->
   <VideoButton icon="mdi:pause" action="pause" class="btn-pause absolute right-10 top-30 z-15" />
 </div>
+
+<script is:inline>
+  (() => {
+    const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789?#%&";
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const locations = document.querySelectorAll("[data-location-scramble], [data-location-reveal]");
+    const revealCharacters = document.querySelectorAll("[data-reveal-character]");
+    const timers = new Set();
+    const randomCharacter = (previous) => {
+      const choices = characters.replace(previous, "");
+      return choices[Math.floor(Math.random() * choices.length)];
+    };
+
+    const updateAnimation = () => {
+      timers.forEach(clearTimeout);
+      timers.clear();
+      if (document.hidden) return;
+
+      revealCharacters.forEach((glyph, index) => {
+        const original = glyph.dataset.revealCharacter;
+        if (glyph.dataset.revealed || reducedMotion.matches) {
+          glyph.textContent = original;
+          glyph.dataset.revealed = "true";
+          return;
+        }
+        const revealAt = Date.now() + 450 + index * 35 + Math.random() * 250;
+        const tick = () => {
+          if (Date.now() >= revealAt) {
+            glyph.textContent = original;
+            glyph.dataset.revealed = "true";
+            return;
+          }
+          glyph.textContent = randomCharacter(glyph.textContent);
+          const timer = setTimeout(() => {
+            timers.delete(timer);
+            tick();
+          }, 25 + Math.random() * 65);
+          timers.add(timer);
+        };
+        tick();
+      });
+
+      locations.forEach((location) => {
+        const revealedLocation = location.dataset.locationReveal;
+        const subtitleIsRevealed = () => Array.from(revealCharacters).every(
+          (glyph) => glyph.dataset.revealed === "true"
+        );
+        if (revealedLocation && (location.dataset.revealed || reducedMotion.matches)) {
+          location.dataset.revealed = "true";
+          location.textContent = revealedLocation;
+          return;
+        }
+        const originalCharacters = Array.from(revealedLocation || "");
+        let revealStartedAt;
+        let settledCount = 0;
+        const revealDelays = originalCharacters.map((_, index) => 80 + index * 85 + Math.random() * 35);
+        const slots = Array.from({ length: revealedLocation ? originalCharacters.length : 7 }, () => randomCharacter(""));
+        const render = () => { location.textContent = slots.join(""); };
+        render();
+
+        slots.forEach((_, index) => {
+          const schedule = () => {
+            const delay = reducedMotion.matches
+              ? 1000 + Math.random() * 1400
+              : 25 + Math.random() * 65;
+            const timer = setTimeout(() => {
+              timers.delete(timer);
+              if (revealedLocation && subtitleIsRevealed()) {
+                revealStartedAt ??= Date.now();
+                if (Date.now() - revealStartedAt >= revealDelays[index]) {
+                  slots[index] = originalCharacters[index];
+                  settledCount += 1;
+                  if (settledCount === slots.length) location.dataset.revealed = "true";
+                  render();
+                  return;
+                }
+              }
+              // Only the secret location's final slot can disappear.
+              slots[index] = !revealedLocation && index === 6 && Math.random() < 0.5
+                ? ""
+                : randomCharacter(slots[index]);
+              render();
+              schedule();
+            }, delay);
+            timers.add(timer);
+          };
+          schedule();
+        });
+      });
+    };
+
+    reducedMotion.addEventListener("change", updateAnimation);
+    document.addEventListener("visibilitychange", updateAnimation);
+    updateAnimation();
+  })();
+</script>
 
 <script is:inline>
   (async () => {
@@ -90,6 +188,35 @@ const { titleAriaLabel, subtitle, ctaLabel } = heroEntry.data;
 </script>
 
 <style is:global>
+  .hero-scramble-word {
+    display: inline-block;
+    white-space: nowrap;
+  }
+
+  .hero-scramble-character {
+    position: relative;
+    display: inline-block;
+  }
+
+  .hero-character-width {
+    visibility: hidden;
+  }
+
+  .hero-character-glyph {
+    position: absolute;
+    inset: 0;
+    text-align: center;
+  }
+
+  .hero-location {
+    display: inline-block;
+    width: 7ch;
+    text-align: left;
+    font-family: monospace;
+    white-space: nowrap;
+    vertical-align: baseline;
+  }
+
   /* smooth transitions */
   .pause-overlay,
   .hero-sub,

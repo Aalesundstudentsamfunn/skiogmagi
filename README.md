@@ -107,33 +107,7 @@ Include this file in your repo:
 
 ## 🎫 Ticket Lookup System
 
-The route \`/billett\` lets users fetch their ticket details.
-
-### Frontend files  
-Located in:
-
-\`\`\`
-public/scripts/ticket/
-  page.js — handles form, URL params, auto-fetch & lifecycle
-  api.js  — fetchTicketByRefId()
-  ui.js   — DOM rendering, QR code, dialogs
-\`\`\`
-
-### How it works
-
-1. User enters a ticket ID  
-2. OR visits a direct link:
-
-\`\`\`
-/billett/?ticketId=ABC123
-\`\`\`
-
-3. \`page.js\`:
-   - reads the query  
-   - fetches ticket JSON from \`/api/tickets/<id>\`  
-   - updates UI  
-   - renders QR code  
-   - cleans the URL afterward  
+The standalone ticket lookup page has been removed. Room booking still uses the ticket API at `src/pages/api/tickets/[ref].ts`.
 
 ### API response format
 

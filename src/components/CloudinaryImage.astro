@@ -1,0 +1,10 @@
+---
+import { CldImage } from "astro-cloudinary";
+import type { ComponentProps } from "astro/types";
+import { cloudinaryCloudName } from "../utils/cloudinary";
+
+type Props = ComponentProps<typeof CldImage>;
+const { config, ...props } = Astro.props;
+---
+
+<CldImage {...props} config={{ ...config, cloud: { ...config?.cloud, cloudName: config?.cloud?.cloudName ?? cloudinaryCloudName } }} />
