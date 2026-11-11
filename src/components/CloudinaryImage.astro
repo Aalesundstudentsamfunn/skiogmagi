@@ -1,10 +1,22 @@
 ---
-import { CldImage } from "astro-cloudinary";
-import type { ComponentProps } from "astro/types";
+import type { HTMLAttributes } from "astro/types";
 import { cloudinaryCloudName } from "../utils/cloudinary";
 
-type Props = ComponentProps<typeof CldImage>;
-const { config, ...props } = Astro.props;
+interface Props extends Omit<HTMLAttributes<"img">, "src"> {
+  src: string;
+  version?: string | number;
+}
+
+const { src, version, sizes = "100vw", loading = "lazy", decoding = "async", ...props } = Astro.props;
+if (!cloudinaryCloudName) {
+  throw new Error("PUBLIC_CLOUDINARY_CLOUD_NAME is required in production.");
+}
+
+const publicId = src.split("/").map(encodeURIComponent).join("/");
+const versionPath = version ? `v${version}/` : "";
+const imageUrl = (width: number) =>
+  `https://res.cloudinary.com/${encodeURIComponent(cloudinaryCloudName)}/image/upload/c_limit,w_${width}/f_auto/q_auto/${versionPath}${publicId}`;
+const widths = [320, 480, 640, 960, 1280, 1920, 2560];
 ---
 
-<CldImage {...props} config={{ ...config, cloud: { ...config?.cloud, cloudName: config?.cloud?.cloudName ?? cloudinaryCloudName } }} />
+<img {...props} src={imageUrl(1920)} srcset={widths.map((width) => `${imageUrl(width)} ${width}w`).join(", ")} sizes={sizes} loading={loading} decoding={decoding} />

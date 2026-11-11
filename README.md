@@ -1,6 +1,6 @@
 # Ski & Magi — Official Website  
 A fast, modern website built with Astro for the Ski & Magi winter trip.  
-Includes program pages, event info, landing video, and a full ticket lookup system.
+Includes program pages, event info, landing video, and ticket validation for room booking.
 
 **NOTE:**
 *This is a production repo, commits here will update the website. Use local for testing or development branch.*
@@ -23,7 +23,7 @@ Includes program pages, event info, landing video, and a full ticket lookup syst
 ## 🚀 Getting Started
 
 ### Requirements  
-- Node.js **18+** (LTS recommended)  
+- Node.js **24 LTS** recommended (`nvm use` reads `.nvmrc`); minimum **22.23.4**
 - npm or pnpm  
 
 ### Install
@@ -67,8 +67,10 @@ npm run preview
 Create a \`.env\` file in the project root.
 
 \`\`\`
-PUBLIC_CLOUDINARY_CLOUD_NAME=skiogmagi
+PUBLIC_CLOUDINARY_CLOUD_NAME=deh4z2t5x
 \`\`\`
+
+The Cloudinary name is optional during `npm run dev` (defaults to `deh4z2t5x`) and required for production builds. Images use responsive Cloudinary CDN URLs directly.
 
 Only public-prefixed env vars are exposed to the client in Astro.
 
@@ -146,7 +148,7 @@ dist
 \`\`\`
 
 **Node version:**  
-Set to **18.x** in **Site Settings → Build & Deploy → Environment**.
+Node.js **24** is configured in `netlify.toml`.
 
 ### Netlify environment variables  
 Add under:
