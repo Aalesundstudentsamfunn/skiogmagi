@@ -4,6 +4,7 @@ interface Props {
   description?: string;
   author?: string;
   themeColor?: string;
+  noindex?: boolean;
 }
 
 const {
@@ -11,6 +12,7 @@ const {
   description = "På Ski & Magi reiser omlag 400 studenter på en tredagers skitur i den norske fjellheimen. Dette har vært en tradisjon siden tidlig 90-tall og er det eldste arrangementet for studenter i Ålesund.",
   author = "Dennis Løvold",
   themeColor = "#0b0f1a",
+  noindex = false,
 } = Astro.props as Props;
 
 const siteName = "Ski & Magi";
@@ -44,6 +46,7 @@ const ogImageUrl = Astro.site
 <title>{fullTitle}</title>
 <meta name="description" content={description} />
 <meta name="author" content={author} />
+{noindex && <meta name="robots" content="noindex, nofollow" />}
 
 <!-- Canonical -->
 <link rel="canonical" href={pageUrl} />
