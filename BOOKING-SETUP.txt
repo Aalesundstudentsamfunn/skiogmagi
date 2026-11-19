@@ -1,0 +1,148 @@
+LOKAL TESTMODUS ER AKTIVERT
+Start npm run dev og åpne http://localhost:4321/booking/ (bruk porten terminalen viser).
+BOOKING_TEST_MODE=true er lagret i lokal .env. Modusen krever Astro dev OG localhost/loopback; den er sperret i produksjonsbygg og ved tilgang fra andre maskiner.
+
+Bruk TEST-001, TEST-002, TEST-003 osv. som individuelle Stello-billetter.
+TEST-INVALID eller TEST-REFUNDED avvises. Bare TEST- etterfulgt av 3–6 sifre godtas.
+Bruk fiktive navn, e-post og telefon i deltakerfeltene.
+Det er 2 testrom av hver type, så du kan prøve utsolgt-situasjonen.
+
+Admin: http://localhost:4321/booking/admin/
+Lokal testnøkkel: skiogmagi-local-test-admin-1234567890
+
+Forslag til gjennomgang:
+1. Book et 3-mannsrom med TEST-001, TEST-002, TEST-003. Se bekreftet kvittering.
+2. Book et 4-mannsrom med TEST-004 til TEST-007.
+3. Send en manuell forespørsel for én med TEST-008.
+4. Send en manuell forespørsel for to med TEST-009 som romansvarlig; ledsager trenger ikke billett-ID i dette steget.
+5. Logg inn i admin, velg de to ventende forespørslene (totalt 3 personer), avklar romønskene, skriv saksnotat og tildel 3-mannsrom.
+6. Test duplikat billett, avbestilling og frigivelse. Bruk «Nullstill alle lokale testbookinger» i admin for å starte på nytt.
+
+Lagring: .booking-test/state.json i prosjektet. Data blir værende ved oppfriskning og omstart, og er ignorert av Git.
+Ingen Stello-kall eller Supabase-kall utføres i lokal testmodus, uansett hvilke ekte nøkler som eventuelt finnes i .env.
+Dette er en simulering av billettkontroll og datalagring. Reell Stello-/Supabase-integrasjon må fortsatt kontrolleres før publisering.
+Slå av ved å sette BOOKING_TEST_MODE=false i .env og starte dev-serveren på nytt.
+
+Verifisert: 13 eksisterende API-tester + 4 tester for lokal modus besto. Lokaltestene dekker sperre i produksjon/ved fjerntilgang, hele booking-/adminflyten, varig lagring, duplikater, gjentatt innsending, parallelle kapasitetsforsøk og nullstilling.
+Nye filer: src/lib/booking/local-test.mjs, src/scripts/booking-test-mode.js, tests/booking-local.test.mjs.
+
+--- TIDLIGERE OPPSATTSNOTATER ---
+SKI & MAGI — ROMBOOKING
+Utviklet 19. november 2026
+
+Kode er endret direkte i:
+C:\Users\mohere-hp\Desktop\Prosjekter\ski-og-magi\skiogmagi
+
+STATUS
+- /booking/: bekreft Stello-billett først, velg 3-/4-mannsrom eller manuell forespørsel for 1–2.
+- Romansvarlig oppretter registreringen. Alle på et automatisk booket rom må ha ulike, gyldige billetter.
+- For manuell forespørsel bekreftes romansvarlig sin billett. En eventuell ledsager registreres med navn; ledsagerens billett avklares av arrangøren.
+- Manuelle forespørsler bruker ingen romkapasitet før tildeling.
+- /booking/admin/: administrasjonsnøkkel, oversikt, felles tildeling av hele rom, og avbestilling.
+- Manuell tildeling krever avklaring av kjønn/romønsker og billetter. Ulike ønsker krever uttrykkelig avtale dokumentert i saksnotatet.
+- Kvitteringen skiller bekreftet rom fra ventende forespørsel og kan skrives ut.
+- Ingen automatisk e-post. Arrangøren må kontakte romansvarlig ved manuell tildeling og avbestilling.
+- Tildelingen reserverer romtype og intern romgruppe. Hotellromnummer håndteres separat.
+- Gammel reserve/release-funksjon med automatisk paring av alenereisende er deaktivert (HTTP 410).
+
+STELLO: ÉN FUNKSJON Å FYLLE INN SENERE
+Fil: src/lib/booking/stello.mjs
+Funksjon: verifyStelloTicket(reference, { eventId, env })
+
+Returner dette KUN når billetten faktisk er gyldig:
+{ ticketId: 'kanonisk-individuell-billett-id', eventId: 'riktig-arrangement', valid: true }
+
+ticketId må identifisere én deltaker, ikke en ordre med flere billetter.
+Adapteren må kontrollere arrangement, betaling, refusjon og eventuell overføring.
+Bruk et tidsavbrudd og serverlagrede API-nøkler.
+Returner ugyldig resultat ved ugyldig billett, og kast en BookingError ved driftsfeil.
+Den tomme funksjonen kaster foreløpig stello_not_configured. Ingen testbilletter godtas av produksjonsadapteren. Lokal testmodus er beskrevet ovenfor.
+
+Den offentlige dokumentasjonen https://stello.no/utviklere beskriver ordre-webhooks.
+Vi har ikke antatt at disse inneholder individuelle billett-ID-er.
+
+MILJØVARIABLER
+Se .env.example. Fyll inn servervariabler lokalt og i Netlify:
+SUPABASE_URL=https://oyqsajjkrjiwtlktvdlg.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=<hemmelig servernøkkel>
+STELLO_EVENT_ID=<riktig Stello-arrangement>
+BOOKING_TOKEN_SECRET=<egen tilfeldig hemmelighet, minst 32 tegn>
+ROOM_ADMIN_TOKEN=<annen tilfeldig hemmelighet, minst 32 tegn>
+
+Bruk aldri PUBLIC_-prefiks for disse hemmelighetene. Ikke legg dem i Git.
+Lag uavhengige tilfeldige nøkler, f.eks. med Node:
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+Kjør dette to ganger, én gang per hemmelighet.
+Administrasjonsnøkkelen holdes bare i minnet i nettleseren og slettes ved utlogging.
+
+SUPABASE
+Prosjekt: oyqsajjkrjiwtlktvdlg
+Skjema: skiogmagi
+Migrasjonene skiogmagi_semi_automatic_booking og skiogmagi_booking_receipt_room_size ER ALLEREDE KJØRT i det tilkoblede prosjektet.
+Ikke kjør db/booking-schema.sql på nytt der. Filen er et skjemaøyeblikksbilde for gjennomgang og oppsett av en separat database med den opprinnelige tabellstrukturen.
+
+Eksisterende booking, booking_person og oversikt er brukt videre.
+booking.id_responsible (uuid) er beholdt; ny responsible_person_id peker riktig på booking_person.id (bigint).
+Nye tabeller: room_allocation, ticket_claim og booking_rate_limit.
+Kapasitet i oversikt betyr ANTALL ROM: 100 tremannsrom og 120 firemannsrom.
+Raden 'personer uten rom' brukes ikke som fysisk romkapasitet.
+Kapasitet beregnes fra lagrede romtildelinger, ikke tellere i nettleseren.
+
+Alle reservasjoner/tildelinger/avbestillinger utføres samlet i databasetransaksjoner med felles lås.
+Unike billettkrav hindrer at én billett brukes i flere aktive registreringer.
+En request_key + innholdsfingeravtrykk hindrer dobbeltlagring ved gjentatt innsending.
+Delvis avbestilling av et manuelt sammensatt rom frigjør ikke hele rommet; først når siste registrering er avbestilt.
+API-et bruker offentlige RPC-funksjoner som SECURITY INVOKER med EXECUTE bare for service_role.
+Tabellene har RLS og ingen tilgang for anon/authenticated. Manglende RLS-policy er tilsiktet for disse serverstyrte tabellene.
+Ingen endringer er gjort i andre skjemaer i det delte Supabase-prosjektet.
+
+VERIFISERING
+BESTÅTT: 13 tester i tests/booking.test.mjs.
+Kommando: node --test tests/booking.test.mjs
+(I Codex-miljøet fungerte node --preserve-symlinks --preserve-symlinks-main tests/booking.test.mjs.)
+
+BESTÅTT: tests/booking-database.sql kjørt mot Supabase med service_role-rettigheter i en transaksjon som ble rullet tilbake.
+Dekker 3-/4-mannsrom, manuelle forespørsler, kapasitet, duplikater, atomisk tilbakerulling, idempotens, saksnotat/romønsker, felles romtildeling og avbestilling/frigivelse.
+Etter testene: 0 bookinger, 0 deltakere, 0 romtildelinger; 100/120 rom tilgjengelig.
+Testene er ment for en tom testdatabase. Ikke kjør kapasitetstesten mot en database med reelle bookinger.
+
+BESTÅTT: Begge nye Astro-sidene kompilerer isolert uten kompilatorfeil.
+BESTÅTT: Syntakskontroll av nettleserskripter og erstattet Netlify-funksjon.
+BESTÅTT: git diff --check.
+
+IKKE FULLFØRT: Full npm run build og visuell nettlesertest.
+Byggeverktøyet stopper på EPERM/Access is denied når Node/esbuild leser overordnede kataloger i dette Codex-miljøet.
+En midlertidig tilpasning av Node-oppslaget kom forbi første feil, men esbuild stopper fortsatt før sidebyggingen.
+Ingen slike midlertidige tilpasninger er lagret i prosjektet.
+Kjør full bygging og nettlesertest i vanlig lokal terminal eller Netlify før publisering.
+
+FØR PUBLISERING
+1. Samordne med origin/main: den lokale main-grenen ligger 10 kjente commits bak, inkludert Astro-/sikkerhetsoppdateringer. Jeg har ikke hentet, slått sammen eller overskrevet disse endringene.
+2. Fyll inn Stello-adapteren og miljøvariablene.
+3. Kjør tester og full bygging på den samordnede grenen med passende avhengigheter.
+4. Test lokalt eller i en beskyttet forhåndsvisning: 3/4 direkte, 1/2 manuelt, duplikat, fullbooket, romfordeling og avbestilling.
+5. Test minst én ekte Stello-billett, ugyldig/refundert billett og billett til feil arrangement.
+6. Publiser når dette er kontrollert. Ingen commit, push eller Netlify-publisering er utført her.
+
+VIKTIGE FILER
+src/pages/booking.astro
+src/pages/booking/admin.astro
+src/pages/api/booking/[action].ts
+src/lib/booking/stello.mjs
+src/lib/booking/service.mjs
+src/lib/booking/errors.mjs
+src/scripts/booking.js
+src/scripts/booking-admin.js
+src/scripts/booking-api.js
+src/assets/styles/booking.css
+netlify/functions/room-availability.js
+netlify.toml
+.env.example
+db/booking-schema.sql
+tests/booking.test.mjs
+tests/booking-database.sql
+
+
+LOKAL NETLIFY EDGE-OPPSTART RETTET
+astro.config.mjs bruker vanlig Astro-server når NODE_ENV=development. Produksjonsbygg bruker fortsatt Netlify-adapteren. Dette unngår Edge/Deno-emulatoren som feilet ved oppstart. Stopp eventuell kjørende dev-server med Ctrl+C og kjør npm run dev på nytt. Konfigurasjonen er kontrollert for begge miljøer; full lokal serverdrift er ikke verifisert fra Codex.
+

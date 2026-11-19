@@ -29,5 +29,7 @@ export default defineConfig({
   // Framework + media integrations
   integrations: [astroIcon(), mdx()],
 
-  adapter: netlify(),
+  // Astro serves the API routes locally without a deployment adapter.
+  // Avoid starting Netlify's Deno/Edge emulator during `astro dev`.
+  adapter: process.env.NODE_ENV === "development" ? undefined : netlify(),
 });

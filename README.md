@@ -67,7 +67,7 @@ npm run preview
 Create a \`.env\` file in the project root.
 
 \`\`\`
-PUBLIC_CLOUDINARY_CLOUD_NAME=skiogmagi
+PUBLIC_CLOUDINARY_CLOUD_NAME=deh4z2t5x
 \`\`\`
 
 Only public-prefixed env vars are exposed to the client in Astro.

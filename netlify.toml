@@ -7,6 +7,11 @@
 [build.environment]
   NODE_VERSION = "20.12.2"
 
+[[headers]]
+  for = "/booking/admin*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+
 ## Headers: caching and performance
 ## Fingerprinted assets from Astro (`/_astro/*`) can be cached for a year
 [[headers]]

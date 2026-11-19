@@ -13,7 +13,7 @@ const { title = "Ski & Magi", description = "Vintermagi." } = Astro.props;
   </head>
   <body class="text-neutral-900 bg-neutral-100">
     <Navigation />
-    <main class="relative isolate overflow-hidden min-h-svh flex flex-col">
+    <main class="relative isolate overflow-clip min-h-svh flex flex-col">
       <MagicBackground sparkles={false} />
       <slot />
     </main>
