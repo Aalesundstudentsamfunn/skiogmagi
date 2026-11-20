@@ -1,4 +1,5 @@
-import { BookingError } from './errors.mjs';
+import type { VerifyTicket } from './types.ts';
+import { BookingError } from './errors.ts';
 
 /**
  * TODO: Implement when the individual-ticket API is supplied.
@@ -8,6 +9,6 @@ import { BookingError } from './errors.mjs';
  * Keep credentials server-side, add a timeout, and handle upstream outages.
  * No Tikkio fallback and no mock tickets in production.
  */
-export async function verifyStelloTicket(reference, { eventId, env }) {
+export const verifyStelloTicket: VerifyTicket = async (_reference, _context) => {
   throw new BookingError('stello_not_configured', 503);
-}
+};

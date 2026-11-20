@@ -24,7 +24,7 @@ Dette er en simulering av billettkontroll og datalagring. Reell Stello-/Supabase
 Slå av ved å sette BOOKING_TEST_MODE=false i .env og starte dev-serveren på nytt.
 
 Verifisert: 13 eksisterende API-tester + 4 tester for lokal modus besto. Lokaltestene dekker sperre i produksjon/ved fjerntilgang, hele booking-/adminflyten, varig lagring, duplikater, gjentatt innsending, parallelle kapasitetsforsøk og nullstilling.
-Nye filer: src/lib/booking/local-test.mjs, src/scripts/booking-test-mode.js, tests/booking-local.test.mjs.
+Nye filer: src/lib/booking/local-test.ts, src/scripts/booking-test-mode.ts, tests/booking-local.test.ts.
 
 --- TIDLIGERE OPPSATTSNOTATER ---
 SKI & MAGI — ROMBOOKING
@@ -46,7 +46,7 @@ STATUS
 - Gammel reserve/release-funksjon med automatisk paring av alenereisende er deaktivert (HTTP 410).
 
 STELLO: ÉN FUNKSJON Å FYLLE INN SENERE
-Fil: src/lib/booking/stello.mjs
+Fil: src/lib/booking/stello.ts
 Funksjon: verifyStelloTicket(reference, { eventId, env })
 
 Returner dette KUN når billetten faktisk er gyldig:
@@ -97,9 +97,8 @@ Tabellene har RLS og ingen tilgang for anon/authenticated. Manglende RLS-policy 
 Ingen endringer er gjort i andre skjemaer i det delte Supabase-prosjektet.
 
 VERIFISERING
-BESTÅTT: 13 tester i tests/booking.test.mjs.
-Kommando: node --test tests/booking.test.mjs
-(I Codex-miljøet fungerte node --preserve-symlinks --preserve-symlinks-main tests/booking.test.mjs.)
+BESTÅTT: 13 tester i tests/booking.test.ts.
+Kjør npm run check:booking for typesjekk og npm run test:booking for bookingtestene.
 
 BESTÅTT: tests/booking-database.sql kjørt mot Supabase med service_role-rettigheter i en transaksjon som ble rullet tilbake.
 Dekker 3-/4-mannsrom, manuelle forespørsler, kapasitet, duplikater, atomisk tilbakerulling, idempotens, saksnotat/romønsker, felles romtildeling og avbestilling/frigivelse.
@@ -128,18 +127,18 @@ VIKTIGE FILER
 src/pages/booking.astro
 src/pages/booking/admin.astro
 src/pages/api/booking/[action].ts
-src/lib/booking/stello.mjs
-src/lib/booking/service.mjs
-src/lib/booking/errors.mjs
-src/scripts/booking.js
-src/scripts/booking-admin.js
-src/scripts/booking-api.js
+src/lib/booking/stello.ts
+src/lib/booking/service.ts
+src/lib/booking/errors.ts
+src/scripts/booking.ts
+src/scripts/booking-admin.ts
+src/scripts/booking-api.ts
 src/assets/styles/booking.css
-netlify/functions/room-availability.js
+netlify/functions/room-availability.ts
 netlify.toml
 .env.example
 db/booking-schema.sql
-tests/booking.test.mjs
+tests/booking.test.ts
 tests/booking-database.sql
 
 

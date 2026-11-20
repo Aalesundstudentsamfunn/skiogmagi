@@ -1,19 +1,25 @@
-import { api, errorMessage } from './booking-api.js';
-import { showLocalTestMode } from './booking-test-mode.js';
+import type { BookingSubmission, PersonInput } from '../lib/booking/types.ts';
+import { isRoomPreference } from '../lib/booking/types.ts';
+import { api, BookingApiError, errorMessage } from './booking-api.ts';
+import { showLocalTestMode } from './booking-test-mode.ts';
 void showLocalTestMode();
-const $ = selector => document.querySelector(selector);
-const form = $('#booking-form');
-const leadForm = $('#ticket-form');
-const leadRef = $('#lead-reference');
-const fields = [...document.querySelectorAll('[data-person]')];
-const proofs = new Map();
+function $<T extends HTMLElement = HTMLElement>(selector: string): T {
+  const element = document.querySelector<T>(selector);
+  if (!element) throw new Error('Missing booking element: ' + selector);
+  return element;
+}
+const form = $<HTMLFormElement>('#booking-form');
+const leadForm = $<HTMLFormElement>('#ticket-form');
+const leadRef = $<HTMLInputElement>('#lead-reference');
+const fields = [...document.querySelectorAll<HTMLFieldSetElement>('[data-person]')];
+const proofs = new Map<number, { reference: string; proof: string }>();
 let choice = '';
 let requestKey = crypto.randomUUID();
-const error = message => {
+const error = (message: string) => {
   const panel = $('#booking-error'); panel.textContent = message; panel.hidden = false; panel.focus();
 };
 const clearError = () => { $('#booking-error').hidden = true; };
-const count = () => choice === 'manual' ? Number($('#manual-count').value) : Number(choice || 0);
+const count = () => choice === 'manual' ? Number($<HTMLSelectElement>('#manual-count').value) : Number(choice || 0);
 const invalidate = () => { requestKey = crypto.randomUUID(); };
 async function availability() {
   try {
@@ -23,62 +29,64 @@ async function availability() {
       const label = $(`[data-availability="${size}"]`);
       const available = room && room.remaining > 0;
       label.textContent = room ? `${room.remaining} rom ledige` : 'Tilgjengelighet er ikke avklart';
-      $(`input[name="choice"][value="${size}"]`).disabled = !available;
+      $<HTMLInputElement>(`input[name="choice"][value="${size}"]`).disabled = !available;
     }
   } catch {
     document.querySelectorAll('[data-availability]').forEach(el => { el.textContent = 'Kunne ikke hente ledige rom. Prøv igjen senere.'; });
-    for (const size of [3,4]) $(`input[name="choice"][value="${size}"]`).disabled = true;
+    for (const size of [3,4]) $<HTMLInputElement>(`input[name="choice"][value="${size}"]`).disabled = true;
   }
 }
 leadForm.addEventListener('submit', async event => {
   event.preventDefault(); clearError();
   const reference = leadRef.value.trim();
-  $('#lead-verify').disabled = true;
+  $<HTMLButtonElement>('#lead-verify').disabled = true;
   $('#lead-status').textContent = 'Kontrollerer billetten …';
   try {
     const result = await api('verify',{reference});
     if (leadRef.value.trim() !== reference) { $('#lead-status').textContent = 'ID-en ble endret. Bekreft på nytt.'; return; }
     proofs.set(1,{reference,proof:result.proof});
     leadRef.readOnly = true;
-    $('#lead-verify').hidden = true; $('#lead-change').hidden = false;
+    $<HTMLButtonElement>('#lead-verify').hidden = true; $('#lead-change').hidden = false;
     $('#lead-status').textContent = 'Billetten er bekreftet. Velg hvordan dere reiser.';
     form.hidden = false; await availability();
   } catch (e) { $('#lead-status').textContent = ''; error(errorMessage(e)); }
-  finally { $('#lead-verify').disabled = false; }
+  finally { $<HTMLButtonElement>('#lead-verify').disabled = false; }
 });
 $('#lead-change').addEventListener('click', () => {
   proofs.delete(1); leadRef.readOnly = false; leadRef.focus(); form.hidden = true;
-  $('#lead-change').hidden = true; $('#lead-verify').hidden = false;
+  $('#lead-change').hidden = true; $<HTMLButtonElement>('#lead-verify').hidden = false;
   $('#lead-status').textContent = ''; invalidate();
 });
 function updatePeople() {
   const manual = choice === 'manual';
   $('#manual-options').hidden = !manual;
-  $('#preference').required = manual;
+  $<HTMLSelectElement>('#preference').required = manual;
   $('#people-section').hidden = !choice;
   fields.forEach((field,index) => {
     const active = index < count(); field.hidden = !active; field.disabled = !active;
-    const ticket = field.querySelector('[data-ticket-box]');
-    if (ticket) {
+    const ticket = field.querySelector<HTMLElement>('[data-ticket-box]');
+    const reference = field.querySelector<HTMLInputElement>('[data-reference]');
+    if (ticket && reference) {
       ticket.hidden = manual;
-      field.querySelector('[data-reference]').required = active && !manual;
+      reference.required = active && !manual;
     }
   });
-  $('#booking-submit').textContent = manual ? 'Send forespørsel om romplass' : 'Bekreft rombooking';
+  $<HTMLButtonElement>('#booking-submit').textContent = manual ? 'Send forespørsel om romplass' : 'Bekreft rombooking';
   invalidate();
 }
-document.querySelectorAll('input[name="choice"]').forEach(input => input.addEventListener('change', () => { choice=input.value; updatePeople(); }));
-$('#manual-count').addEventListener('change',updatePeople);
+document.querySelectorAll<HTMLInputElement>('input[name="choice"]').forEach(input => input.addEventListener('change', () => { choice=input.value; updatePeople(); }));
+$<HTMLSelectElement>('#manual-count').addEventListener('change',updatePeople);
 fields.forEach((field,index) => {
-  const referenceInput = field.querySelector('[data-reference]');
-  const button = field.querySelector('[data-verify]');
-  if (!button) return;
-  referenceInput.addEventListener('input', () => { proofs.delete(index+1); field.querySelector('[data-ticket-status]').textContent = ''; });
+  const referenceInput = field.querySelector<HTMLInputElement>('[data-reference]');
+  const button = field.querySelector<HTMLButtonElement>('[data-verify]');
+  const status = field.querySelector<HTMLElement>('[data-ticket-status]');
+  if (!button || !referenceInput || !status) return;
+  referenceInput.addEventListener('input', () => { proofs.delete(index+1); status.textContent = ''; });
   button.addEventListener('click', async () => {
     clearError();
     if (!referenceInput.reportValidity()) return;
     const reference = referenceInput.value.trim();
-    button.disabled = true; const status=field.querySelector('[data-ticket-status]'); status.textContent='Kontrollerer …';
+    button.disabled = true; status.textContent='Kontrollerer …';
     try {
       const result=await api('verify',{reference});
       if(referenceInput.value.trim() !== reference) { status.textContent='ID-en ble endret. Bekreft på nytt.'; return; }
@@ -93,16 +101,24 @@ form.addEventListener('submit',async event => {
   event.preventDefault(); clearError();
   if (!choice || !form.reportValidity()) return;
   const people=fields.slice(0,count()).map((field,index) => {
-    const person=Object.fromEntries([...field.querySelectorAll('[data-field]')].map(input => [input.dataset.field,input.value]));
+    const value = (name: keyof PersonInput) => field.querySelector<HTMLInputElement>('[data-field="' + name + '"]')?.value ?? '';
+    const person: PersonInput = {
+      firstname: value('firstname'),
+      lastname: value('lastname'),
+      mail: value('mail'),
+      phone: value('phone'),
+    };
     return {...person,...proofs.get(index+1)};
   });
   if (people.some((person,index) => (choice!=='manual' || index===0) && !person.proof)) {
     error('Bekreft billetten til hver deltaker før du sender inn.'); return;
   }
-  const payload={requestKey,mode:choice==='manual'?'manual':'automatic',people,
-    preference:choice==='manual'?$('#preference').value:'contact',note:$('#booking-note').value,accepted:$('#booking-accepted').checked};
-  $('#booking-fields').disabled=true;
-  $('#booking-submit').textContent='Registrerer …';
+  const preference = choice === 'manual' ? $<HTMLSelectElement>('#preference').value : 'contact';
+  if (!isRoomPreference(preference)) return;
+  const payload: BookingSubmission = {requestKey,mode:choice==='manual'?'manual':'automatic',people,
+    preference,note:$<HTMLTextAreaElement>('#booking-note').value,accepted:$<HTMLInputElement>('#booking-accepted').checked};
+  $<HTMLFieldSetElement>('#booking-fields').disabled=true;
+  $<HTMLButtonElement>('#booking-submit').textContent='Registrerer …';
   try {
     const result=await api('submit',payload);
     form.hidden=true; $('#ticket-step').hidden=true;
@@ -117,7 +133,7 @@ form.addEventListener('submit',async event => {
     }
     $('#booking-receipt').hidden=false; $('#booking-receipt').focus();
     proofs.clear(); form.reset(); leadRef.value='';
-  } catch(e) { error(errorMessage(e)); if(e.code==='sold_out') await availability(); }
-  finally { $('#booking-fields').disabled=false; $('#booking-submit').textContent=choice==='manual'?'Send forespørsel om romplass':'Bekreft rombooking'; }
+  } catch(e) { error(errorMessage(e)); if(e instanceof BookingApiError && e.code==='sold_out') await availability(); }
+  finally { $<HTMLFieldSetElement>('#booking-fields').disabled=false; $<HTMLButtonElement>('#booking-submit').textContent=choice==='manual'?'Send forespørsel om romplass':'Bekreft rombooking'; }
 });
 $('#receipt-print').addEventListener('click',() => window.print());

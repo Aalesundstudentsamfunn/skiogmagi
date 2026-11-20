@@ -1,23 +1,24 @@
-import test from 'node:test';
+import test, { type TestContext } from 'node:test';
+import type { AdminBooking, Availability, BookingMode } from '../src/lib/booking/types.ts';
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
 import { unlink } from 'node:fs/promises';
 import { resolve } from 'node:path';
-import { createLocalTestHandler, isLocalTestAllowed, TEST_ADMIN_TOKEN } from '../src/lib/booking/local-test.mjs';
+import { createLocalTestHandler, isLocalTestAllowed, TEST_ADMIN_TOKEN } from '../src/lib/booking/local-test.ts';
 
-function setup(t) {
+function setup(t: TestContext) {
   const filename=resolve('.booking-test',`test-${randomUUID()}.json`);
   t.after(()=>unlink(filename).catch(e=>{if(e.code!=='ENOENT')throw e;}));
   const settings={isDev:true,env:{BOOKING_TEST_MODE:'true'},hostname:'localhost',clientAddress:'127.0.0.1',filename};
   const make=()=>createLocalTestHandler(settings);
   let handler=make(),next=1000;
-  const request=async(action,body,admin=false)=>{
+  const request=async(action: string,body?: unknown,admin=false)=>{
     const response=await handler(new Request(`http://localhost:4321/api/booking/${action}`,{
       method:body===undefined?'GET':'POST',headers:{'Content-Type':'application/json',Origin:'http://localhost:4321',...(admin?{Authorization:`Bearer ${TEST_ADMIN_TOKEN}`}:{})},
       ...(body===undefined?{}:{body:JSON.stringify(body)}),
     }));return {status:response.status,data:await response.json()};
   };
-  const payload=async(n,mode='automatic')=>{
+  const payload=async(n: number,mode: BookingMode = 'automatic')=>{
     const people=[];
     for(let i=0;i<n;i++) {
       const reference=`TEST-${next++}`;
@@ -51,21 +52,21 @@ test('whole local flow: 3/4 rooms, 1+2 manual assignment, staff cancellation and
   }
   assert.deepEqual((await h.request('availability')).data,before);
   assert.equal((await h.request('admin')).status,401);
-  const list=(await h.request('admin',undefined,true)).data;
+  const list: AdminBooking[] = (await h.request('admin',undefined,true)).data;
   const ids=list.filter(b=>b.status==='pending').map(b=>b.id);
   const assignment={action:'assign',ids,roomType:3,note:'Billetter og romønsker kontrollert med alle',preferencesConfirmed:false};
   assert.equal((await h.request('admin',assignment,true)).data.error,'confirm_preferences');
   assignment.preferencesConfirmed=true;
   assert.equal((await h.request('admin',assignment,true)).data.status,'confirmed');
-  assert.equal((await h.request('availability')).data.find(r=>r.roomType===3).remaining,0);
+  assert.equal((await h.request('availability')).data.find((r: Availability)=>r.roomType===3).remaining,0);
   for(let i=0;i<ids.length;i++) {
     assert.equal((await h.request('admin',{action:'cancel',id:ids[i],note:'Test avbestilling'},true)).status,200);
-    assert.equal((await h.request('availability')).data.find(r=>r.roomType===3).remaining,i===0?0:1);
+    assert.equal((await h.request('availability')).data.find((r: Availability)=>r.roomType===3).remaining,i===0?0:1);
   }
   assert.equal((await h.request('reset',{})).status,401);
   assert.equal((await h.request('reset',{},true)).status,200);
   assert.deepEqual((await h.request('admin',undefined,true)).data,[]);
-  assert.deepEqual((await h.request('availability')).data.map(r=>r.remaining),[2,2]);
+  assert.deepEqual((await h.request('availability')).data.map((r: Availability)=>r.remaining),[2,2]);
 });
 test('local persistence, retries and duplicate claims work across handler reloads',async t=>{
   const h=setup(t),payload=await h.payload(3);
